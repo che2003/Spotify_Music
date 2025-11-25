@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: spotify-music
+
+  # 1. ?????
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/spotify_music?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+
+  # 2. Redis ??
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+
+  # 3. ?????? (??????)
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+# 4. MyBatis-Plus 配置
+mybatis-plus:
+  # 【关键修复】必须指定 XML 文件的位置，否则 MyBatis 找不到 SQL
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+
+logging:
+  level:
+    org.springframework.web: DEBUG # ⬅️ 必须添加，用于查看请求匹配日志
