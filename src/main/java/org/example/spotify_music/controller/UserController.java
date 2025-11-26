@@ -4,25 +4,53 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.example.spotify_music.common.Result;
 import org.example.spotify_music.dto.PasswordChangeDto;
 import org.example.spotify_music.dto.UserUpdateDto;
+import org.example.spotify_music.entity.Artist;
+import org.example.spotify_music.entity.Playlist;
 import org.example.spotify_music.entity.User;
+import org.example.spotify_music.entity.UserArtistLike;
+import org.example.spotify_music.entity.UserFollow;
+import org.example.spotify_music.mapper.ArtistMapper;
+import org.example.spotify_music.mapper.PlaylistMapper;
+import org.example.spotify_music.mapper.UserArtistLikeMapper;
+import org.example.spotify_music.mapper.UserFollowMapper;
 import org.example.spotify_music.mapper.UserMapper;
+import org.example.spotify_music.vo.PublicProfileVo;
+import org.example.spotify_music.vo.PublicUserVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
     @Autowired private UserMapper userMapper;
+    @Autowired private PlaylistMapper playlistMapper;
+    @Autowired private UserFollowMapper userFollowMapper;
+    @Autowired private UserArtistLikeMapper userArtistLikeMapper;
+    @Autowired private ArtistMapper artistMapper;
     @Autowired private PasswordEncoder passwordEncoder; // 使用 SecurityConfig 暴露的编码器
 
     // 辅助方法：获取当前登录用户实体
     private User getCurrentUser() {
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userMapper.selectOne(new QueryWrapper<User>().eq("username", username));
+    }
+
+    private PublicUserVo toPublicUser(User user) {
+        if (user == null) return null;
+        PublicUserVo vo = new PublicUserVo();
+        vo.setId(user.getId());
+        vo.setUsername(user.getUsername());
+        vo.setNickname(user.getNickname());
+        vo.setAvatarUrl(user.getAvatarUrl());
+        return vo;
     }
 
     // 1. 获取用户个人资料
@@ -71,5 +99,54 @@ public class UserController {
         userMapper.updateById(user);
 
         return Result.success("密码修改成功");
+    }
+
+    // 4. 公开的用户主页信息
+    @GetMapping("/public/{userId}")
+    public Result<PublicProfileVo> getPublicProfile(@PathVariable Long userId) {
+        User targetUser = userMapper.selectById(userId);
+        if (targetUser == null || Boolean.TRUE.equals(targetUser.getDeleted())) {
+            return Result.error("用户不存在");
+        }
+
+        PublicProfileVo profileVo = new PublicProfileVo();
+        profileVo.setUser(toPublicUser(targetUser));
+
+        List<Playlist> playlists = playlistMapper.selectList(new QueryWrapper<Playlist>()
+                .eq("creator_id", userId)
+                .eq("is_public", true));
+        profileVo.setPlaylists(playlists);
+
+        List<UserArtistLike> artistLikes = userArtistLikeMapper.selectList(new QueryWrapper<UserArtistLike>()
+                .eq("user_id", userId));
+        if (artistLikes.isEmpty()) {
+            profileVo.setLikedArtists(Collections.emptyList());
+        } else {
+            List<Long> artistIds = artistLikes.stream().map(UserArtistLike::getArtistId).collect(Collectors.toList());
+            List<Artist> likedArtists = artistMapper.selectBatchIds(artistIds);
+            profileVo.setLikedArtists(likedArtists);
+        }
+
+        List<UserFollow> followings = userFollowMapper.selectList(new QueryWrapper<UserFollow>()
+                .eq("user_id", userId));
+        if (followings.isEmpty()) {
+            profileVo.setFollowing(Collections.emptyList());
+        } else {
+            List<Long> followingIds = followings.stream().map(UserFollow::getFollowedUserId).collect(Collectors.toList());
+            List<User> followingUsers = userMapper.selectBatchIds(followingIds);
+            profileVo.setFollowing(followingUsers.stream().map(this::toPublicUser).collect(Collectors.toList()));
+        }
+
+        List<UserFollow> fans = userFollowMapper.selectList(new QueryWrapper<UserFollow>()
+                .eq("followed_user_id", userId));
+        if (fans.isEmpty()) {
+            profileVo.setFans(Collections.emptyList());
+        } else {
+            List<Long> fanIds = fans.stream().map(UserFollow::getUserId).collect(Collectors.toList());
+            List<User> fanUsers = userMapper.selectBatchIds(fanIds);
+            profileVo.setFans(fanUsers.stream().map(this::toPublicUser).collect(Collectors.toList()));
+        }
+
+        return Result.success(profileVo);
     }
 }
