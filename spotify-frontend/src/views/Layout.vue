@@ -92,6 +92,14 @@ const onEnded = () => {
 const onSliderChange = (val: number) => { if (audioRef.value) audioRef.value.currentTime = val }
 const onVolumeChange = (val: number) => { if (audioRef.value) audioRef.value.volume = val / 100 }
 
+// --- 队列弹窗 ---
+const isQueueOpen = ref(false)
+const toggleQueue = () => { isQueueOpen.value = !isQueueOpen.value }
+const playFromQueue = (index: number) => {
+  const target = playerStore.playList[index]
+  if (target) playerStore.setSong(target)
+}
+
 // --- 状态监听 ---
 watch(() => playerStore.isPlaying, (playing) => {
   if (audioRef.value) playing ? audioRef.value.play().catch(()=>{}) : audioRef.value.pause()
@@ -279,7 +287,7 @@ const formatTime = (seconds: number) => {
 
       <div class="right-controls">
         <button class="icon-btn small" title="Lyrics"><svg role="img" height="16" width="16" viewBox="0 0 16 16" fill="currentColor"><path d="M13.426 2.574a2.831 2.831 0 00-4.797 1.55l3.247 3.247a2.831 2.831 0 001.55-4.797zM10.5 8.118l-2.619-2.62A63.275 63.275 0 017.883 5.5l-.611-.453C5.405 3.19 1.604.5 1.604.5a.28.28 0 00-.28.28c0 .166.161.275.265.353.224.167.462.34.713.516l.67.467c1.838 1.285 4.54 3.115 5.17 5.387l-2.62 2.62a2.83 2.83 0 000 4.003l.476.476a2.83 2.83 0 004.004 0l2.618-2.619zm-1.414 4.953l-.476-.476a.83.83 0 010-1.174l2.266-2.265 1.65 1.65-2.266 2.265a.83.83 0 01-1.174 0z"></path></svg></button>
-        <button class="icon-btn small" title="Queue"><svg role="img" height="16" width="16" viewBox="0 0 16 16" fill="currentColor"><path d="M15 15H1v-1.5h14V15zm0-4.5H1V9h14v1.5zm-14-7A2.5 2.5 0 013.5 1h9a2.5 2.5 0 010 5h-9A2.5 2.5 0 011 3.5zm2.5-1a1 1 0 000 2h9a1 1 0 100-2h-9z"></path></svg></button>
+        <button class="icon-btn small" title="Queue" @click="toggleQueue"><svg role="img" height="16" width="16" viewBox="0 0 16 16" fill="currentColor"><path d="M15 15H1v-1.5h14V15zm0-4.5H1V9h14v1.5zm-14-7A2.5 2.5 0 013.5 1h9a2.5 2.5 0 010 5h-9A2.5 2.5 0 011 3.5zm2.5-1a1 1 0 000 2h9a1 1 0 100-2h-9z"></path></svg></button>
 
         <div class="volume-group">
           <button class="icon-btn small"><svg role="img" height="16" width="16" viewBox="0 0 16 16" fill="currentColor"><path d="M9.741.534a.75.75 0 01.735.645C10.746 2.83 11.5 5.117 11.5 7.5s-.754 4.67-1.024 6.321a.75.75 0 01-1.479-.242c.25-1.536.943-3.683.943-6.079s-.693-4.543-.943-6.08a.75.75 0 01.644-.886zM1.75 3.5h2.85l3.613-2.709A1.25 1.25 0 0110.25 1.8v12.401a1.25 1.25 0 01-2.037.99L4.601 12.5H1.75A1.75 1.75 0 010 10.75v-5.5A1.75 1.75 0 011.75 3.5zM13.293 1.843a.75.75 0 01.734.645c.496 3.035.973 5.012.973 5.012s-.477 1.977-.973 5.012a.75.75 0 01-1.479-.242c.48-2.946.912-4.77.912-4.77s-.432-1.824-.912-4.77a.75.75 0 01.645-.886z"></path></svg></button>
@@ -290,6 +298,27 @@ const formatTime = (seconds: number) => {
       </div>
     </div>
   </div>
+
+  <el-drawer
+    v-model="isQueueOpen"
+    title="播放队列"
+    size="360px"
+    direction="rtl"
+    destroy-on-close
+  >
+    <div v-if="playerStore.playList.length === 0" class="queue-empty">暂无播放内容</div>
+    <ul v-else class="queue-list">
+      <li
+        v-for="(song, index) in playerStore.playList"
+        :key="song.id || index"
+        :class="{ active: playerStore.currentSong.id === song.id }"
+        @click="playFromQueue(index)"
+      >
+        <div class="queue-title">{{ song.title || '未命名歌曲' }}</div>
+        <div class="queue-artist">{{ song.artistName || '未知歌手' }}</div>
+      </li>
+    </ul>
+  </el-drawer>
 </template>
 
 <style scoped>
@@ -408,4 +437,42 @@ const formatTime = (seconds: number) => {
 :deep(.spotify-slider .el-slider__button) { border: none; background-color: white; display: none; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 :deep(.spotify-slider:hover .el-slider__button) { display: block; } /* 悬停显示滑块 */
 :deep(.spotify-slider .el-slider__button-wrapper) { top: -15px; }
+
+/* 队列抽屉 */
+.queue-empty {
+  color: #b3b3b3;
+  text-align: center;
+  padding: 24px 0;
+}
+
+.queue-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.queue-list li {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #1f1f1f;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  border: 1px solid transparent;
+}
+
+.queue-list li:hover {
+  background: #282828;
+  transform: translateX(-2px);
+}
+
+.queue-list li.active {
+  border-color: #1db954;
+  background: rgba(29, 185, 84, 0.08);
+}
+
+.queue-title { color: white; font-weight: 700; font-size: 14px; }
+.queue-artist { color: #a7a7a7; font-size: 12px; margin-top: 2px; }
 </style>
