@@ -92,6 +92,12 @@
         </if>
     </select>
 
+    <select id="countSongByGenreId" resultType="int">
+        SELECT COUNT(*)
+        FROM music_song_genre
+        WHERE genre_id = #{genreId}
+    </select>
+
     <update id="incrementPlayCount">
         UPDATE music_song SET play_count = play_count + 1 WHERE id = #{id}
     </update>
