@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.spotify_music.mapper.PlayHistoryMapper">
+
+    <select id="selectRecentByUser" resultType="org.example.spotify_music.vo.PlayHistoryVo">
+        SELECT
+            s.id,
+            s.title,
+            s.file_url,
+            s.cover_url,
+            s.genre,
+            s.duration,
+            s.lyrics,
+            s.play_count,
+            s.artist_id,
+            a.name AS artistName,
+            s.album_id AS albumId,
+            alb.title AS albumTitle,
+            alb.cover_url AS albumCover,
+            ph.play_time
+        FROM play_history ph
+        LEFT JOIN music_song s ON ph.song_id = s.id
+        LEFT JOIN music_artist a ON s.artist_id = a.id
+        LEFT JOIN music_album alb ON s.album_id = alb.id
+        WHERE ph.user_id = #{userId}
+        ORDER BY ph.play_time DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>
