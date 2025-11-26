@@ -33,12 +33,13 @@ const fetchFollowingUsers = async () => {
   try {
     const res = await request.get('/follow/following')
     followingUsers.value = res.data
+  } catch (error) { console.error(error) }
+}
 
 const fetchLikedSongs = async () => {
   try {
     const res = await request.get('/interaction/song/liked')
     likedSongs.value = res.data || []
-
   } catch (error) { console.error(error) }
 }
 
@@ -94,16 +95,12 @@ const toggleFollowUser = async (userId: number) => {
   } catch (error) { console.error(error) }
 }
 
-onMounted(() => {
-  fetchMyPlaylists()
-  fetchFollowingUsers()
-
 const goToSong = (id: number) => router.push(`/song/${id}`)
 
 onMounted(() => {
   fetchMyPlaylists()
+  fetchFollowingUsers()
   fetchLikedSongs()
-
 })
 </script>
 
