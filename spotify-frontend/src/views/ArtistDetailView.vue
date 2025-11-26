@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import request from '@/utils/request'
@@ -59,12 +60,12 @@ const fetchData = async () => {
   artist.value = null
   songs.value = []
   isFollowing.value = false
-
   try {
     const [artistRes, songRes] = await Promise.all([
       request.get('/artist/list'),
       request.get('/song/list')
     ])
+
 
     if (requestId !== fetchToken) return
 
@@ -121,6 +122,7 @@ watch(
   },
   { immediate: true }
 )
+
 </script>
 
 <template>
