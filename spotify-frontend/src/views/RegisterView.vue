@@ -65,13 +65,15 @@ const handleRegister = async () => {
   background: linear-gradient(to bottom, #1db954 0%, #121212 40%);
 }
 .login-box {
-  background-color: black; padding: 40px; border-radius: 8px; width: 400px; text-align: center;
+  background-color: rgba(24, 24, 24, 0.9); padding: 40px; border-radius: 16px; width: 400px; text-align: center;
+  border: 1px solid var(--spotify-border);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 }
-h2 { color: white; margin-bottom: 10px; font-weight: bold; }
-p { color: #b3b3b3; margin-bottom: 30px; }
+h2 { color: var(--spotify-white); margin-bottom: 10px; font-weight: bold; }
+p { color: var(--spotify-text-sub); margin-bottom: 30px; }
 .input-group { margin-bottom: 20px; }
 .login-btn { width: 100%; font-weight: bold; letter-spacing: 2px; margin-top: 10px; }
-.links { margin-top: 20px; color: #b3b3b3; font-size: 14px; }
-.link-text { color: white; font-weight: bold; cursor: pointer; margin-left: 5px; }
+.links { margin-top: 20px; color: var(--spotify-text-sub); font-size: 14px; }
+.link-text { color: var(--spotify-white); font-weight: bold; cursor: pointer; margin-left: 5px; }
 .link-text:hover { text-decoration: underline; }
 </style>
