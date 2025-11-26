@@ -76,6 +76,12 @@ const router = createRouter({
           meta: { requiresAuth: true, roles: ['musician'] }
         },
         {
+          path: 'upload/:id',
+          name: 'editSong',
+          component: UploadView,
+          meta: { requiresAuth: true, roles: ['musician'] }
+        },
+        {
           path: 'musician/stats',
           name: 'musicianStats',
           component: StatsDashboard,
