@@ -112,6 +112,9 @@ const formatTime = (seconds: number) => {
             <el-menu-item index="/upload">
               <el-icon><i class="el-icon-upload"></i></el-icon><span>发布歌曲</span>
             </el-menu-item>
+            <el-menu-item index="/musician/stats">
+              <el-icon><i class="el-icon-data-board"></i></el-icon><span>作品数据</span>
+            </el-menu-item>
             <el-menu-item index="/musician/works">
               <el-icon><i class="el-icon-folder"></i></el-icon><span>我的作品</span>
             </el-menu-item>

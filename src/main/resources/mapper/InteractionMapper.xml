@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.spotify_music.mapper.InteractionMapper">
+
+    <select id="countLikesByArtist" resultType="long">
+        SELECT COUNT(*)
+        FROM user_interaction ui
+        LEFT JOIN music_song s ON ui.song_id = s.id
+        WHERE ui.type = 3
+          AND s.artist_id = #{artistId}
+    </select>
+
+    <select id="averageRatingByArtist" resultType="double">
+        SELECT AVG(ui.rating)
+        FROM user_interaction ui
+        LEFT JOIN music_song s ON ui.song_id = s.id
+        WHERE ui.rating IS NOT NULL
+          AND s.artist_id = #{artistId}
+    </select>
+
+</mapper>
