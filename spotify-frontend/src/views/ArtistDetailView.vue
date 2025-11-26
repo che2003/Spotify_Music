@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import request from '@/utils/request'
 import { usePlayerStore } from '@/stores/player'
@@ -33,6 +33,7 @@ const artist = ref<Artist | null>(null)
 const songs = ref<SongVo[]>([])
 const isFollowing = ref(false)
 const followLoading = ref(false)
+let fetchToken = 0
 
 const artistSongs = computed(() => songs.value.filter(song => song.artistId === Number(route.params.id)))
 const albums = computed(() => {
@@ -53,6 +54,7 @@ const albums = computed(() => {
 })
 
 const fetchData = async () => {
+  const requestId = ++fetchToken
   loading.value = true
   artist.value = null
   songs.value = []
@@ -64,6 +66,8 @@ const fetchData = async () => {
       request.get('/song/list')
     ])
 
+    if (requestId !== fetchToken) return
+
     const currentId = Number(route.params.id)
     artist.value = artistRes.data.find((item: Artist) => item.id === currentId) || null
     songs.value = songRes.data
@@ -74,9 +78,13 @@ const fetchData = async () => {
       ElMessage.error('未找到该艺人')
     }
   } catch (e) {
-    ElMessage.error('加载艺人信息失败')
+    if (requestId === fetchToken) {
+      ElMessage.error('加载艺人信息失败')
+    }
   } finally {
-    loading.value = false
+    if (requestId === fetchToken) {
+      loading.value = false
+    }
   }
 }
 
@@ -86,7 +94,9 @@ const goAlbum = (albumId?: number) => { if (albumId) router.push(`/album/${album
 const checkFollowStatus = async (artistId: number) => {
   try {
     const res = await request.get(`/follow/check?artistId=${artistId}`)
-    isFollowing.value = res.data
+    if (artistId === artist.value?.id) {
+      isFollowing.value = res.data
+    }
   } catch (e) {}
 }
 
@@ -104,8 +114,13 @@ const toggleFollow = async () => {
   }
 }
 
-onMounted(fetchData)
-watch(() => route.params.id, () => fetchData())
+watch(
+  () => route.params.id,
+  () => {
+    fetchData()
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
