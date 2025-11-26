@@ -24,10 +24,58 @@ public class FollowController {
     @Autowired private UserMapper userMapper;
     @Autowired private ArtistMapper artistMapper;
 
-    private Long getCurrentUserId() {
+    private User getCurrentUser() {
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userMapper.selectOne(new QueryWrapper<User>().eq("username", username));
+        return userMapper.selectOne(new QueryWrapper<User>().eq("username", username));
+    }
+
+    private Long getCurrentUserId() {
+        User user = getCurrentUser();
+        if (user == null) return null;
         return user.getId();
+    }
+
+    @PostMapping("/user/toggle")
+    public Result<Boolean> toggleFollowUser(@RequestParam Long followedUserId) {
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId == null) return Result.error("用户未登录");
+
+        if (followedUserId == null) return Result.error("缺少目标用户");
+
+        User targetUser = userMapper.selectById(followedUserId);
+        if (targetUser == null || Boolean.TRUE.equals(targetUser.getDeleted())) {
+            return Result.error("用户不存在");
+        }
+
+        if (followedUserId.equals(currentUserId)) {
+            return Result.error("不能关注自己");
+        }
+
+        QueryWrapper<UserFollow> query = new QueryWrapper<>();
+        query.eq("user_id", currentUserId).eq("followed_user_id", followedUserId);
+        UserFollow existing = followMapper.selectOne(query);
+
+        if (existing != null) {
+            followMapper.deleteById(existing.getId());
+            return Result.success(false);
+        } else {
+            UserFollow follow = new UserFollow();
+            follow.setUserId(currentUserId);
+            follow.setFollowedUserId(followedUserId);
+            followMapper.insert(follow);
+            return Result.success(true);
+        }
+    }
+
+    @GetMapping("/user/status")
+    public Result<Boolean> checkUserFollowStatus(@RequestParam Long followedUserId) {
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId == null) return Result.error("用户未登录");
+
+        Long count = followMapper.selectCount(new QueryWrapper<UserFollow>()
+                .eq("user_id", currentUserId)
+                .eq("followed_user_id", followedUserId));
+        return Result.success(count > 0);
     }
 
     // 切换关注状态 (关注/取关 艺人)
