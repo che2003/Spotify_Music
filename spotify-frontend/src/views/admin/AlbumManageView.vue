@@ -43,7 +43,7 @@ const fetchArtists = async () => {
 const fetchAlbums = async () => {
   loading.value = true
   try {
-    const res = await request.get('/album/list')
+    const res = await request.get('/admin/album/crud')
     albumList.value = res.data
   } finally {
     loading.value = false
@@ -66,8 +66,11 @@ const openEdit = (row: any) => {
 }
 
 const submitAlbum = async () => {
-  const api = albumForm.id ? '/album/update' : '/album/create'
-  await request.post(api, albumForm)
+  if (albumForm.id) {
+    await request.put(`/admin/album/crud/${albumForm.id}`, albumForm)
+  } else {
+    await request.post('/admin/album/crud', albumForm)
+  }
   ElMessage.success('保存成功')
   dialogVisible.value = false
   fetchAlbums()
@@ -75,7 +78,7 @@ const submitAlbum = async () => {
 
 const removeAlbum = (id: number) => {
   ElMessageBox.confirm('确定删除该专辑吗？', '提示', { type: 'warning' }).then(async () => {
-    await request.post(`/album/delete?id=${id}`)
+    await request.delete(`/admin/album/crud/${id}`)
     ElMessage.success('已删除')
     fetchAlbums()
   })
