@@ -67,19 +67,19 @@ const router = createRouter({
           path: 'upload',
           name: 'upload',
           component: UploadView,
-          meta: { requiresAuth: true, roles: ['musician', 'admin'] }
+          meta: { requiresAuth: true, roles: ['musician'] }
         },
         {
           path: 'musician/stats',
           name: 'musicianStats',
           component: StatsDashboard,
-          meta: { requiresAuth: true, roles: ['musician', 'admin'] }
+          meta: { requiresAuth: true, roles: ['musician'] }
         },
         {
           path: 'musician/works',
           name: 'myWorks',
           component: MyWorksView,
-          meta: { requiresAuth: true, roles: ['musician', 'admin'] }
+          meta: { requiresAuth: true, roles: ['musician'] }
         },
 
         // 管理员功能

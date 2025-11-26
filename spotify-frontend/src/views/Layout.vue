@@ -14,7 +14,7 @@ const userRoles = computed(() => (Array.isArray(user.roles) ? user.roles : []))
 const displayName = computed(() => user.username || '未命名用户')
 
 // --- 权限控制 ---
-const isMusician = computed(() => userRoles.value.includes('musician') || userRoles.value.includes('admin'))
+const isMusician = computed(() => userRoles.value.includes('musician'))
 const isAdmin = computed(() => userRoles.value.includes('admin'))
 const roleLabel = computed(() => {
   if (isAdmin.value) return '管理员'
