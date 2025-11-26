@@ -5,7 +5,8 @@
     <sql id="Base_Column_List_Vo">
         s.id, s.title, s.file_url, s.cover_url, s.genre, s.duration, s.lyrics, s.play_count,
         s.artist_id, a.name AS artistName,
-        s.album_id AS albumId, alb.title AS albumTitle, alb.cover_url AS albumCover
+        s.album_id AS albumId, alb.title AS albumTitle, alb.cover_url AS albumCover,
+        s.create_time AS releaseTime
     </sql>
 
     <select id="selectSongVoList" resultType="org.example.spotify_music.vo.SongVo">
