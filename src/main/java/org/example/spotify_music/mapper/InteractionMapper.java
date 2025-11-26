@@ -9,5 +9,7 @@ public interface InteractionMapper extends BaseMapper<Interaction> {
 
     Long countLikesByArtist(@Param("artistId") Long artistId);
 
+    Long countLikesBySong(@Param("songId") Long songId);
+
     Double averageRatingByArtist(@Param("artistId") Long artistId);
 }

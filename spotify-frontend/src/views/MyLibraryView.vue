@@ -6,9 +6,14 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 
 const router = useRouter()
 const myPlaylists = ref<any[]>([])
+
 const followingUsers = ref<any[]>([])
+
+const likedSongs = ref<any[]>([])
+
 const dialogVisible = ref(false)
 const isEditMode = ref(false)
+const activeTab = ref('playlist')
 
 const playlistForm = reactive({
   id: null as number | null,
@@ -28,6 +33,12 @@ const fetchFollowingUsers = async () => {
   try {
     const res = await request.get('/follow/following')
     followingUsers.value = res.data
+
+const fetchLikedSongs = async () => {
+  try {
+    const res = await request.get('/interaction/song/liked')
+    likedSongs.value = res.data || []
+
   } catch (error) { console.error(error) }
 }
 
@@ -72,6 +83,7 @@ const deletePlaylist = (event: Event, id: number) => {
 }
 
 const goToPlaylist = (id: number) => router.push(`/playlist/${id}`)
+
 const goToUser = (id: number) => router.push(`/user/${id}`)
 
 const toggleFollowUser = async (userId: number) => {
@@ -85,30 +97,54 @@ const toggleFollowUser = async (userId: number) => {
 onMounted(() => {
   fetchMyPlaylists()
   fetchFollowingUsers()
+
+const goToSong = (id: number) => router.push(`/song/${id}`)
+
+onMounted(() => {
+  fetchMyPlaylists()
+  fetchLikedSongs()
+
 })
 </script>
 
 <template>
   <div class="library-container">
     <h2 class="title">我的音乐库</h2>
-    <div class="playlist-grid">
-      <div class="playlist-card create-card" @click="openDialog(false)">
-        <div class="create-icon">+</div>
-        <div class="playlist-title">创建新歌单</div>
-      </div>
+    <el-tabs v-model="activeTab" class="library-tabs">
+      <el-tab-pane label="歌单" name="playlist">
+        <div class="playlist-grid">
+          <div class="playlist-card create-card" @click="openDialog(false)">
+            <div class="create-icon">+</div>
+            <div class="playlist-title">创建新歌单</div>
+          </div>
 
-      <div v-for="playlist in myPlaylists" :key="playlist.id" class="playlist-card" @click="goToPlaylist(playlist.id)">
-        <div class="card-actions">
-          <el-icon class="action-icon edit" @click.stop="openDialog(true, playlist)"><i class="el-icon-edit"></i></el-icon>
-          <el-icon class="action-icon delete" @click="deletePlaylist($event, playlist.id)"><i class="el-icon-delete"></i></el-icon>
+          <div v-for="playlist in myPlaylists" :key="playlist.id" class="playlist-card" @click="goToPlaylist(playlist.id)">
+            <div class="card-actions">
+              <el-icon class="action-icon edit" @click.stop="openDialog(true, playlist)"><i class="el-icon-edit"></i></el-icon>
+              <el-icon class="action-icon delete" @click="deletePlaylist($event, playlist.id)"><i class="el-icon-delete"></i></el-icon>
+            </div>
+            <img :src="playlist.coverUrl || 'https://via.placeholder.com/150/1db954/FFFFFF?text=P'" class="cover-img" />
+            <div class="playlist-info">
+              <div class="playlist-title">{{ playlist.title }}</div>
+              <div class="playlist-description">User #{{ playlist.creatorId }}</div>
+            </div>
+          </div>
         </div>
-        <img :src="playlist.coverUrl || 'https://via.placeholder.com/150/1db954/FFFFFF?text=P'" class="cover-img" />
-        <div class="playlist-info">
-          <div class="playlist-title">{{ playlist.title }}</div>
-          <div class="playlist-description">User #{{ playlist.creatorId }}</div>
+      </el-tab-pane>
+
+      <el-tab-pane label="我喜欢的歌曲" name="liked">
+        <div v-if="likedSongs.length" class="liked-grid">
+          <div v-for="song in likedSongs" :key="song.id" class="liked-card" @click="goToSong(song.id)">
+            <img :src="song.coverUrl || 'https://via.placeholder.com/150/121212/FFFFFF?text=♪'" class="cover-img" />
+            <div class="song-info">
+              <div class="song-title">{{ song.title }}</div>
+              <div class="song-artist">{{ song.artistName || '未知艺人' }}</div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+        <div v-else class="empty-tip">还没有喜欢的歌曲，去探索一下吧</div>
+      </el-tab-pane>
+    </el-tabs>
 
     <div class="follow-section">
       <div class="follow-header">
@@ -160,6 +196,15 @@ onMounted(() => {
 .playlist-description { color: #b3b3b3; font-size: 14px; }
 .create-card { border: 2px dashed #404040; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #b3b3b3; }
 .create-icon { font-size: 48px; margin-bottom: 10px; }
+.library-tabs { margin-top: 10px; }
+.liked-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.liked-card { background-color: #181818; padding: 12px; border-radius: 8px; display: flex; gap: 12px; align-items: center; cursor: pointer; transition: 0.25s; }
+.liked-card:hover { background-color: #242424; transform: translateY(-2px); }
+.liked-card .cover-img { width: 72px; height: 72px; margin: 0; }
+.song-info { display: flex; flex-direction: column; gap: 4px; }
+.song-title { color: #fff; font-weight: 700; }
+.song-artist { color: #b3b3b3; font-size: 14px; }
+.empty-tip { color: #b3b3b3; text-align: center; padding: 30px 0; }
 
 .card-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; opacity: 0; transition: opacity 0.2s; }
 .playlist-card:hover .card-actions { opacity: 1; }
