@@ -55,7 +55,6 @@ const albums = computed(() => {
 })
 
 const fetchData = async () => {
-
   const requestId = ++fetchToken
   loading.value = true
   artist.value = null
@@ -146,7 +145,6 @@ watch(
             {{ isFollowing ? '已关注' : '关注' }}
           </el-button>
         </div>
-
         <p class="bio" v-if="artist.bio">{{ artist.bio }}</p>
       </div>
     </div>
