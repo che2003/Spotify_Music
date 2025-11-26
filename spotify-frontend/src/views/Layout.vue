@@ -92,6 +92,7 @@ const formatTime = (seconds: number) => {
 
         <el-menu default-active="/discover" class="spotify-menu" router>
           <el-menu-item index="/discover"><el-icon><i class="el-icon-house"></i></el-icon><span>首页</span></el-menu-item>
+          <el-menu-item index="/new"><el-icon><i class="el-icon-bell"></i></el-icon><span>新发行</span></el-menu-item>
           <el-menu-item index="/search"><el-icon><i class="el-icon-search"></i></el-icon><span>搜索</span></el-menu-item>
 
           <el-menu-item index="/charts"><el-icon><i class="el-icon-data-analysis"></i></el-icon><span>排行榜</span></el-menu-item>
