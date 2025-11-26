@@ -1,21 +1,49 @@
 <script setup lang="ts">
-import { RouterView, useRouter } from 'vue-router'
+import { RouterView, useRoute, useRouter } from 'vue-router'
 import { ref, watch, computed, onMounted } from 'vue'
 import { usePlayerStore } from '@/stores/player'
 import SharePopover from '@/components/SharePopover.vue'
 
 const router = useRouter()
+const route = useRoute()
 const playerStore = usePlayerStore()
 const audioRef = ref<HTMLAudioElement | null>(null)
 // 获取用户信息
 const user = JSON.parse(localStorage.getItem('user') || '{}')
+const userRoles = computed(() => (Array.isArray(user.roles) ? user.roles : []))
+const displayName = computed(() => user.username || '未命名用户')
 
 // --- 权限控制 ---
-const isMusician = computed(() => {
-  return user.roles && (user.roles.includes('musician') || user.roles.includes('admin'))
+const isMusician = computed(() => userRoles.value.includes('musician') || userRoles.value.includes('admin'))
+const isAdmin = computed(() => userRoles.value.includes('admin'))
+const roleLabel = computed(() => {
+  if (isAdmin.value) return '管理员'
+  if (isMusician.value) return '音乐人'
+  return '听众'
 })
-const isAdmin = computed(() => {
-  return user.roles && user.roles.includes('admin')
+
+const menuEntries = [
+  '/discover',
+  '/new',
+  '/search',
+  '/charts',
+  '/genres',
+  '/history',
+  '/library',
+  '/profile',
+  '/upload',
+  '/musician/stats',
+  '/musician/works',
+  '/admin/dashboard',
+  '/admin/users',
+  '/admin/songs'
+]
+const activeMenu = computed(() => {
+  const segments = route.path.split('/').filter(Boolean)
+  if (segments.length === 0) return '/discover'
+  const basePath = `/${segments.slice(0, Math.min(2, segments.length)).join('/')}`
+  const matched = menuEntries.find((path) => basePath.startsWith(path) || route.path.startsWith(path))
+  return matched || '/discover'
 })
 
 // --- 初始化 ---
@@ -93,22 +121,33 @@ const formatTime = (seconds: number) => {
           <span style="color:white; font-size: 24px; font-weight: 700; letter-spacing: -1px;">Spotify</span>
         </div>
 
-        <el-menu default-active="/discover" class="spotify-menu" router>
-          <el-menu-item index="/discover"><el-icon><i class="el-icon-house"></i></el-icon><span>首页</span></el-menu-item>
-          <el-menu-item index="/new"><el-icon><i class="el-icon-bell"></i></el-icon><span>新发行</span></el-menu-item>
-          <el-menu-item index="/search"><el-icon><i class="el-icon-search"></i></el-icon><span>搜索</span></el-menu-item>
+        <el-menu :default-active="activeMenu" class="spotify-menu" router>
+          <el-menu-item-group>
+            <template #title>
+              <div class="section-title">浏览</div>
+            </template>
+            <el-menu-item index="/discover"><el-icon><i class="el-icon-house"></i></el-icon><span>首页</span></el-menu-item>
+            <el-menu-item index="/new"><el-icon><i class="el-icon-bell"></i></el-icon><span>新发行</span></el-menu-item>
+            <el-menu-item index="/search"><el-icon><i class="el-icon-search"></i></el-icon><span>搜索</span></el-menu-item>
+            <el-menu-item index="/charts"><el-icon><i class="el-icon-data-analysis"></i></el-icon><span>排行榜</span></el-menu-item>
+            <el-menu-item index="/genres"><el-icon><i class="el-icon-collection-tag"></i></el-icon><span>流派分类</span></el-menu-item>
+          </el-menu-item-group>
 
-          <el-menu-item index="/charts"><el-icon><i class="el-icon-data-analysis"></i></el-icon><span>排行榜</span></el-menu-item>
+          <el-menu-item-group>
+            <template #title>
+              <div class="section-title">我的音乐</div>
+            </template>
+            <el-menu-item index="/history"><el-icon><i class="el-icon-time"></i></el-icon><span>播放历史</span></el-menu-item>
+            <el-menu-item index="/library"><el-icon><i class="el-icon-collection"></i></el-icon><span>音乐库</span></el-menu-item>
+            <el-menu-item index="/profile">
+              <el-icon><i class="el-icon-user"></i></el-icon><span>个人中心</span>
+            </el-menu-item>
+          </el-menu-item-group>
 
-          <el-menu-item index="/genres"><el-icon><i class="el-icon-collection-tag"></i></el-icon><span>流派分类</span></el-menu-item>
-          <el-menu-item index="/history"><el-icon><i class="el-icon-time"></i></el-icon><span>播放历史</span></el-menu-item>
-          <el-menu-item index="/library"><el-icon><i class="el-icon-collection"></i></el-icon><span>音乐库</span></el-menu-item>
-
-          <el-menu-item index="/profile">
-            <el-icon><i class="el-icon-user"></i></el-icon><span>个人中心</span>
-          </el-menu-item>
-
-          <template v-if="isMusician">
+          <el-menu-item-group v-if="isMusician">
+            <template #title>
+              <div class="section-title">音乐人</div>
+            </template>
             <el-menu-item index="/upload">
               <el-icon><i class="el-icon-upload"></i></el-icon><span>发布歌曲</span>
             </el-menu-item>
@@ -118,9 +157,12 @@ const formatTime = (seconds: number) => {
             <el-menu-item index="/musician/works">
               <el-icon><i class="el-icon-folder"></i></el-icon><span>我的作品</span>
             </el-menu-item>
-          </template>
+          </el-menu-item-group>
 
-          <template v-if="isAdmin">
+          <el-menu-item-group v-if="isAdmin">
+            <template #title>
+              <div class="section-title">管理后台</div>
+            </template>
             <el-menu-item index="/admin/dashboard">
               <el-icon><i class="el-icon-data-board"></i></el-icon><span>数据看板</span>
             </el-menu-item>
@@ -130,7 +172,7 @@ const formatTime = (seconds: number) => {
             <el-menu-item index="/admin/songs">
               <el-icon><i class="el-icon-files"></i></el-icon><span>内容管理</span>
             </el-menu-item>
-          </template>
+          </el-menu-item-group>
         </el-menu>
 
         <div class="logout-area" @click="logout">
@@ -141,9 +183,14 @@ const formatTime = (seconds: number) => {
 
       <el-container class="content-container">
         <el-header class="spotify-header">
-          <div class="user-pill">
-            <el-avatar :size="28" :src="user.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'" />
-            <span class="username">{{ user.username }}</span>
+          <div class="header-actions">
+            <div class="user-pill">
+              <el-avatar :size="32" :src="user.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'" />
+              <div class="user-info">
+                <span class="username">{{ displayName }}</span>
+                <span class="user-role">{{ roleLabel }}</span>
+              </div>
+            </div>
           </div>
         </el-header>
 
@@ -248,13 +295,15 @@ const formatTime = (seconds: number) => {
 <style scoped>
 /* === 布局 === */
 .h-main { height: calc(100vh - 90px); display: flex; }
-.aside { background-color: black; display: flex; flex-direction: column; padding: 24px 12px; }
-.logo { padding-left: 12px; margin-bottom: 30px; }
+.spotify-aside { background-color: black; display: flex; flex-direction: column; padding: 24px 12px; gap: 12px; }
+.logo { padding-left: 12px; margin-bottom: 8px; }
 .spotify-menu { border-right: none; background-color: black; flex-grow: 1; }
+:deep(.el-menu-item-group__title) { padding-left: 12px; font-size: 12px; letter-spacing: 0.5px; color: #7c7c7c; }
+.section-title { color: #7c7c7c; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; font-size: 12px; }
 :deep(.el-menu-item) { color: #b3b3b3 !important; font-weight: 700; border-radius: 4px; margin-bottom: 4px; height: 40px; font-size: 14px; }
 :deep(.el-menu-item:hover) { color: white !important; background-color: transparent !important; }
 :deep(.el-menu-item.is-active) { color: white !important; background-color: #282828 !important; }
-:deep(.el-icon) { font-size: 24px; margin-right: 16px; }
+:deep(.el-icon) { font-size: 20px; margin-right: 14px; }
 
 .logout-area {
   margin-top: auto;
@@ -266,6 +315,7 @@ const formatTime = (seconds: number) => {
   font-weight: 700;
   font-size: 14px;
   transition: color 0.2s;
+  border-top: 1px solid #1f1f1f;
 }
 .logout-area:hover { color: white; }
 .logout-area .el-icon { margin-right: 16px; font-size: 24px; }
@@ -278,16 +328,20 @@ const formatTime = (seconds: number) => {
   overflow: hidden;
 }
 
-.header { background: rgba(18, 18, 18, 0.85); height: 64px; display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: absolute; width: 100%; top: 0; z-index: 100; box-sizing: border-box; }
-.user-pill { background-color: rgba(0,0,0,0.7); border-radius: 23px; padding: 2px 12px 2px 2px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; }
-.user-pill:hover { background-color: #282828; }
+.spotify-header { background: linear-gradient(90deg, rgba(18, 18, 18, 0.95), rgba(18, 18, 18, 0.75)); height: 64px; display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; position: absolute; width: 100%; top: 0; z-index: 100; box-sizing: border-box; }
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.user-pill { background-color: rgba(0,0,0,0.6); border-radius: 28px; padding: 4px 14px 4px 6px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; border: 1px solid rgba(255,255,255,0.06); }
+.user-pill:hover { background-color: #282828; border-color: rgba(255,255,255,0.14); }
+.user-info { display: flex; flex-direction: column; line-height: 1.2; }
 .username { font-size: 14px; font-weight: 700; margin-right: 4px; }
+.user-role { font-size: 12px; color: #9e9e9e; }
 
 .spotify-main {
-  background: linear-gradient(to bottom, #1f1f1f 0%, #121212 300px);
+  background: linear-gradient(to bottom, #1f1f1f 0%, #121212 320px);
   padding: 84px 32px 20px 32px;
   overflow-y: auto;
   flex-grow: 1;
+  border-radius: 16px 16px 0 0;
 }
 
 /* === 底部播放条 (Fixed Bottom) === */
