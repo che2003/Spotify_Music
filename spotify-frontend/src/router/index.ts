@@ -26,6 +26,9 @@ import StatsDashboard from '../views/musician/StatsDashboard.vue'
 import SongManageView from '../views/admin/SongManageView.vue'
 import AlbumManageView from '../views/admin/AlbumManageView.vue'
 import BannerManageView from '../views/admin/BannerManageView.vue'
+import ArtistManageView from '../views/admin/ArtistManageView.vue'
+import GenreManageView from '../views/admin/GenreManageView.vue'
+
 import MusicianAlbumManageView from '../views/musician/AlbumManageView.vue'
 
 const router = createRouter({
@@ -114,6 +117,17 @@ const router = createRouter({
           path: 'admin/banners',
           name: 'adminBanners',
           component: BannerManageView,
+
+          path: 'admin/artists',
+          name: 'adminArtists',
+          component: ArtistManageView,
+          meta: { requiresAuth: true, roles: ['admin'] }
+        },
+        {
+          path: 'admin/genres',
+          name: 'adminGenres',
+          component: GenreManageView,
+
           meta: { requiresAuth: true, roles: ['admin'] }
         },
         {
