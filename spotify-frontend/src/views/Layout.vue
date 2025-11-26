@@ -80,10 +80,20 @@ const logout = () => {
 }
 
 // --- 音频事件 ---
-const onTimeUpdate = () => { if (audioRef.value) playerStore.currentTime = audioRef.value.currentTime }
+const onTimeUpdate = () => {
+  if (!audioRef.value) return
+  playerStore.currentTime = audioRef.value.currentTime
+  if (!playerStore.historyRecorded && audioRef.value.currentTime >= 30) {
+    playerStore.recordPlayHistory()
+  }
+}
 const onLoadedMetadata = () => { if (audioRef.value) playerStore.duration = audioRef.value.duration }
 const onEnded = () => {
+  if (!playerStore.historyRecorded) {
+    playerStore.recordPlayHistory()
+  }
   if (playerStore.mode === 'loop') {
+    playerStore.historyRecorded = false
     if (audioRef.value) { audioRef.value.currentTime = 0; audioRef.value.play() }
   } else {
     playerStore.next()

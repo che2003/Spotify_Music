@@ -13,6 +13,7 @@ export const usePlayerStore = defineStore('player', () => {
     const currentTime = ref(0)
     const volume = ref(80)
     const mode = ref<'sequence' | 'loop' | 'random'>('sequence')
+    const historyRecorded = ref(false)
 
     // --- 喜欢列表状态 ---
     const likedSongIds = ref<Set<number>>(new Set())
@@ -54,7 +55,7 @@ export const usePlayerStore = defineStore('player', () => {
         }
         currentSong.value = song
         isPlaying.value = true
-        recordInteraction(song.id, 1)
+        historyRecorded.value = false
     }
 
     const togglePlay = () => { isPlaying.value = !isPlaying.value }
@@ -68,7 +69,7 @@ export const usePlayerStore = defineStore('player', () => {
         }
         currentSong.value = playList.value[currentIndex.value]
         isPlaying.value = true
-        recordInteraction(currentSong.value.id, 1)
+        historyRecorded.value = false
     }
 
     const prev = () => {
@@ -77,7 +78,7 @@ export const usePlayerStore = defineStore('player', () => {
         if (currentIndex.value < 0) currentIndex.value = playList.value.length - 1
         currentSong.value = playList.value[currentIndex.value]
         isPlaying.value = true
-        recordInteraction(currentSong.value.id, 1)
+        historyRecorded.value = false
     }
 
     const toggleMode = () => {
@@ -90,10 +91,20 @@ export const usePlayerStore = defineStore('player', () => {
         request.post('/interaction/record', { songId, type }).catch(() => {})
     }
 
+    const recordPlayHistory = async () => {
+        if (!currentSong.value.id || historyRecorded.value) return
+        try {
+            await request.post('/history/record', { songId: currentSong.value.id })
+            historyRecorded.value = true
+        } catch (e) {
+            console.error('记录播放历史失败', e)
+        }
+    }
+
     return {
         currentSong, isPlaying, playList, currentIndex,
-        duration, currentTime, volume, mode,
+        duration, currentTime, volume, mode, historyRecorded,
         likedSongIds, fetchLikedSongs, toggleLike,
-        setSong, togglePlay, next, prev, toggleMode
+        setSong, togglePlay, next, prev, toggleMode, recordPlayHistory
     }
 })
