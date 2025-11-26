@@ -5,6 +5,7 @@ import Layout from '../views/Layout.vue'
 import Discover from '../views/home/Discover.vue'
 import Search from '../views/SearchView.vue'
 import MyLibrary from '../views/MyLibraryView.vue'
+import HistoryView from '../views/home/HistoryView.vue'
 import PlaylistDetail from '../views/PlaylistDetailView.vue'
 import SongDetail from '../views/SongDetailView.vue'
 import ArtistDetail from '../views/ArtistDetailView.vue'
@@ -38,6 +39,7 @@ const router = createRouter({
         { path: 'discover', name: 'discover', component: Discover },
         { path: 'search', name: 'search', component: Search },
         { path: 'library', name: 'library', component: MyLibrary },
+        { path: 'history', name: 'history', component: HistoryView },
 
         // 详情页
         { path: 'playlist/:id', name: 'playlistDetail', component: PlaylistDetail },

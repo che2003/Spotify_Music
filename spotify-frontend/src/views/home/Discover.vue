@@ -14,6 +14,12 @@ interface SongVo {
 
 const router = useRouter()
 const songList = ref<SongVo[]>([])
+const hotSongs = ref<SongVo[]>([])
+const latestSongs = ref<SongVo[]>([])
+const latestAlbums = ref<any[]>([])
+const genres = ref<any[]>([])
+const genreSongs = ref<SongVo[]>([])
+const activeGenreId = ref<number | null>(null)
 const playerStore = usePlayerStore()
 const loading = ref(true)
 
@@ -28,7 +34,7 @@ const greeting = computed(() => {
 // 数据分层 (模拟栏目)
 const heroSongs = computed(() => songList.value.slice(0, 6))       // 顶部 6 个
 const recommendSongs = computed(() => songList.value.slice(6, 12)) // 为您推荐
-const newReleases = computed(() => songList.value.slice(12, 18))   // 新歌速递
+const newReleases = computed(() => latestSongs.value.slice(0, 8))   // 新歌速递
 
 const fetchRecommendations = async () => {
   loading.value = true
@@ -43,10 +49,56 @@ const fetchRecommendations = async () => {
   }
 }
 
+const fetchHotSongs = async () => {
+  try {
+    const res = await request.get('/song/hot', { params: { limit: 10 } })
+    hotSongs.value = res.data
+  } catch (e) { console.error(e) }
+}
+
+const fetchLatestSongs = async () => {
+  try {
+    const res = await request.get('/song/new', { params: { limit: 12 } })
+    latestSongs.value = res.data
+  } catch (e) { console.error(e) }
+}
+
+const fetchLatestAlbums = async () => {
+  try {
+    const res = await request.get('/album/new', { params: { limit: 6 } })
+    latestAlbums.value = res.data
+  } catch (e) { console.error(e) }
+}
+
+const fetchGenres = async () => {
+  try {
+    const res = await request.get('/genre/list')
+    genres.value = res.data
+    if (genres.value.length) {
+      activeGenreId.value = genres.value[0].id
+      fetchGenreSongs(genres.value[0].id)
+    }
+  } catch (e) { console.error(e) }
+}
+
+const fetchGenreSongs = async (genreId: number) => {
+  activeGenreId.value = genreId
+  try {
+    const res = await request.get(`/song/genre/${genreId}`, { params: { limit: 8 } })
+    genreSongs.value = res.data
+  } catch (e) { console.error(e) }
+}
+
 const playMusic = (song: SongVo) => { playerStore.setSong(song) }
 const goToSongDetail = (id: number) => { router.push(`/song/${id}`) }
 
-onMounted(() => { fetchRecommendations() })
+onMounted(() => {
+  fetchRecommendations()
+  fetchHotSongs()
+  fetchLatestSongs()
+  fetchLatestAlbums()
+  fetchGenres()
+})
 </script>
 
 <template>
@@ -112,12 +164,77 @@ onMounted(() => { fetchRecommendations() })
         </div>
       </div>
 
+      <div class="section" v-if="hotSongs.length">
+        <div class="section-header">
+          <h2 class="section-title">热门榜单</h2>
+        </div>
+        <div class="chart-list">
+          <div v-for="(song, index) in hotSongs" :key="song.id" class="chart-item" @click="goToSongDetail(song.id)">
+            <div class="rank" :class="{ top: index < 3 }">{{ index + 1 }}</div>
+            <img :src="song.coverUrl" class="chart-cover" />
+            <div class="chart-info">
+              <div class="chart-title">{{ song.title }}</div>
+              <div class="chart-artist">{{ song.artistName }}</div>
+            </div>
+            <el-button size="small" type="success" @click.stop="playMusic(song)">播放</el-button>
+          </div>
+        </div>
+      </div>
+
       <div class="section" v-if="newReleases.length > 0">
         <div class="section-header">
           <h2 class="section-title">新歌速递</h2>
         </div>
         <div class="song-grid">
           <div v-for="song in newReleases" :key="song.id" class="song-card" @click="goToSongDetail(song.id)">
+            <div class="cover-wrapper">
+              <img :src="song.coverUrl" class="cover-img" />
+              <div class="play-btn-overlay" @click.stop="playMusic(song)">
+                <svg role="img" height="24" width="24" viewBox="0 0 24 24" fill="black"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path></svg>
+              </div>
+            </div>
+            <div class="song-info">
+              <div class="song-title">{{ song.title }}</div>
+              <div class="song-artist">{{ song.artistName || '未知歌手' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" v-if="latestAlbums.length">
+        <div class="section-header">
+          <h2 class="section-title">全新专辑</h2>
+        </div>
+        <div class="album-grid">
+          <div v-for="album in latestAlbums" :key="album.id" class="album-card" @click="router.push(`/album/${album.id}`)">
+            <img :src="album.coverUrl || 'https://placehold.co/180x180?text=Album'" class="album-cover" />
+            <div class="album-meta">
+              <div class="album-title">{{ album.title }}</div>
+              <div class="album-artist">{{ album.artistName || '未知艺人' }}</div>
+              <div class="album-date">{{ album.releaseDate || '发行时间未知' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" v-if="genres.length">
+        <div class="section-header">
+          <h2 class="section-title">流派探索</h2>
+          <div class="genre-tags">
+            <el-tag
+                v-for="genre in genres"
+                :key="genre.id"
+                :type="genre.id === activeGenreId ? 'success' : 'info'"
+                effect="dark"
+                class="genre-tag"
+                @click="fetchGenreSongs(genre.id)"
+            >
+              {{ genre.name }}
+            </el-tag>
+          </div>
+        </div>
+        <div class="song-grid">
+          <div v-for="song in genreSongs" :key="song.id" class="song-card" @click="goToSongDetail(song.id)">
             <div class="cover-wrapper">
               <img :src="song.coverUrl" class="cover-img" />
               <div class="play-btn-overlay" @click.stop="playMusic(song)">
@@ -161,4 +278,23 @@ onMounted(() => { fetchRecommendations() })
 .song-title { color: white; font-weight: 700; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 8px; }
 .song-artist { color: #b3b3b3; font-size: 14px; font-weight: 400; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .skeleton-card { display: flex; align-items: center; padding: 12px; background: #181818; border-radius: 8px; }
+.chart-list { display: flex; flex-direction: column; gap: 10px; }
+.chart-item { display: grid; grid-template-columns: 40px 60px 1fr 80px; align-items: center; padding: 10px; background: #181818; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+.chart-item:hover { background: #262626; }
+.rank { font-weight: 900; color: #b3b3b3; font-size: 18px; }
+.rank.top { color: #1db954; }
+.chart-cover { width: 56px; height: 56px; border-radius: 6px; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+.chart-info { display: flex; flex-direction: column; gap: 4px; }
+.chart-title { color: white; font-weight: 700; }
+.chart-artist { color: #b3b3b3; font-size: 13px; }
+.album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+.album-card { background: #181818; border-radius: 10px; overflow: hidden; transition: transform 0.2s, background 0.2s; cursor: pointer; }
+.album-card:hover { transform: translateY(-4px); background: #262626; }
+.album-cover { width: 100%; aspect-ratio: 1; object-fit: cover; }
+.album-meta { padding: 12px; display: flex; flex-direction: column; gap: 4px; }
+.album-title { color: white; font-weight: 700; }
+.album-artist { color: #b3b3b3; font-size: 13px; }
+.album-date { color: #8f8f8f; font-size: 12px; }
+.genre-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.genre-tag { cursor: pointer; }
 </style>
