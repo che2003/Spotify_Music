@@ -12,6 +12,7 @@ import org.example.spotify_music.vo.SongVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.example.spotify_music.entity.Song;
 
 import java.util.List;
 
