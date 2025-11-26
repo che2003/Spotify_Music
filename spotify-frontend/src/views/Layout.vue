@@ -188,6 +188,12 @@ const formatTime = (seconds: number) => {
           <el-menu-item index="/admin/albums">
             <el-icon><i class="el-icon-collection"></i></el-icon><span>专辑管理</span>
           </el-menu-item>
+          <el-menu-item index="/admin/artists">
+            <el-icon><i class="el-icon-user"></i></el-icon><span>艺人管理</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/genres">
+            <el-icon><i class="el-icon-collection-tag"></i></el-icon><span>流派管理</span>
+          </el-menu-item>
         </el-menu-item-group>
         </el-menu>
 
