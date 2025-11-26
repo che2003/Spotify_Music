@@ -2,12 +2,16 @@ package org.example.spotify_music.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.example.spotify_music.common.Result;
+import org.example.spotify_music.dto.PlayRecordRequest;
 import org.example.spotify_music.entity.User;
 import org.example.spotify_music.mapper.PlayHistoryMapper;
 import org.example.spotify_music.mapper.UserMapper;
+import org.example.spotify_music.service.PlayHistoryService;
 import org.example.spotify_music.vo.PlayHistoryVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +25,7 @@ public class PlayHistoryController {
 
     @Autowired private PlayHistoryMapper playHistoryMapper;
     @Autowired private UserMapper userMapper;
+    @Autowired private PlayHistoryService playHistoryService;
 
     private Long getCurrentUserId() {
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -31,5 +36,15 @@ public class PlayHistoryController {
     @GetMapping("/recent")
     public Result<List<PlayHistoryVo>> recent(@RequestParam(defaultValue = "30") Integer limit) {
         return Result.success(playHistoryMapper.selectRecentByUser(getCurrentUserId(), limit));
+    }
+
+    @PostMapping("/record")
+    public Result<String> recordPlay(@RequestBody PlayRecordRequest request) {
+        if (request == null || request.getSongId() == null) {
+            return Result.error("songId is required");
+        }
+
+        playHistoryService.recordPlay(getCurrentUserId(), request.getSongId());
+        return Result.success("播放记录已保存");
     }
 }
