@@ -44,7 +44,10 @@ public class SecurityConfig {
                         .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
                         .requestMatchers("/assets/**", "/static/**", "/images/**").permitAll()
 
-                        // 5. 其他接口必须验证 Token
+                        // 5. 对外公开的用户主页
+                        .requestMatchers("/user/public/**").permitAll()
+
+                        // 6. 其他接口必须验证 Token
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
