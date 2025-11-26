@@ -208,9 +208,21 @@ const formatDuration = (duration?: number) => {
 }
 .filter-tags { display: flex; gap: 10px; margin-bottom: 20px; }
 .filter-tags span {
-  padding: 6px 16px; background: #242424; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.2s;
+  padding: 6px 16px;
+  background: #1b1b1b;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 1px solid #2f2f2f;
+  color: #e5e5e5;
 }
-.filter-tags span.active, .filter-tags span:hover { background: white; color: black; }
+.filter-tags span.active, .filter-tags span:hover {
+  background: linear-gradient(135deg, #1db954, #1ed760);
+  color: #0b210f;
+  box-shadow: 0 4px 10px rgba(29, 185, 84, 0.25);
+  border-color: transparent;
+}
 
 .results-list { display: flex; flex-direction: column; gap: 20px; }
 .section-block { background: #121212; padding: 16px; border-radius: 12px; }
@@ -243,8 +255,11 @@ const formatDuration = (duration?: number) => {
 .empty-hint { margin-top: 40px; color: #8c8c8c; text-align: center; }
 
 /* Table 适配 */
-:deep(.el-table) { background: transparent; --el-table-tr-bg-color: transparent; --el-table-header-bg-color: transparent; color: #b3b3b3; --el-table-row-hover-bg-color: #2a2a2a; --el-table-border-color: transparent; }
+:deep(.el-table) { background: transparent; --el-table-tr-bg-color: transparent; --el-table-header-bg-color: transparent; color: #b3b3b3; --el-table-row-hover-bg-color: #242424; --el-table-border-color: transparent; }
 :deep(.el-table th) { border-bottom: 1px solid #333; color: white; }
 :deep(.el-table td) { border-bottom: none; }
+:deep(.el-table__body tr td) { background-color: #151515; transition: background-color 0.2s ease; }
+:deep(.el-table__body tr.el-table__row--striped td) { background-color: #1d1d1d; }
+:deep(.el-table__body tr:hover > td) { background-color: #242424 !important; }
 :deep(.el-input__wrapper) { border-radius: 50px; }
 </style>
