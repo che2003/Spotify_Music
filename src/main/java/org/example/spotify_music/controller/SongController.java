@@ -5,7 +5,9 @@ import org.example.spotify_music.common.Result;
 import org.example.spotify_music.dto.SongUploadRequest;
 import org.example.spotify_music.entity.Artist;
 import org.example.spotify_music.entity.User;
+import org.example.spotify_music.entity.SongGenre;
 import org.example.spotify_music.mapper.ArtistMapper;
+import org.example.spotify_music.mapper.SongGenreMapper;
 import org.example.spotify_music.mapper.SongMapper;
 import org.example.spotify_music.mapper.UserMapper;
 import org.example.spotify_music.service.SongService;
@@ -17,6 +19,7 @@ import org.example.spotify_music.entity.Song;
 import org.springframework.beans.BeanUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/song")
@@ -26,11 +29,22 @@ public class SongController {
     @Autowired private SongMapper songMapper;
     @Autowired private UserMapper userMapper;
     @Autowired private ArtistMapper artistMapper;
+    @Autowired private SongGenreMapper songGenreMapper;
 
     private Long getCurrentUserId() {
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userMapper.selectOne(new QueryWrapper<User>().eq("username", username));
         return user.getId();
+    }
+
+    private boolean isAdmin() {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
+    private boolean isMusician() {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_MUSICIAN"));
     }
 
     // 1. 获取所有歌曲 (公共)
@@ -80,19 +94,13 @@ public class SongController {
         Long currentUserId = getCurrentUserId();
 
         // 判断是否是管理员
-        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
-        if (isAdmin) {
+        if (isAdmin()) {
             songService.removeById(id);
             return Result.success("管理员删除成功");
         }
 
         // 判断是否是音乐人并检查归属
-        boolean isMusician = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_MUSICIAN"));
-
-        if (isMusician) {
+        if (isMusician()) {
             Song song = songService.getById(id);
             if (song == null) return Result.error("歌曲不存在");
 
@@ -117,5 +125,48 @@ public class SongController {
     public Result<List<SongVo>> byGenre(@PathVariable("id") Long genreId,
                                        @RequestParam(value = "limit", required = false) Integer limit) {
         return Result.success(songMapper.selectSongVoByGenreId(genreId, limit));
+    }
+
+    @PostMapping("/update")
+    public Result<?> updateSong(@RequestBody SongUploadRequest request) {
+        if (request.getId() == null) {
+            return Result.error("缺少歌曲ID");
+        }
+
+        Song existing = songService.getById(request.getId());
+        if (existing == null) {
+            return Result.error("歌曲不存在");
+        }
+
+        Long currentUserId = getCurrentUserId();
+        if (!isAdmin()) {
+            if (!isMusician()) {
+                return Result.error("权限不足");
+            }
+            Artist owner = artistMapper.selectById(existing.getArtistId());
+            if (owner == null || !currentUserId.equals(owner.getUserId())) {
+                return Result.error("无权修改他人的作品");
+            }
+            request.setArtistId(existing.getArtistId());
+        }
+
+        if (request.getArtistId() != null) existing.setArtistId(request.getArtistId());
+        existing.setAlbumId(request.getAlbumId());
+        existing.setTitle(request.getTitle());
+        existing.setFileUrl(request.getFileUrl());
+        existing.setCoverUrl(request.getCoverUrl());
+        existing.setDuration(request.getDuration());
+        existing.setGenre(request.getGenre());
+        existing.setLyrics(request.getDescription());
+
+        songService.updateSongWithGenres(existing, request.getGenreIds());
+        return Result.success("保存成功");
+    }
+
+    @GetMapping("/{id}/genres")
+    public Result<List<Integer>> genreIds(@PathVariable Long id) {
+        List<Integer> ids = songGenreMapper.selectList(new QueryWrapper<SongGenre>().eq("song_id", id))
+                .stream().map(SongGenre::getGenreId).collect(Collectors.toList());
+        return Result.success(ids);
     }
 }

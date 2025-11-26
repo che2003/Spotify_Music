@@ -37,4 +37,26 @@ public class SongServiceImpl extends ServiceImpl<SongMapper, Song> implements So
 
         mappings.forEach(songGenreMapper::insert);
     }
+
+    @Override
+    @Transactional
+    public void updateSongWithGenres(Song song, List<Long> genreIds) {
+        this.updateById(song);
+
+        songGenreMapper.delete(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<SongGenre>()
+                .eq("song_id", song.getId()));
+
+        if (genreIds == null || genreIds.isEmpty()) {
+            return;
+        }
+
+        List<SongGenre> mappings = genreIds.stream().map(genreId -> {
+            SongGenre mapping = new SongGenre();
+            mapping.setSongId(song.getId());
+            mapping.setGenreId(genreId.intValue());
+            return mapping;
+        }).collect(Collectors.toList());
+
+        mappings.forEach(songGenreMapper::insert);
+    }
 }
