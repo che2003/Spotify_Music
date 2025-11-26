@@ -1,18 +1,23 @@
 :root {
-    --spotify-black: #000000;
+    --spotify-ink: #0b0d0f;
     --spotify-dark-gray: #121212;
     --spotify-light-gray: #181818;
+    --spotify-surface: #1f1f1f;
     --spotify-hover-gray: #282828;
+    --spotify-border: #2c2c2c;
     --spotify-green: #1db954;
-    --spotify-white: #ffffff;
-    --spotify-text-sub: #b3b3b3;
+    --spotify-green-bright: #1ed760;
+    --spotify-white: #f5f7fb;
+    --spotify-text-sub: #c7c7c7;
     --el-color-primary: #1db954 !important; /* 覆盖 Element 主色 */
 }
 
 body {
     margin: 0;
     padding: 0;
-    background-color: var(--spotify-dark-gray);
+    background: radial-gradient(circle at 20% 20%, rgba(30, 215, 96, 0.12), transparent 30%),
+                radial-gradient(circle at 80% 0%, rgba(30, 215, 96, 0.12), transparent 28%),
+                linear-gradient(180deg, var(--spotify-ink) 0%, var(--spotify-dark-gray) 40%, #0b0d0f 100%);
     color: var(--spotify-white);
     font-family: 'Circular', -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -69,11 +74,11 @@ body {
     letter-spacing: 1px;
 }
 .el-button--success {
-    background-color: var(--spotify-green) !important;
-    color: black !important;
+    background: linear-gradient(135deg, var(--spotify-green), var(--spotify-green-bright)) !important;
+    color: #0b0b0b !important;
 }
 .el-button--success:hover {
-    background-color: #1ed760 !important; /* 亮一点的绿 */
+    background-color: var(--spotify-green-bright) !important; /* 亮一点的绿 */
     transform: scale(1.04); /* 微放大效果 */
 }
 
@@ -90,4 +95,20 @@ body {
 .el-input__wrapper:hover, .el-input__wrapper.is-focus {
     background-color: #2a2a2a !important;
     box-shadow: 0 0 0 1px white !important; /* 聚焦时白边框 */
+}
+
+/* 深色化对话框与抽屉 */
+.el-dialog, .el-drawer {
+    background-color: var(--spotify-surface) !important;
+    color: var(--spotify-white) !important;
+    border: 1px solid var(--spotify-border) !important;
+}
+
+.el-dialog__title, .el-drawer__header span {
+    color: var(--spotify-white) !important;
+    font-weight: 700;
+}
+
+.el-drawer__body, .el-dialog__body {
+    color: var(--spotify-text-sub);
 }
