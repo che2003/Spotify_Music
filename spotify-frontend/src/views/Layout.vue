@@ -34,9 +34,11 @@ const menuEntries = [
   '/upload',
   '/musician/stats',
   '/musician/works',
+  '/musician/albums',
   '/admin/dashboard',
   '/admin/users',
-  '/admin/songs'
+  '/admin/songs',
+  '/admin/albums'
 ]
 const activeMenu = computed(() => {
   const segments = route.path.split('/').filter(Boolean)
@@ -162,10 +164,13 @@ const formatTime = (seconds: number) => {
             <el-menu-item index="/musician/stats">
               <el-icon><i class="el-icon-data-board"></i></el-icon><span>作品数据</span>
             </el-menu-item>
-            <el-menu-item index="/musician/works">
-              <el-icon><i class="el-icon-folder"></i></el-icon><span>我的作品</span>
-            </el-menu-item>
-          </el-menu-item-group>
+          <el-menu-item index="/musician/works">
+            <el-icon><i class="el-icon-folder"></i></el-icon><span>我的作品</span>
+          </el-menu-item>
+          <el-menu-item index="/musician/albums">
+            <el-icon><i class="el-icon-collection"></i></el-icon><span>我的专辑</span>
+          </el-menu-item>
+        </el-menu-item-group>
 
           <el-menu-item-group v-if="isAdmin">
             <template #title>
@@ -177,10 +182,13 @@ const formatTime = (seconds: number) => {
             <el-menu-item index="/admin/users">
               <el-icon><i class="el-icon-user"></i></el-icon><span>用户管理</span>
             </el-menu-item>
-            <el-menu-item index="/admin/songs">
-              <el-icon><i class="el-icon-files"></i></el-icon><span>内容管理</span>
-            </el-menu-item>
-          </el-menu-item-group>
+          <el-menu-item index="/admin/songs">
+            <el-icon><i class="el-icon-files"></i></el-icon><span>内容管理</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/albums">
+            <el-icon><i class="el-icon-collection"></i></el-icon><span>专辑管理</span>
+          </el-menu-item>
+        </el-menu-item-group>
         </el-menu>
 
         <div class="logout-area" @click="logout">

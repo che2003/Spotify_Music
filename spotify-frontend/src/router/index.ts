@@ -24,6 +24,8 @@ import DashboardView from '../views/admin/DashboardView.vue'
 import MyWorksView from '../views/musician/MyWorksView.vue'
 import StatsDashboard from '../views/musician/StatsDashboard.vue'
 import SongManageView from '../views/admin/SongManageView.vue'
+import AlbumManageView from '../views/admin/AlbumManageView.vue'
+import MusicianAlbumManageView from '../views/musician/AlbumManageView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -81,6 +83,12 @@ const router = createRouter({
           component: MyWorksView,
           meta: { requiresAuth: true, roles: ['musician'] }
         },
+        {
+          path: 'musician/albums',
+          name: 'musicianAlbums',
+          component: MusicianAlbumManageView,
+          meta: { requiresAuth: true, roles: ['musician'] }
+        },
 
         // 管理员功能
         {
@@ -93,6 +101,12 @@ const router = createRouter({
           path: 'admin/songs',
           name: 'adminSongs',
           component: SongManageView,
+          meta: { requiresAuth: true, roles: ['admin'] }
+        },
+        {
+          path: 'admin/albums',
+          name: 'adminAlbums',
+          component: AlbumManageView,
           meta: { requiresAuth: true, roles: ['admin'] }
         },
         {
