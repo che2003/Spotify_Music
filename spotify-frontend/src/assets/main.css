@@ -112,3 +112,17 @@ body {
 .el-drawer__body, .el-dialog__body {
     color: var(--spotify-text-sub);
 }
+
+/* Skeleton 深色化，避免出现突兀的浅色占位块 */
+.el-skeleton {
+    --el-skeleton-color: #1c1c1c;
+    --el-skeleton-to-color: #2a2a2a;
+}
+
+.el-skeleton__item {
+    background-color: var(--el-skeleton-color) !important;
+}
+
+.el-skeleton__item.is-animated::after {
+    background: linear-gradient(90deg, transparent, var(--el-skeleton-to-color), transparent) !important;
+}
