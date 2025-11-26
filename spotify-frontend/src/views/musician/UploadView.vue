@@ -1,22 +1,46 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+interface GenreOption {
+  id: number
+  name: string
+}
+
 const uploadUrl = '/api/storage/upload' // 对应后端 StorageController
 const fileList = ref([])
 const coverList = ref([])
+const genreOptions = ref<GenreOption[]>([])
 
 const form = reactive({
   title: '',
-  genre: 'Pop',
+  genre: '',
+  genreIds: [] as number[],
+  description: '',
   artistId: 1, // 暂时硬编码，理想情况应从当前登录的 Musician 信息获取
   albumId: 1,  // 暂时硬编码
   fileUrl: '',
   coverUrl: '',
   duration: 0
+})
+
+const loadGenres = async () => {
+  try {
+    const res = await request.get('/genre/list')
+    genreOptions.value = res.data || []
+    if (!form.genre && genreOptions.value.length > 0) {
+      form.genre = genreOptions.value[0].name
+    }
+  } catch (error) {
+    console.error('加载流派失败', error)
+  }
+}
+
+onMounted(() => {
+  loadGenres()
 })
 
 // 上传 MP3 成功回调
@@ -45,8 +69,14 @@ const submitSong = async () => {
   }
 
   try {
+    const payload = {
+      ...form,
+      description: form.description,
+      genreIds: form.genreIds
+    }
+
     // 调用 SongController.add
-    await request.post('/song/add', form)
+    await request.post('/song/add', payload)
     ElMessage.success('歌曲发布成功！')
     router.push('/library') // 发布完跳转到资料库
   } catch (error) {
@@ -66,14 +96,40 @@ const submitSong = async () => {
         <el-input v-model="form.title" placeholder="请输入歌名" size="large" />
       </el-form-item>
 
-      <el-form-item label="流派 (Genre)">
-        <el-select v-model="form.genre" placeholder="选择流派" size="large" style="width: 100%">
-          <el-option label="Pop" value="Pop" />
-          <el-option label="Rock" value="Rock" />
-          <el-option label="Hip-Hop" value="Hip-Hop" />
-          <el-option label="Ballad" value="Ballad" />
-          <el-option label="Electronic" value="Electronic" />
+      <el-form-item label="主流派 (Genre)">
+        <el-select
+            v-model="form.genre"
+            placeholder="选择流派"
+            size="large"
+            filterable
+            style="width: 100%"
+        >
+          <el-option
+              v-for="item in genreOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.name"
+          />
         </el-select>
+      </el-form-item>
+
+      <el-form-item label="流派标签">
+        <el-select
+            v-model="form.genreIds"
+            placeholder="可多选标签"
+            multiple
+            filterable
+            size="large"
+            style="width: 100%"
+        >
+          <el-option
+              v-for="item in genreOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+          />
+        </el-select>
+        <div class="helper-text">选择多个标签可以帮助听众更快发现你的作品</div>
       </el-form-item>
 
       <el-form-item label="音频文件 (MP3)">
@@ -104,6 +160,17 @@ const submitSong = async () => {
         >
           <el-button>点击上传封面</el-button>
         </el-upload>
+      </el-form-item>
+
+      <el-form-item label="歌曲描述 / 创作故事">
+        <el-input
+            v-model="form.description"
+            type="textarea"
+            :rows="4"
+            maxlength="500"
+            show-word-limit
+            placeholder="介绍歌曲的创作背景、风格或想传达的情绪"
+        />
       </el-form-item>
 
       <div class="submit-btn-wrapper">
@@ -148,5 +215,10 @@ const submitSong = async () => {
   width: 200px;
   font-weight: bold;
   letter-spacing: 1px;
+}
+.helper-text {
+  color: #b3b3b3;
+  margin-top: 6px;
+  font-size: 13px;
 }
 </style>
