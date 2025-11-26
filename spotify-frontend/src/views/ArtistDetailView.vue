@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import request from '@/utils/request'
@@ -54,17 +55,18 @@ const albums = computed(() => {
 })
 
 const fetchData = async () => {
+
   const requestId = ++fetchToken
   loading.value = true
   artist.value = null
   songs.value = []
   isFollowing.value = false
-
   try {
     const [artistRes, songRes] = await Promise.all([
       request.get('/artist/list'),
       request.get('/song/list')
     ])
+
 
     if (requestId !== fetchToken) return
 
@@ -121,6 +123,7 @@ watch(
   },
   { immediate: true }
 )
+
 </script>
 
 <template>
@@ -143,6 +146,7 @@ watch(
             {{ isFollowing ? '已关注' : '关注' }}
           </el-button>
         </div>
+
         <p class="bio" v-if="artist.bio">{{ artist.bio }}</p>
       </div>
     </div>
