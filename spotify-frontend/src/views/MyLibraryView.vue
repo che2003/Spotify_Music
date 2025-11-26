@@ -6,7 +6,11 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 
 const router = useRouter()
 const myPlaylists = ref<any[]>([])
+
+const followingUsers = ref<any[]>([])
+
 const likedSongs = ref<any[]>([])
+
 const dialogVisible = ref(false)
 const isEditMode = ref(false)
 const activeTab = ref('playlist')
@@ -25,10 +29,16 @@ const fetchMyPlaylists = async () => {
   } catch (error) { console.error(error) }
 }
 
+const fetchFollowingUsers = async () => {
+  try {
+    const res = await request.get('/follow/following')
+    followingUsers.value = res.data
+
 const fetchLikedSongs = async () => {
   try {
     const res = await request.get('/interaction/song/liked')
     likedSongs.value = res.data || []
+
   } catch (error) { console.error(error) }
 }
 
@@ -73,11 +83,27 @@ const deletePlaylist = (event: Event, id: number) => {
 }
 
 const goToPlaylist = (id: number) => router.push(`/playlist/${id}`)
+
+const goToUser = (id: number) => router.push(`/user/${id}`)
+
+const toggleFollowUser = async (userId: number) => {
+  try {
+    const res = await request.post(`/follow/user/toggle?followedUserId=${userId}`)
+    ElMessage.success(res.data ? '关注成功' : '已取消关注')
+    fetchFollowingUsers()
+  } catch (error) { console.error(error) }
+}
+
+onMounted(() => {
+  fetchMyPlaylists()
+  fetchFollowingUsers()
+
 const goToSong = (id: number) => router.push(`/song/${id}`)
 
 onMounted(() => {
   fetchMyPlaylists()
   fetchLikedSongs()
+
 })
 </script>
 
@@ -119,6 +145,26 @@ onMounted(() => {
         <div v-else class="empty-tip">还没有喜欢的歌曲，去探索一下吧</div>
       </el-tab-pane>
     </el-tabs>
+
+    <div class="follow-section">
+      <div class="follow-header">
+        <h3>我关注的用户</h3>
+        <span class="follow-count">{{ followingUsers.length }} 人</span>
+      </div>
+      <div class="follow-list" v-if="followingUsers.length">
+        <div v-for="user in followingUsers" :key="user.id" class="follow-card">
+          <div class="user-info" @click="goToUser(user.id)">
+            <el-avatar :size="48" :src="user.avatarUrl || ''" />
+            <div>
+              <div class="follow-name">{{ user.nickname || user.username }}</div>
+              <div class="follow-username">@{{ user.username }}</div>
+            </div>
+          </div>
+          <el-button size="small" type="info" @click="toggleFollowUser(user.id)">取关</el-button>
+        </div>
+      </div>
+      <div v-else class="empty-follow">暂无关注用户</div>
+    </div>
 
     <el-dialog v-model="dialogVisible" :title="isEditMode ? '编辑歌单' : '创建新歌单'" width="400px" class="create-dialog">
       <el-form :model="playlistForm" label-position="top">
@@ -165,6 +211,16 @@ onMounted(() => {
 .action-icon { color: white; background: rgba(0,0,0,0.6); padding: 6px; border-radius: 50%; font-size: 16px; }
 .action-icon:hover { background: var(--spotify-green); color: black; }
 .action-icon.delete:hover { background: #f56c6c; color: white; }
+
+.follow-section { margin-top: 32px; background: #181818; padding: 20px; border-radius: 8px; }
+.follow-header { display: flex; justify-content: space-between; align-items: center; color: white; margin-bottom: 16px; }
+.follow-count { color: #b3b3b3; font-size: 14px; }
+.follow-list { display: flex; flex-direction: column; gap: 12px; }
+.follow-card { display: flex; justify-content: space-between; align-items: center; background: #202020; padding: 12px; border-radius: 8px; }
+.user-info { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.follow-name { color: white; font-weight: 600; }
+.follow-username { color: #b3b3b3; font-size: 12px; }
+.empty-follow { color: #777; }
 
 :global(.create-dialog) { background-color: #282828 !important; }
 :global(.create-dialog .el-dialog__title) { color: white; }
