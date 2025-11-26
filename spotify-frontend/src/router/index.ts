@@ -13,6 +13,7 @@ import AlbumDetail from '../views/AlbumDetailView.vue'
 import UploadView from '../views/musician/UploadView.vue'
 import UserManageView from '../views/admin/UserManageView.vue'
 import ProfileView from '../views/user/ProfileView.vue'
+import GenreBrowseView from '../views/GenreBrowseView.vue'
 // 引入可能的其他页面组件，确保所有组件都已定义或导入
 import DashboardView from '../views/admin/DashboardView.vue'
 import MyWorksView from '../views/musician/MyWorksView.vue'
@@ -38,6 +39,7 @@ const router = createRouter({
       children: [
         { path: 'discover', name: 'discover', component: Discover },
         { path: 'search', name: 'search', component: Search },
+        { path: 'genres', name: 'genres', component: GenreBrowseView },
         { path: 'library', name: 'library', component: MyLibrary },
         { path: 'history', name: 'history', component: HistoryView },
 
