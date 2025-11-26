@@ -10,6 +10,12 @@
           AND s.artist_id = #{artistId}
     </select>
 
+    <select id="countLikesBySong" resultType="long">
+        SELECT COUNT(*)
+        FROM user_interaction
+        WHERE type = 3 AND song_id = #{songId}
+    </select>
+
     <select id="averageRatingByArtist" resultType="double">
         SELECT AVG(ui.rating)
         FROM user_interaction ui

@@ -4,6 +4,11 @@ import { useRouter } from 'vue-router'
 import request from '@/utils/request'
 import { usePlayerStore } from '@/stores/player'
 
+interface GenreItem {
+  id: number
+  name: string
+}
+
 interface SongVo {
   id: number
   title: string
@@ -21,10 +26,12 @@ interface GenrePanel {
 }
 
 const keyword = ref('')
+const genreList = ref<GenreItem[]>([])
 const moodPresets = ['清晨通勤', '轻松小憩', '夜晚助眠', '专注学习', '派对活力', '旅行公路']
 const genrePanels = ref<GenrePanel[]>([])
 const activeGenreId = ref<number | null>(null)
 const activeSongs = ref<SongVo[]>([])
+const loadingGenres = ref(false)
 const loadingPanels = ref(false)
 const loadingSongs = ref(false)
 
@@ -35,11 +42,32 @@ const activeGenreName = computed(() => {
   return genrePanels.value.find((item) => item.id === activeGenreId.value)?.name || '精选歌单'
 })
 
+const filteredGenres = computed(() => {
+  const kw = keyword.value.trim().toLowerCase()
+  if (!kw) return genreList.value
+  return genreList.value.filter((genre) => genre.name.toLowerCase().includes(kw))
+})
+
 const formatDuration = (seconds?: number) => {
   if (!seconds && seconds !== 0) return '--:--'
   const mins = Math.floor(seconds / 60)
   const secs = Math.floor(seconds % 60)
   return `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
+const fetchGenreList = async () => {
+  loadingGenres.value = true
+  try {
+    const res = await request.get('/genre/list')
+    genreList.value = res.data || []
+    if (!activeGenreId.value && genreList.value.length) {
+      setActiveGenre(genreList.value[0].id)
+    }
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loadingGenres.value = false
+  }
 }
 
 const fetchPanels = async () => {
@@ -53,7 +81,7 @@ const fetchPanels = async () => {
     })
     genrePanels.value = res.data || []
 
-    if (genrePanels.value.length > 0) {
+    if (!activeGenreId.value && genrePanels.value.length > 0) {
       setActiveGenre(genrePanels.value[0].id)
     } else {
       activeGenreId.value = null
@@ -96,6 +124,7 @@ const goSongDetail = (id: number) => router.push(`/song/${id}`)
 const goArtistDetail = (id?: number) => { if (id) router.push(`/artist/${id}`) }
 
 onMounted(() => {
+  fetchGenreList()
   fetchPanels()
 })
 </script>
@@ -135,6 +164,28 @@ onMounted(() => {
           </el-tag>
         </div>
       </div>
+    </div>
+
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">全部流派</p>
+        <h2>选择一个流派开始探索</h2>
+      </div>
+    </div>
+
+    <div class="genre-grid" v-loading="loadingGenres">
+      <div
+        v-for="genre in filteredGenres"
+        :key="genre.id"
+        class="genre-card"
+        :class="{ active: genre.id === activeGenreId }"
+        @click="setActiveGenre(genre.id)"
+      >
+        <div class="genre-avatar">{{ genre.name.charAt(0).toUpperCase() }}</div>
+        <div class="genre-name">{{ genre.name }}</div>
+        <el-tag size="small" effect="dark" type="success">流派</el-tag>
+      </div>
+      <div v-if="!filteredGenres.length && !loadingGenres" class="empty-state">暂无匹配的流派</div>
     </div>
 
     <div class="panel-grid" v-loading="loadingPanels">
@@ -263,6 +314,47 @@ h2 {
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
   margin-bottom: 32px;
+}
+.genre-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.genre-card {
+  background: linear-gradient(135deg, #1f1f1f 0%, #161616 100%);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.genre-card:hover {
+  transform: translateY(-2px);
+  border-color: #2b2b2b;
+}
+.genre-card.active {
+  border-color: #1db954;
+  box-shadow: 0 10px 30px rgba(29, 185, 84, 0.18);
+}
+.genre-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(29, 185, 84, 0.16);
+  color: #1db954;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+}
+.genre-name {
+  font-weight: 700;
+  font-size: 16px;
 }
 .panel-card {
   background: #181818;

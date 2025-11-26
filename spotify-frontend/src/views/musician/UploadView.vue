@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 interface GenreOption {
   id: number
   name: string
@@ -15,8 +16,11 @@ const fileList = ref([])
 const coverList = ref([])
 const genreOptions = ref<GenreOption[]>([])
 const albumOptions = ref<any[]>([])
+const isEditMode = computed(() => Boolean(route.params.id || route.query.id))
+const pageTitle = computed(() => (isEditMode.value ? '编辑歌曲' : '发布新歌曲'))
 
 const form = reactive({
+  id: null as number | null,
   title: '',
   genre: '',
   genreIds: [] as number[],
@@ -61,9 +65,39 @@ const loadArtistAndAlbums = async () => {
   }
 }
 
+const loadSongDetail = async () => {
+  const songId = route.params.id || route.query.id
+  if (!songId) return
+
+  try {
+    const res = await request.get(`/song/${songId}`)
+    const data = res.data
+    form.id = data.id
+    form.title = data.title || ''
+    form.genre = data.genre || ''
+    form.albumId = data.albumId || null
+    form.artistId = data.artistId || null
+    form.description = data.lyrics || ''
+    form.fileUrl = data.fileUrl || ''
+    form.coverUrl = data.coverUrl || ''
+    form.duration = data.duration || 0
+
+    fileList.value = form.fileUrl ? [{ name: '已上传音频', url: form.fileUrl }] : []
+    coverList.value = form.coverUrl ? [{ name: '已上传封面', url: form.coverUrl }] : []
+
+    const genreRes = await request.get(`/song/${songId}/genres`)
+    form.genreIds = genreRes.data || []
+  } catch (error) {
+    console.error('加载歌曲详情失败', error)
+  }
+}
+
 onMounted(() => {
   loadGenres()
   loadArtistAndAlbums()
+  if (isEditMode.value) {
+    loadSongDetail()
+  }
 })
 
 // 上传 MP3 成功回调
@@ -94,24 +128,30 @@ const submitSong = async () => {
   try {
     const payload = {
       ...form,
+      songId: form.id || undefined,
       description: form.description,
       genreIds: form.genreIds
     }
 
-    // 调用 SongController.add
-    await request.post('/song/add', payload)
-    ElMessage.success('歌曲发布成功！')
-    router.push('/library') // 发布完跳转到资料库
+    if (isEditMode.value) {
+      await request.put('/song/update', payload)
+      ElMessage.success('歌曲更新成功！')
+      router.push({ name: 'myWorks' })
+    } else {
+      await request.post('/song/add', payload)
+      ElMessage.success('歌曲发布成功！')
+      router.push('/library')
+    }
   } catch (error) {
     console.error(error)
-    ElMessage.error('发布失败')
+    ElMessage.error(isEditMode.value ? '更新失败' : '发布失败')
   }
 }
 </script>
 
 <template>
   <div class="upload-container">
-    <h2 class="title">发布新歌曲</h2>
+    <h2 class="title">{{ pageTitle }}</h2>
 
     <el-form :model="form" label-position="top" class="upload-form">
 
