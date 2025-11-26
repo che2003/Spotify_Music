@@ -5,7 +5,9 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.example.spotify_music.entity.PlayHistory;
 import org.example.spotify_music.vo.PlayHistoryVo;
+import org.example.spotify_music.vo.SongMetricVo;
 import org.example.spotify_music.vo.SongVo;
+import org.example.spotify_music.vo.TrendPointVo;
 
 import java.util.List;
 
@@ -16,4 +18,13 @@ public interface PlayHistoryMapper extends BaseMapper<PlayHistory> {
 
     List<SongVo> selectTopPlayedSongs(@Param("days") Integer days,
                                       @Param("limit") Integer limit);
+
+    Long countUniqueListenersByArtist(@Param("artistId") Long artistId);
+
+    List<TrendPointVo> selectPlayTrendByArtist(@Param("artistId") Long artistId,
+                                               @Param("days") Integer days);
+
+    List<SongMetricVo> selectTopPlayedSongsByArtist(@Param("artistId") Long artistId,
+                                                    @Param("days") Integer days,
+                                                    @Param("limit") Integer limit);
 }
