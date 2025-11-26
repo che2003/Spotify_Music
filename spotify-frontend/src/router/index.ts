@@ -21,6 +21,7 @@ import ChartsView from '../views/ChartsView.vue'
 // 引入可能的其他页面组件，确保所有组件都已定义或导入
 import DashboardView from '../views/admin/DashboardView.vue'
 import MyWorksView from '../views/musician/MyWorksView.vue'
+import StatsDashboard from '../views/musician/StatsDashboard.vue'
 import SongManageView from '../views/admin/SongManageView.vue'
 
 const router = createRouter({
@@ -62,6 +63,7 @@ const router = createRouter({
 
         // 音乐人功能
         { path: 'upload', name: 'upload', component: UploadView },
+        { path: 'musician/stats', name: 'musicianStats', component: StatsDashboard },
         { path: 'musician/works', name: 'myWorks', component: MyWorksView },
 
         // 管理员功能
