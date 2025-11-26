@@ -11,6 +11,7 @@ import SongDetail from '../views/SongDetailView.vue'
 import ArtistDetail from '../views/ArtistDetailView.vue'
 import AlbumDetail from '../views/AlbumDetailView.vue'
 import UploadView from '../views/musician/UploadView.vue'
+import NewReleasesView from '../views/NewReleasesView.vue'
 import UserManageView from '../views/admin/UserManageView.vue'
 import ProfileView from '../views/user/ProfileView.vue'
 import GenreBrowseView from '../views/GenreBrowseView.vue'
@@ -41,6 +42,7 @@ const router = createRouter({
       redirect: '/discover',
       children: [
         { path: 'discover', name: 'discover', component: Discover },
+        { path: 'new', name: 'newReleases', component: NewReleasesView },
         { path: 'search', name: 'search', component: Search },
 
         { path: 'charts', name: 'charts', component: ChartsView },
