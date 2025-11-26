@@ -27,7 +27,9 @@ public class GenreController {
 
     @GetMapping("/list")
     public Result<List<Genre>> listGenres() {
-        return Result.success(genreMapper.selectList(null));
+        QueryWrapper<Genre> wrapper = new QueryWrapper<>();
+        wrapper.lambda().orderByAsc(Genre::getName);
+        return Result.success(genreMapper.selectList(wrapper));
     }
 
     @GetMapping("/{id}/songs")
