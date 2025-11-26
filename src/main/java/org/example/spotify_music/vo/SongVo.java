@@ -1,5 +1,7 @@
 package org.example.spotify_music.vo;
 
+import java.time.LocalDateTime;
+
 public class SongVo {
     private Long id;
     private String title;
@@ -14,6 +16,7 @@ public class SongVo {
     private Integer duration;
     private String lyrics;
     private Long playCount;
+    private LocalDateTime releaseTime;
 
     // Getter/Setter
     public Long getId() { return id; }
@@ -44,4 +47,7 @@ public class SongVo {
     // 新增 artistId 的 Getter/Setter
     public Long getArtistId() { return artistId; }
     public void setArtistId(Long artistId) { this.artistId = artistId; }
+
+    public LocalDateTime getReleaseTime() { return releaseTime; }
+    public void setReleaseTime(LocalDateTime releaseTime) { this.releaseTime = releaseTime; }
 }
