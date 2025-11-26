@@ -8,6 +8,9 @@ public class SongVo {
     private String genre;
     private String artistName;
     private Long artistId; // 【新增】艺人ID
+    private Long albumId;   // 专辑 ID
+    private String albumTitle; // 专辑名
+    private String albumCover; // 专辑封面
     private Integer duration;
     private String lyrics;
     private Long playCount;
@@ -25,6 +28,12 @@ public class SongVo {
     public void setGenre(String genre) { this.genre = genre; }
     public String getArtistName() { return artistName; }
     public void setArtistName(String artistName) { this.artistName = artistName; }
+    public Long getAlbumId() { return albumId; }
+    public void setAlbumId(Long albumId) { this.albumId = albumId; }
+    public String getAlbumTitle() { return albumTitle; }
+    public void setAlbumTitle(String albumTitle) { this.albumTitle = albumTitle; }
+    public String getAlbumCover() { return albumCover; }
+    public void setAlbumCover(String albumCover) { this.albumCover = albumCover; }
     public Integer getDuration() { return duration; }
     public void setDuration(Integer duration) { this.duration = duration; }
     public String getLyrics() { return lyrics; }

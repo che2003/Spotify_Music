@@ -7,6 +7,8 @@ import Search from '../views/SearchView.vue'
 import MyLibrary from '../views/MyLibraryView.vue'
 import PlaylistDetail from '../views/PlaylistDetailView.vue'
 import SongDetail from '../views/SongDetailView.vue'
+import ArtistDetail from '../views/ArtistDetailView.vue'
+import AlbumDetail from '../views/AlbumDetailView.vue'
 import UploadView from '../views/musician/UploadView.vue'
 import UserManageView from '../views/admin/UserManageView.vue'
 import ProfileView from '../views/user/ProfileView.vue'
@@ -40,6 +42,8 @@ const router = createRouter({
         // 详情页
         { path: 'playlist/:id', name: 'playlistDetail', component: PlaylistDetail },
         { path: 'song/:id', name: 'songDetail', component: SongDetail },
+        { path: 'artist/:id', name: 'artistDetail', component: ArtistDetail },
+        { path: 'album/:id', name: 'albumDetail', component: AlbumDetail },
 
         // 个人中心
         { path: 'profile', name: 'profile', component: ProfileView },

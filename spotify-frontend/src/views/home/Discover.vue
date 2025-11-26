@@ -50,59 +50,88 @@ onMounted(() => { fetchRecommendations() })
 </script>
 
 <template>
-  <div class="discover-container" v-loading="loading" element-loading-background="transparent">
-
+  <div class="discover-container">
     <h2 class="greeting">{{ greeting }}</h2>
-    <div class="hero-grid">
-      <div v-for="song in heroSongs" :key="'hero-' + song.id" class="hero-card" @click="playMusic(song)">
-        <img :src="song.coverUrl" class="hero-img" />
-        <span class="hero-text">{{ song.title }}</span>
-        <div class="play-btn-hero" @click.stop="playMusic(song)">
-          <svg role="img" height="24" width="24" viewBox="0 0 24 24" fill="black"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path></svg>
+
+    <template v-if="loading">
+      <div class="hero-grid">
+        <el-skeleton v-for="i in 6" :key="i" animated class="skeleton-card">
+          <template #template>
+            <el-skeleton-item variant="image" style="width:80px;height:80px;border-radius:4px" />
+            <div style="flex:1; padding: 0 12px;">
+              <el-skeleton-item variant="text" style="width:70%; height:16px; margin-top: 12px;" />
+            </div>
+          </template>
+        </el-skeleton>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">为您推荐</h2>
+        </div>
+        <div class="song-grid">
+          <el-skeleton v-for="i in 6" :key="'rec-' + i" animated class="song-card">
+            <template #template>
+              <el-skeleton-item variant="image" style="width:100%;height:160px;border-radius:8px" />
+              <el-skeleton-item variant="text" style="width:80%;margin-top:12px;" />
+              <el-skeleton-item variant="text" style="width:60%;margin-top:8px;" />
+            </template>
+          </el-skeleton>
         </div>
       </div>
-    </div>
+    </template>
 
-    <div class="section" v-if="recommendSongs.length > 0">
-      <div class="section-header">
-        <h2 class="section-title">为您推荐</h2>
+    <template v-else>
+      <div class="hero-grid">
+        <div v-for="song in heroSongs" :key="'hero-' + song.id" class="hero-card" @click="playMusic(song)">
+          <img :src="song.coverUrl" class="hero-img" />
+          <span class="hero-text">{{ song.title }}</span>
+          <div class="play-btn-hero" @click.stop="playMusic(song)">
+            <svg role="img" height="24" width="24" viewBox="0 0 24 24" fill="black"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path></svg>
+          </div>
+        </div>
       </div>
-      <div class="song-grid">
-        <div v-for="song in recommendSongs" :key="song.id" class="song-card" @click="goToSongDetail(song.id)">
-          <div class="cover-wrapper">
-            <img :src="song.coverUrl" class="cover-img" />
-            <div class="play-btn-overlay" @click.stop="playMusic(song)">
-              <svg role="img" height="24" width="24" viewBox="0 0 24 24" fill="black"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path></svg>
+
+      <div class="section" v-if="recommendSongs.length > 0">
+        <div class="section-header">
+          <h2 class="section-title">为您推荐</h2>
+        </div>
+        <div class="song-grid">
+          <div v-for="song in recommendSongs" :key="song.id" class="song-card" @click="goToSongDetail(song.id)">
+            <div class="cover-wrapper">
+              <img :src="song.coverUrl" class="cover-img" />
+              <div class="play-btn-overlay" @click.stop="playMusic(song)">
+                <svg role="img" height="24" width="24" viewBox="0 0 24 24" fill="black"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path></svg>
+              </div>
+            </div>
+            <div class="song-info">
+              <div class="song-title">{{ song.title }}</div>
+              <div class="song-artist">{{ song.artistName || '未知歌手' }}</div>
             </div>
           </div>
-          <div class="song-info">
-            <div class="song-title">{{ song.title }}</div>
-            <div class="song-artist">{{ song.artistName || '未知歌手' }}</div>
-          </div>
         </div>
       </div>
-    </div>
 
-    <div class="section" v-if="newReleases.length > 0">
-      <div class="section-header">
-        <h2 class="section-title">新歌速递</h2>
-      </div>
-      <div class="song-grid">
-        <div v-for="song in newReleases" :key="song.id" class="song-card" @click="goToSongDetail(song.id)">
-          <div class="cover-wrapper">
-            <img :src="song.coverUrl" class="cover-img" />
-            <div class="play-btn-overlay" @click.stop="playMusic(song)">
-              <svg role="img" height="24" width="24" viewBox="0 0 24 24" fill="black"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path></svg>
+      <div class="section" v-if="newReleases.length > 0">
+        <div class="section-header">
+          <h2 class="section-title">新歌速递</h2>
+        </div>
+        <div class="song-grid">
+          <div v-for="song in newReleases" :key="song.id" class="song-card" @click="goToSongDetail(song.id)">
+            <div class="cover-wrapper">
+              <img :src="song.coverUrl" class="cover-img" />
+              <div class="play-btn-overlay" @click.stop="playMusic(song)">
+                <svg role="img" height="24" width="24" viewBox="0 0 24 24" fill="black"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path></svg>
+              </div>
+            </div>
+            <div class="song-info">
+              <div class="song-title">{{ song.title }}</div>
+              <div class="song-artist">{{ song.artistName || '未知歌手' }}</div>
             </div>
           </div>
-          <div class="song-info">
-            <div class="song-title">{{ song.title }}</div>
-            <div class="song-artist">{{ song.artistName || '未知歌手' }}</div>
-          </div>
         </div>
       </div>
-    </div>
-
+    </template>
   </div>
 </template>
 
@@ -131,4 +160,5 @@ onMounted(() => { fetchRecommendations() })
 .play-btn-overlay:hover { transform: scale(1.1) !important; background-color: #1ed760; }
 .song-title { color: white; font-weight: 700; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 8px; }
 .song-artist { color: #b3b3b3; font-size: 14px; font-weight: 400; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.skeleton-card { display: flex; align-items: center; padding: 12px; background: #181818; border-radius: 8px; }
 </style>
