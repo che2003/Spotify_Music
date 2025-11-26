@@ -17,6 +17,7 @@ import ProfileView from '../views/user/ProfileView.vue'
 import GenreBrowseView from '../views/GenreBrowseView.vue'
 
 import ChartsView from '../views/ChartsView.vue'
+import NotFoundView from '../views/NotFoundView.vue'
 
 // 引入可能的其他页面组件，确保所有组件都已定义或导入
 import DashboardView from '../views/admin/DashboardView.vue'
@@ -102,15 +103,18 @@ const router = createRouter({
         }
       ]
     },
-    // 404 路由 (可选)
-    // { path: '/:pathMatch(.*)*', name: 'NotFound', component: () => import('../views/NotFoundView.vue') }
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: NotFoundView
+    }
   ]
 })
 
 // 路由守卫：未登录或权限不足时拦截
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
-  const publicPages = ['login', 'register']
+  const publicPages = ['login', 'register', 'NotFound']
   const authRequired = !publicPages.includes((to.name as string) || '')
 
   if (authRequired && !token) {
