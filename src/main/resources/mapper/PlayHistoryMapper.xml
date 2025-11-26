@@ -27,4 +27,34 @@
         LIMIT #{limit}
     </select>
 
+    <select id="selectTopPlayedSongs" resultType="org.example.spotify_music.vo.SongVo">
+        SELECT
+            s.id,
+            s.title,
+            s.file_url,
+            s.cover_url,
+            s.genre,
+            s.duration,
+            s.lyrics,
+            s.artist_id,
+            a.name AS artistName,
+            s.album_id AS albumId,
+            alb.title AS albumTitle,
+            alb.cover_url AS albumCover,
+            COUNT(*) AS playCount
+        FROM play_history ph
+        LEFT JOIN music_song s ON ph.song_id = s.id
+        LEFT JOIN music_artist a ON s.artist_id = a.id
+        LEFT JOIN music_album alb ON s.album_id = alb.id
+        <where>
+            <if test="days != null and days &gt; 0">
+                ph.play_time &gt;= DATE_SUB(NOW(), INTERVAL #{days} DAY)
+            </if>
+        </where>
+        GROUP BY s.id, s.title, s.file_url, s.cover_url, s.genre, s.duration, s.lyrics,
+                 s.artist_id, a.name, s.album_id, alb.title, alb.cover_url
+        ORDER BY playCount DESC
+        LIMIT #{limit}
+    </select>
+
 </mapper>

@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.example.spotify_music.entity.PlayHistory;
 import org.example.spotify_music.vo.PlayHistoryVo;
+import org.example.spotify_music.vo.SongVo;
 
 import java.util.List;
 
@@ -12,4 +13,7 @@ import java.util.List;
 public interface PlayHistoryMapper extends BaseMapper<PlayHistory> {
 
     List<PlayHistoryVo> selectRecentByUser(@Param("userId") Long userId, @Param("limit") Integer limit);
+
+    List<SongVo> selectTopPlayedSongs(@Param("days") Integer days,
+                                      @Param("limit") Integer limit);
 }
