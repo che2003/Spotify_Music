@@ -5,26 +5,26 @@ import org.example.spotify_music.common.Result;
 import org.example.spotify_music.entity.Interaction;
 import org.example.spotify_music.entity.User;
 import org.example.spotify_music.mapper.InteractionMapper;
-import org.example.spotify_music.mapper.PlayHistoryMapper;
-import org.example.spotify_music.mapper.SongMapper;
 import org.example.spotify_music.mapper.UserMapper;
 import org.example.spotify_music.entity.PlayHistory;
+import org.example.spotify_music.service.InteractionService;
+import org.example.spotify_music.vo.LikeStatusVo;
+import org.example.spotify_music.vo.SongVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/interaction")
 public class InteractionController {
 
     @Autowired private InteractionMapper interactionMapper;
+    @Autowired private InteractionService interactionService;
     @Autowired private UserMapper userMapper;
-    @Autowired private SongMapper songMapper;
-    @Autowired private PlayHistoryMapper playHistoryMapper;
+    @Autowired private PlayHistoryService playHistoryService;
 
     private Long getCurrentUserId() {
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -52,25 +52,33 @@ public class InteractionController {
         interactionMapper.insert(interaction);
 
         if (isPlay && interaction.getSongId() != null) {
-            songMapper.incrementPlayCount(interaction.getSongId());
-
-            PlayHistory history = new PlayHistory();
-            history.setSongId(interaction.getSongId());
-            history.setUserId(interaction.getUserId());
-            history.setPlayTime(java.time.LocalDateTime.now());
-            playHistoryMapper.insert(history);
+            playHistoryService.recordPlay(interaction.getUserId(), interaction.getSongId());
         }
 
         return Result.success("行为已记录");
     }
 
-    @GetMapping("/liked")
-    public Result<List<Long>> getLikedSongs() {
+    @PostMapping("/song/toggleLike")
+    public Result<LikeStatusVo> toggleSongLike(@RequestParam Long songId) {
         Long userId = getCurrentUserId();
-        QueryWrapper<Interaction> query = new QueryWrapper<>();
-        query.eq("user_id", userId).eq("type", 3).select("song_id");
-        List<Interaction> list = interactionMapper.selectList(query);
-        List<Long> songIds = list.stream().map(Interaction::getSongId).distinct().collect(Collectors.toList());
-        return Result.success(songIds);
+        LikeStatusVo status = interactionService.toggleSongLike(songId, userId);
+        return Result.success(status);
+    }
+
+    @GetMapping("/song/status")
+    public Result<LikeStatusVo> getSongLikeStatus(@RequestParam Long songId) {
+        Long userId = getCurrentUserId();
+        LikeStatusVo status = interactionService.getSongLikeStatus(songId, userId);
+        return Result.success(status);
+    }
+
+    @GetMapping("/liked")
+    public Result<List<Long>> getLikedSongIds() {
+        return Result.success(interactionService.getLikedSongIds(getCurrentUserId()));
+    }
+
+    @GetMapping("/song/liked")
+    public Result<List<SongVo>> getLikedSongs() {
+        return Result.success(interactionService.getLikedSongs(getCurrentUserId()));
     }
 }

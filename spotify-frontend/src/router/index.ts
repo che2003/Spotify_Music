@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import Layout from '../views/Layout.vue'
-import Discover from '../views/home/Discover.vue'
+import HomeView from '../views/HomeView.vue'
 import Search from '../views/SearchView.vue'
 import MyLibrary from '../views/MyLibraryView.vue'
 import HistoryView from '../views/home/HistoryView.vue'
@@ -26,6 +26,10 @@ import MyWorksView from '../views/musician/MyWorksView.vue'
 import StatsDashboard from '../views/musician/StatsDashboard.vue'
 import SongManageView from '../views/admin/SongManageView.vue'
 import AlbumManageView from '../views/admin/AlbumManageView.vue'
+import BannerManageView from '../views/admin/BannerManageView.vue'
+import ArtistManageView from '../views/admin/ArtistManageView.vue'
+import GenreManageView from '../views/admin/GenreManageView.vue'
+
 import MusicianAlbumManageView from '../views/musician/AlbumManageView.vue'
 
 const router = createRouter({
@@ -46,7 +50,7 @@ const router = createRouter({
       component: Layout, // 主布局
       redirect: '/discover',
       children: [
-        { path: 'discover', name: 'discover', component: Discover, meta: { requiresAuth: true } },
+        { path: 'discover', name: 'discover', component: HomeView, meta: { requiresAuth: true } },
         { path: 'new', name: 'newReleases', component: NewReleasesView, meta: { requiresAuth: true } },
         { path: 'search', name: 'search', component: Search, meta: { requiresAuth: true } },
 
@@ -70,6 +74,12 @@ const router = createRouter({
         {
           path: 'upload',
           name: 'upload',
+          component: UploadView,
+          meta: { requiresAuth: true, roles: ['musician'] }
+        },
+        {
+          path: 'upload/:id',
+          name: 'editSong',
           component: UploadView,
           meta: { requiresAuth: true, roles: ['musician'] }
         },
@@ -109,6 +119,23 @@ const router = createRouter({
           path: 'admin/albums',
           name: 'adminAlbums',
           component: AlbumManageView,
+          meta: { requiresAuth: true, roles: ['admin'] }
+        },
+        {
+          path: 'admin/banners',
+          name: 'adminBanners',
+          component: BannerManageView,
+
+          path: 'admin/artists',
+          name: 'adminArtists',
+          component: ArtistManageView,
+          meta: { requiresAuth: true, roles: ['admin'] }
+        },
+        {
+          path: 'admin/genres',
+          name: 'adminGenres',
+          component: GenreManageView,
+
           meta: { requiresAuth: true, roles: ['admin'] }
         },
         {
