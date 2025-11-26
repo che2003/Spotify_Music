@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import request from '@/utils/request'
 import { usePlayerStore } from '@/stores/player'
@@ -54,17 +54,23 @@ const albums = computed(() => {
 
 const fetchData = async () => {
   loading.value = true
+  artist.value = null
+  songs.value = []
+  isFollowing.value = false
+
   try {
     const [artistRes, songRes] = await Promise.all([
       request.get('/artist/list'),
       request.get('/song/list')
     ])
-    artist.value = artistRes.data.find((item: Artist) => item.id === Number(route.params.id)) || null
+
+    const currentId = Number(route.params.id)
+    artist.value = artistRes.data.find((item: Artist) => item.id === currentId) || null
     songs.value = songRes.data
+
     if (artist.value?.id) {
-      checkFollowStatus(artist.value.id)
-    }
-    if (!artist.value) {
+      await checkFollowStatus(artist.value.id)
+    } else {
       ElMessage.error('未找到该艺人')
     }
   } catch (e) {
@@ -99,6 +105,7 @@ const toggleFollow = async () => {
 }
 
 onMounted(fetchData)
+watch(() => route.params.id, () => fetchData())
 </script>
 
 <template>
