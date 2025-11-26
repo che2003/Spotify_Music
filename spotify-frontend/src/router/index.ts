@@ -14,6 +14,7 @@ import UploadView from '../views/musician/UploadView.vue'
 import NewReleasesView from '../views/NewReleasesView.vue'
 import UserManageView from '../views/admin/UserManageView.vue'
 import ProfileView from '../views/user/ProfileView.vue'
+import PublicProfileView from '../views/user/PublicProfileView.vue'
 import GenreBrowseView from '../views/GenreBrowseView.vue'
 
 import ChartsView from '../views/ChartsView.vue'
@@ -63,6 +64,7 @@ const router = createRouter({
 
         // 个人中心
         { path: 'profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true } },
+        { path: 'user/:id', name: 'publicProfile', component: PublicProfileView, meta: { requiresAuth: true } },
 
         // 音乐人功能
         {
