@@ -12,6 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/follow")
 public class FollowController {
@@ -70,5 +74,31 @@ public class FollowController {
                 .eq("followed_user_id", artist.getUserId()));
 
         return Result.success(count > 0);
+    }
+
+    // 关注列表（我关注的人）
+    @GetMapping("/following")
+    public Result<List<User>> followingList() {
+        Long currentUserId = getCurrentUserId();
+        List<UserFollow> relations = followMapper.selectList(new QueryWrapper<UserFollow>()
+                .eq("user_id", currentUserId));
+        if (relations.isEmpty()) {
+            return Result.success(Collections.emptyList());
+        }
+        List<Long> ids = relations.stream().map(UserFollow::getFollowedUserId).collect(Collectors.toList());
+        return Result.success(userMapper.selectBatchIds(ids));
+    }
+
+    // 粉丝列表（关注我的人）
+    @GetMapping("/fans")
+    public Result<List<User>> fansList() {
+        Long currentUserId = getCurrentUserId();
+        List<UserFollow> relations = followMapper.selectList(new QueryWrapper<UserFollow>()
+                .eq("followed_user_id", currentUserId));
+        if (relations.isEmpty()) {
+            return Result.success(Collections.emptyList());
+        }
+        List<Long> ids = relations.stream().map(UserFollow::getUserId).collect(Collectors.toList());
+        return Result.success(userMapper.selectBatchIds(ids));
     }
 }
