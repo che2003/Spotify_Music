@@ -3,7 +3,6 @@ package org.example.spotify_music.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.example.spotify_music.common.Result;
 import org.example.spotify_music.entity.Artist;
-import org.example.spotify_music.entity.Song;
 import org.example.spotify_music.entity.User;
 import org.example.spotify_music.mapper.ArtistMapper;
 import org.example.spotify_music.mapper.SongMapper;
@@ -11,7 +10,6 @@ import org.example.spotify_music.mapper.UserMapper;
 import org.example.spotify_music.service.SongService;
 import org.example.spotify_music.vo.SongVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +34,16 @@ public class SongController {
     @GetMapping("/list")
     public Result<List<SongVo>> list() {
         return Result.success(songMapper.selectSongVoList());
+    }
+
+    @GetMapping("/hot")
+    public Result<List<SongVo>> hot(@RequestParam(defaultValue = "20") Integer limit) {
+        return Result.success(songMapper.selectTopSongVos(limit));
+    }
+
+    @GetMapping("/new")
+    public Result<List<SongVo>> latest(@RequestParam(defaultValue = "20") Integer limit) {
+        return Result.success(songMapper.selectLatestSongVos(limit));
     }
 
     // 2. 【新增】获取当前音乐人发布的歌曲
@@ -93,7 +101,13 @@ public class SongController {
     }
 
     @GetMapping("/{id}")
-    public Result<Song> getById(@PathVariable Long id) {
-        return Result.success(songMapper.selectById(id));
+    public Result<SongVo> getById(@PathVariable Long id) {
+        return Result.success(songMapper.selectSongVoById(id));
+    }
+
+    @GetMapping("/genre/{id}")
+    public Result<List<SongVo>> byGenre(@PathVariable("id") Long genreId,
+                                       @RequestParam(value = "limit", required = false) Integer limit) {
+        return Result.success(songMapper.selectSongVoByGenreId(genreId, limit));
     }
 }

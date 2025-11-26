@@ -13,6 +13,7 @@ const playerStore = usePlayerStore()
 const isFollowing = ref(false)
 const lyrics = ref<Array<{ time: number; text: string }>>([])
 const lyricRefs = ref<HTMLDivElement[]>([])
+const loading = ref(true)
 
 const activeLineIndex = computed(() => {
   const current = playerStore.currentTime
@@ -34,17 +35,21 @@ watch(activeLineIndex, async (newIndex) => {
 
 const fetchSongDetails = async () => {
   const songId = route.params.id as string
+  loading.value = true
   try {
-    // 暂时用 list 过滤，推荐改为后端 /song/{id} 接口
-    const res = await request.get('/song/list')
-    const foundSong = res.data.find((s: any) => s.id === parseInt(songId))
-    if (foundSong) song.value = foundSong
-    else ElMessage.error('歌曲不存在')
+    const res = await request.get(`/song/${songId}`)
+    if (!res.data) {
+      ElMessage.error('歌曲不存在')
+      return
+    }
+    song.value = res.data
     if (song.value.artistId) {
       checkFollowStatus(song.value.artistId)
     }
     parseLyrics(song.value.lyrics || '')
-  } catch (error) { ElMessage.error('加载失败') }
+  } catch (error) {
+    ElMessage.error('加载失败')
+  } finally { loading.value = false }
 }
 
 const parseLyrics = (raw: string) => {
@@ -95,7 +100,8 @@ onMounted(() => { fetchSongDetails() })
 
 <template>
   <div class="song-detail-container">
-    <div v-if="song.id" class="detail-wrapper">
+    <el-skeleton v-if="loading" :rows="6" animated />
+    <div v-else-if="song.id" class="detail-wrapper">
       <div class="header-section">
         <img :src="song.coverUrl" class="song-cover" />
         <div class="info-text">
@@ -150,6 +156,7 @@ onMounted(() => { fetchSongDetails() })
         <CommentBox :song-id="song.id" />
       </div>
     </div>
+    <div v-else-if="!loading" class="lyrics-empty">歌曲不存在或已下架</div>
   </div>
 </template>
 
