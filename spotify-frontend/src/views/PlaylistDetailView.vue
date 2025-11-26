@@ -1,24 +1,25 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import request from '@/utils/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { usePlayerStore } from '@/stores/player'
 
 const route = useRoute()
+const playlistId = computed(() => Number(route.params.id))
 const playlist = ref<any>({})
 const songs = ref<any[]>([])
 const playerStore = usePlayerStore()
+const draggingId = ref<number | null>(null)
+const savingOrder = ref(false)
 
 // ------------------------------------
 // 动作 1: 获取歌单详情和歌曲
 // ------------------------------------
 const fetchPlaylistDetails = async () => {
-  const playlistId = route.params.id as string
-
   try {
     const playlistsRes = await request.get('/playlist/my')
-    const currentPlaylist = playlistsRes.data.find((p: any) => p.id === parseInt(playlistId))
+    const currentPlaylist = playlistsRes.data.find((p: any) => p.id === playlistId.value)
     if (currentPlaylist) {
       playlist.value = currentPlaylist
     } else {
@@ -27,7 +28,7 @@ const fetchPlaylistDetails = async () => {
     }
 
     // 后端现在返回 SongVo，包含 artistName
-    const songsRes = await request.get(`/playlist/${playlistId}/songs`)
+    const songsRes = await request.get(`/playlist/${playlistId.value}/songs`)
     songs.value = songsRes.data
 
   } catch (error) {
@@ -40,14 +41,12 @@ const fetchPlaylistDetails = async () => {
 // 动作 2: 移除歌曲
 // ------------------------------------
 const removeSong = (songId: number, title: string) => {
-  const playlistId = route.params.id as string
-
   ElMessageBox.confirm(
       `确定要从歌单《${playlist.value.title}》中移除歌曲【${title}】吗?`,
       '移除确认',
   ).then(async () => {
     try {
-      await request.delete(`/playlist/removeSong?playlistId=${playlistId}&songId=${songId}`)
+      await request.delete(`/playlist/removeSong?playlistId=${playlistId.value}&songId=${songId}`)
       ElMessage.success('歌曲移除成功！')
       fetchPlaylistDetails()
     } catch (error) {
@@ -63,6 +62,48 @@ const removeSong = (songId: number, title: string) => {
 // ------------------------------------
 const playSong = (song: any) => {
   playerStore.setSong(song)
+}
+
+const persistOrder = async () => {
+  if (!songs.value.length) return
+  savingOrder.value = true
+  try {
+    await request.post(`/playlist/${playlistId.value}/reorder`, songs.value.map(song => song.id))
+    ElMessage.success('排序已更新')
+  } catch (error) {
+    ElMessage.error('保存排序失败')
+    fetchPlaylistDetails()
+  } finally {
+    savingOrder.value = false
+  }
+}
+
+const reorderSongs = (targetId: number) => {
+  if (draggingId.value === null || draggingId.value === targetId) return
+
+  const currentIndex = songs.value.findIndex(song => song.id === draggingId.value)
+  const targetIndex = songs.value.findIndex(song => song.id === targetId)
+  if (currentIndex === -1 || targetIndex === -1) return
+
+  const updated = [...songs.value]
+  const [moved] = updated.splice(currentIndex, 1)
+  updated.splice(targetIndex, 0, moved)
+  songs.value = updated
+}
+
+const onDragStart = (songId: number) => {
+  draggingId.value = songId
+}
+
+const onDragEnter = (songId: number) => {
+  reorderSongs(songId)
+}
+
+const onDragEnd = () => {
+  if (draggingId.value !== null) {
+    draggingId.value = null
+    persistOrder()
+  }
 }
 
 
@@ -84,44 +125,40 @@ onMounted(() => {
     </div>
 
     <div class="songs-section">
-      <h3 class="songs-title">歌曲列表 (共 {{ songs.length }} 首)</h3>
+      <div class="songs-title-row">
+        <h3 class="songs-title">歌曲列表 (共 {{ songs.length }} 首)</h3>
+        <div class="songs-hint">拖拽左侧手柄进行排序</div>
+        <el-tag v-if="savingOrder" type="warning" effect="dark">保存中...</el-tag>
+      </div>
 
-      <el-table :data="songs" stripe style="width: 100%">
-        <el-table-column type="index" label="#" width="50" />
-        <el-table-column prop="title" label="歌曲名" />
-
-        <el-table-column prop="artistName" label="歌手名" width="150" />
-
-        <el-table-column prop="duration" label="时长" width="80" />
-
-        <el-table-column label="操作" width="150">
-          <template #default="scope">
-            <el-button link type="success" size="small" @click="playSong(scope.row)">
-              ▶ 播放
-            </el-button>
-            <el-button link type="danger" size="small" @click="removeSong(scope.row.id, scope.row.title)">
-              移除
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="song-list">
+        <div
+            v-for="(song, index) in songs"
+            :key="song.id"
+            class="song-row"
+            draggable="true"
+            @dragstart="onDragStart(song.id)"
+            @dragenter.prevent="onDragEnter(song.id)"
+            @dragover.prevent
+            @dragend="onDragEnd"
+        >
+          <div class="drag-handle">⠿</div>
+          <div class="song-index">{{ index + 1 }}</div>
+          <div class="song-main">
+            <div class="title">{{ song.title }}</div>
+            <div class="meta">{{ song.artistName || '未知歌手' }}</div>
+          </div>
+          <div class="song-actions">
+            <el-button link type="success" size="small" @click="playSong(song)">播放</el-button>
+            <el-button link type="danger" size="small" @click="removeSong(song.id, song.title)">移除</el-button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* 样式保持不变 */
-:deep(.el-table) {
-  --el-table-row-hover-bg-color: #282828 !important;
-  --el-table-bg-color: #121212 !important;
-  --el-table-text-color: white !important;
-  color: white;
-}
-:deep(.el-table th) {
-  background-color: #181818 !important;
-  color: #b3b3b3;
-}
-
 .header-section {
   display: flex;
   align-items: flex-end;
@@ -149,5 +186,16 @@ onMounted(() => {
 .playlist-title { font-size: 48px; font-weight: bold; margin: 0; }
 .playlist-desc { color: #b3b3b3; margin: 5px 0 10px 0; }
 .playlist-creator { font-size: 14px; }
-.songs-title { color: white; font-size: 20px; margin-bottom: 15px; }
+.songs-title { color: white; font-size: 20px; margin: 0; }
+.songs-section { margin-top: 24px; }
+.songs-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.songs-hint { color: #b3b3b3; font-size: 12px; }
+.song-list { display: flex; flex-direction: column; gap: 10px; }
+.song-row { display: grid; grid-template-columns: 32px 32px 1fr auto; gap: 10px; align-items: center; padding: 12px; background: #181818; border-radius: 8px; }
+.song-row:hover { background: #202020; }
+.drag-handle { cursor: grab; color: #888; font-size: 18px; text-align: center; user-select: none; }
+.song-index { color: #b3b3b3; text-align: center; }
+.song-main .title { color: white; font-weight: 700; }
+.song-main .meta { color: #b3b3b3; font-size: 12px; margin-top: 4px; }
+.song-actions { display: flex; gap: 8px; justify-content: flex-end; }
 </style>

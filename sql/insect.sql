@@ -14,6 +14,7 @@ TRUNCATE TABLE user_interaction;
 TRUNCATE TABLE music_playlist_song;
 TRUNCATE TABLE music_playlist;
 TRUNCATE TABLE song_comment;
+TRUNCATE TABLE user_follow;
 TRUNCATE TABLE music_song;
 TRUNCATE TABLE music_album;
 TRUNCATE TABLE music_artist;
@@ -32,6 +33,10 @@ INSERT INTO `sys_user` (`id`, `username`, `password`, `nickname`, `email`) VALUE
 (2, 'musician_official', '$2a$10$9F0Tvh4TgxYGjXt9NqlfAO1Dm89pwHbG36cGBydXoTVKOuKCHqwxK', '官方音乐人', 'music@spotify.com');
 
 INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES (1, 1), (2, 3);
+
+-- 默认关注关系：管理员关注音乐人，方便前端展示
+INSERT INTO `user_follow` (`user_id`, `followed_user_id`) VALUES
+(1, 2);
 
 -- 2.2 普通用户组 A: 华语流行爱好者 (ID 10-19)
 INSERT INTO `sys_user` (`id`, `username`, `password`, `nickname`, `avatar_url`) VALUES

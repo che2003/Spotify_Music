@@ -52,6 +52,17 @@ CREATE TABLE `sys_user_role` (
   PRIMARY KEY (`user_id`, `role_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户角色关联表';
 
+-- 用户关注表 (user_follow) - 支持粉丝关注艺人/用户
+DROP TABLE IF EXISTS `user_follow`;
+CREATE TABLE `user_follow` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT NOT NULL COMMENT '关注方用户ID',
+  `followed_user_id` BIGINT NOT NULL COMMENT '被关注的用户ID',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '关注时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_follow` (`user_id`,`followed_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户关注关系表';
+
 
 -- ----------------------------
 -- 3. 音乐核心资源模块

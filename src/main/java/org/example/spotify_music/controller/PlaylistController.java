@@ -15,9 +15,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -78,6 +80,16 @@ public class PlaylistController {
         if (playlistSongMapper.selectCount(query) > 0) {
             return Result.error("歌曲已在歌单中");
         }
+
+        QueryWrapper<PlaylistSong> sortQuery = new QueryWrapper<>();
+        sortQuery.eq("playlist_id", playlistSong.getPlaylistId())
+                .orderByDesc("sort_order")
+                .last("LIMIT 1");
+
+        PlaylistSong last = playlistSongMapper.selectOne(sortQuery);
+        int nextOrder = last != null && last.getSortOrder() != null ? last.getSortOrder() + 1 : 1;
+        playlistSong.setSortOrder(nextOrder);
+
         playlistSongMapper.insert(playlistSong);
         return Result.success("收藏成功");
     }
@@ -129,5 +141,34 @@ public class PlaylistController {
                 .collect(Collectors.toList());
 
         return Result.success(orderedSongs);
+    }
+
+    // 8. 调整歌单内歌曲排序
+    @PostMapping("/{id}/reorder")
+    @Transactional
+    public Result<?> reorder(@PathVariable Long id, @RequestBody List<Long> songIds) {
+        Playlist playlist = playlistMapper.selectById(id);
+        if (playlist == null) return Result.error("歌单不存在");
+        if (!playlist.getCreatorId().equals(getCurrentUserId())) return Result.error("无权调整他人歌单");
+        if (songIds == null || songIds.isEmpty()) return Result.error("歌曲列表不能为空");
+
+        List<PlaylistSong> associations = playlistSongMapper.selectList(new QueryWrapper<PlaylistSong>().eq("playlist_id", id));
+        Set<Long> existingSongIds = associations.stream().map(PlaylistSong::getSongId).collect(Collectors.toSet());
+        Set<Long> incoming = new HashSet<>(songIds);
+
+        if (existingSongIds.size() != incoming.size() || !existingSongIds.equals(incoming)) {
+            return Result.error("排序列表与歌单歌曲不一致");
+        }
+
+        for (int i = 0; i < songIds.size(); i++) {
+            PlaylistSong update = new PlaylistSong();
+            update.setSortOrder(i + 1);
+
+            QueryWrapper<PlaylistSong> updateWrapper = new QueryWrapper<>();
+            updateWrapper.eq("playlist_id", id).eq("song_id", songIds.get(i));
+            playlistSongMapper.update(update, updateWrapper);
+        }
+
+        return Result.success("排序已更新");
     }
 }
