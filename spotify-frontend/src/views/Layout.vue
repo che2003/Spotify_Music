@@ -175,13 +175,13 @@ const formatTime = (seconds: number) => {
             <el-menu-item index="/musician/stats">
               <el-icon><i class="el-icon-data-board"></i></el-icon><span>作品数据</span>
             </el-menu-item>
-          <el-menu-item index="/musician/works">
-            <el-icon><i class="el-icon-folder"></i></el-icon><span>我的作品</span>
-          </el-menu-item>
-          <el-menu-item index="/musician/albums">
-            <el-icon><i class="el-icon-collection"></i></el-icon><span>我的专辑</span>
-          </el-menu-item>
-        </el-menu-item-group>
+            <el-menu-item index="/musician/works">
+              <el-icon><i class="el-icon-folder"></i></el-icon><span>我的作品</span>
+            </el-menu-item>
+            <el-menu-item index="/musician/albums">
+              <el-icon><i class="el-icon-collection"></i></el-icon><span>我的专辑</span>
+            </el-menu-item>
+          </el-menu-item-group>
 
           <el-menu-item-group v-if="isAdmin">
             <template #title>
@@ -193,22 +193,22 @@ const formatTime = (seconds: number) => {
             <el-menu-item index="/admin/users">
               <el-icon><i class="el-icon-user"></i></el-icon><span>用户管理</span>
             </el-menu-item>
-          <el-menu-item index="/admin/songs">
-            <el-icon><i class="el-icon-files"></i></el-icon><span>内容管理</span>
-          </el-menu-item>
-          <el-menu-item index="/admin/albums">
-            <el-icon><i class="el-icon-collection"></i></el-icon><span>专辑管理</span>
-          </el-menu-item>
-          <el-menu-item index="/admin/banners">
-            <el-icon><i class="el-icon-picture"></i></el-icon><span>Banner 管理</span>
-          <el-menu-item index="/admin/artists">
-            <el-icon><i class="el-icon-user"></i></el-icon><span>艺人管理</span>
-          </el-menu-item>
-          <el-menu-item index="/admin/genres">
-            <el-icon><i class="el-icon-collection-tag"></i></el-icon><span>流派管理</span>
-
-          </el-menu-item>
-        </el-menu-item-group>
+            <el-menu-item index="/admin/songs">
+              <el-icon><i class="el-icon-files"></i></el-icon><span>内容管理</span>
+            </el-menu-item>
+            <el-menu-item index="/admin/albums">
+              <el-icon><i class="el-icon-collection"></i></el-icon><span>专辑管理</span>
+            </el-menu-item>
+            <el-menu-item index="/admin/banners">
+              <el-icon><i class="el-icon-picture"></i></el-icon><span>Banner 管理</span>
+            </el-menu-item>
+            <el-menu-item index="/admin/artists">
+              <el-icon><i class="el-icon-user"></i></el-icon><span>艺人管理</span>
+            </el-menu-item>
+            <el-menu-item index="/admin/genres">
+              <el-icon><i class="el-icon-collection-tag"></i></el-icon><span>流派管理</span>
+            </el-menu-item>
+          </el-menu-item-group>
         </el-menu>
 
         <div class="logout-area" @click="logout">
@@ -247,8 +247,8 @@ const formatTime = (seconds: number) => {
               <svg role="img" height="20" width="20" viewBox="0 0 24 24" fill="white"><path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/></svg>
             </div>
           </div>
-            <div class="track-text">
-              <div class="track-title" @click="goToDetail">{{ playerStore.currentSong.title }}</div>
+          <div class="track-text">
+            <div class="track-title" @click="goToDetail">{{ playerStore.currentSong.title }}</div>
             <div class="track-artist" @click="goToArtistDetail">{{ playerStore.currentSong.artistName }}</div>
           </div>
 
@@ -328,19 +328,19 @@ const formatTime = (seconds: number) => {
   </div>
 
   <el-drawer
-    v-model="isQueueOpen"
-    title="播放队列"
-    size="360px"
-    direction="rtl"
-    destroy-on-close
+      v-model="isQueueOpen"
+      title="播放队列"
+      size="360px"
+      direction="rtl"
+      destroy-on-close
   >
     <div v-if="playerStore.playList.length === 0" class="queue-empty">暂无播放内容</div>
     <ul v-else class="queue-list">
       <li
-        v-for="(song, index) in playerStore.playList"
-        :key="song.id || index"
-        :class="{ active: playerStore.currentSong.id === song.id }"
-        @click="playFromQueue(index)"
+          v-for="(song, index) in playerStore.playList"
+          :key="song.id || index"
+          :class="{ active: playerStore.currentSong.id === song.id }"
+          @click="playFromQueue(index)"
       >
         <div class="queue-title">{{ song.title || '未命名歌曲' }}</div>
         <div class="queue-artist">{{ song.artistName || '未知歌手' }}</div>
@@ -396,8 +396,8 @@ const formatTime = (seconds: number) => {
 
 .spotify-main {
   background:
-    linear-gradient(180deg, rgba(30, 215, 96, 0.08) 0%, rgba(30, 215, 96, 0) 18%),
-    linear-gradient(to bottom, #1b1b1b 0%, #111 320px);
+      linear-gradient(180deg, rgba(30, 215, 96, 0.08) 0%, rgba(30, 215, 96, 0) 18%),
+      linear-gradient(to bottom, #1b1b1b 0%, #111 320px);
   padding: 84px 32px 20px 32px;
   overflow-y: auto;
   flex-grow: 1;

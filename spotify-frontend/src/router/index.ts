@@ -125,7 +125,9 @@ const router = createRouter({
           path: 'admin/banners',
           name: 'adminBanners',
           component: BannerManageView,
-
+          meta: { requiresAuth: true, roles: ['admin'] }
+        },
+        {
           path: 'admin/artists',
           name: 'adminArtists',
           component: ArtistManageView,
@@ -135,7 +137,6 @@ const router = createRouter({
           path: 'admin/genres',
           name: 'adminGenres',
           component: GenreManageView,
-
           meta: { requiresAuth: true, roles: ['admin'] }
         },
         {
