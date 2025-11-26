@@ -14,14 +14,15 @@ const uploadUrl = '/api/storage/upload' // 对应后端 StorageController
 const fileList = ref([])
 const coverList = ref([])
 const genreOptions = ref<GenreOption[]>([])
+const albumOptions = ref<any[]>([])
 
 const form = reactive({
   title: '',
   genre: '',
   genreIds: [] as number[],
   description: '',
-  artistId: 1, // 暂时硬编码，理想情况应从当前登录的 Musician 信息获取
-  albumId: 1,  // 暂时硬编码
+  artistId: null as number | null,
+  albumId: null as number | null,
   fileUrl: '',
   coverUrl: '',
   duration: 0
@@ -39,8 +40,30 @@ const loadGenres = async () => {
   }
 }
 
+const loadArtistAndAlbums = async () => {
+  try {
+    const artistRes = await request.get('/artist/stats/me')
+    if (artistRes.data) {
+      form.artistId = artistRes.data.id
+    }
+  } catch (error) {
+    console.error('获取音乐人信息失败', error)
+  }
+
+  try {
+    const albumRes = await request.get('/album/my')
+    albumOptions.value = albumRes.data || []
+    if (!form.albumId && albumOptions.value.length > 0) {
+      form.albumId = albumOptions.value[0].id
+    }
+  } catch (error) {
+    console.error('加载专辑失败', error)
+  }
+}
+
 onMounted(() => {
   loadGenres()
+  loadArtistAndAlbums()
 })
 
 // 上传 MP3 成功回调
@@ -109,6 +132,24 @@ const submitSong = async () => {
               :key="item.id"
               :label="item.name"
               :value="item.name"
+          />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="选择专辑">
+        <el-select
+            v-model="form.albumId"
+            placeholder="可选择已有专辑"
+            clearable
+            filterable
+            size="large"
+            style="width: 100%"
+        >
+          <el-option
+              v-for="item in albumOptions"
+              :key="item.id"
+              :label="item.title"
+              :value="item.id"
           />
         </el-select>
       </el-form-item>

@@ -8,4 +8,6 @@ import java.util.List;
 public interface SongService extends IService<Song> {
 
     void saveSongWithGenres(Song song, List<Long> genreIds);
+
+    void updateSongWithGenres(Song song, List<Long> genreIds);
 }
