@@ -2,9 +2,11 @@
 import { ref, onMounted } from 'vue'
 import request from '@/utils/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useRouter } from 'vue-router'
 
 const mySongs = ref<any[]>([])
 const loading = ref(false)
+const router = useRouter()
 
 const fetchMySongs = async () => {
   loading.value = true
@@ -26,6 +28,10 @@ const deleteSong = (id: number) => {
   })
 }
 
+const goEdit = (id: number) => {
+  router.push({ name: 'editSong', params: { id } })
+}
+
 onMounted(fetchMySongs)
 </script>
 
@@ -41,8 +47,9 @@ onMounted(fetchMySongs)
       <el-table-column prop="title" label="歌名" />
       <el-table-column prop="genre" label="流派" width="120" />
       <el-table-column prop="playCount" label="播放量" width="100" />
-      <el-table-column label="操作" width="120">
+      <el-table-column label="操作" width="200">
         <template #default="{ row }">
+          <el-button type="primary" size="small" @click="goEdit(row.id)">编辑</el-button>
           <el-button type="danger" size="small" @click="deleteSong(row.id)">删除</el-button>
         </template>
       </el-table-column>

@@ -12,6 +12,8 @@ const router = useRouter()
 const song = ref<any>({})
 const playerStore = usePlayerStore()
 const isFollowing = ref(false)
+const isLiked = ref(false)
+const likeCount = ref<number | null>(null)
 const lyrics = ref<Array<{ time: number; text: string }>>([])
 const lyricRefs = ref<HTMLDivElement[]>([])
 const loading = ref(true)
@@ -47,6 +49,9 @@ const fetchSongDetails = async () => {
     if (song.value.artistId) {
       checkFollowStatus(song.value.artistId)
     }
+    if (song.value.id) {
+      loadLikeStatus(song.value.id)
+    }
     parseLyrics(song.value.lyrics || '')
   } catch (error) {
     ElMessage.error('加载失败')
@@ -78,6 +83,28 @@ const parseLyrics = (raw: string) => {
 
 const goToArtist = () => { if (song.value.artistId) router.push(`/artist/${song.value.artistId}`) }
 const goToAlbum = () => { if (song.value.albumId) router.push(`/album/${song.value.albumId}`) }
+
+const loadLikeStatus = async (songId: number) => {
+  try {
+    const res = await request.get(`/interaction/song/status`, { params: { songId } })
+    isLiked.value = res.data?.liked ?? false
+    likeCount.value = res.data?.likeCount ?? null
+  } catch (e) {
+    isLiked.value = false
+    likeCount.value = null
+  }
+}
+
+const toggleLike = async () => {
+  if (!song.value.id) return
+  try {
+    const res = await request.post(`/interaction/song/toggleLike`, null, { params: { songId: song.value.id } })
+    isLiked.value = res.data?.liked ?? !isLiked.value
+    likeCount.value = res.data?.likeCount ?? likeCount.value
+  } catch (e) {
+    ElMessage.error('操作失败，请重试')
+  }
+}
 
 const checkFollowStatus = async (artistId: number) => {
   try {
@@ -152,6 +179,15 @@ onMounted(() => { fetchSongDetails() })
           <div class="play-btn-large" @click="playSong">
             <svg role="img" height="28" width="28" viewBox="0 0 28 28" fill="black"><path d="M3 1.713a.7.7 0 011.05-.607l19.918 11.5a.7.7 0 010 1.214L4.05 25.319A.7.7 0 013 24.712V1.713z"></path></svg>
           </div>
+          <div class="like-btn" :class="{ active: isLiked }" @click="toggleLike">
+            <svg v-if="isLiked" viewBox="0 0 24 24" width="26" height="26" fill="#1db954">
+              <path d="M12 21s-6.716-4.286-9.8-8.4C-0.964 8.5 1.246 3 6.2 3c2.512 0 4.2 2 4.2 2s1.688-2 4.2-2c4.954 0 7.163 5.5 4.001 9.6C18.716 16.714 12 21 12 21z" />
+            </svg>
+            <svg v-else viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="1.8">
+              <path d="M12 21s-6.716-4.286-9.8-8.4C-0.964 8.5 1.246 3 6.2 3c2.512 0 4.2 2 4.2 2s1.688-2 4.2-2c4.954 0 7.163 5.5 4.001 9.6C18.716 16.714 12 21 12 21z" stroke-linejoin="round" />
+            </svg>
+            <span v-if="likeCount !== null" class="like-count">{{ likeCount }}</span>
+          </div>
           <SharePopover
               v-if="song.id"
               resource-type="song"
@@ -185,6 +221,10 @@ onMounted(() => { fetchSongDetails() })
 .actions { margin-top: 30px; display: flex; align-items: center; gap: 12px; }
 .play-btn-large { width: 56px; height: 56px; border-radius: 50%; background: var(--spotify-green); color: black; font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; }
 .play-btn-large:hover { transform: scale(1.05); background: #1ed760; }
+.like-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px; border-radius: 50%; border: 1px solid #2a2a2a; background: rgba(255,255,255,0.08); cursor: pointer; transition: 0.2s ease; color: #fff; }
+.like-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+.like-btn.active { border-color: #1db954; box-shadow: 0 0 0 1px rgba(29,185,84,0.6); }
+.like-count { color: #b3b3b3; font-weight: 700; font-size: 14px; }
 .content-section { margin-top: 20px; }
 .lyrics-box { margin-bottom: 40px; }
 .lyrics-panel { background: rgba(0,0,0,0.25); border-radius: 16px; padding: 20px; max-height: 420px; overflow: hidden; backdrop-filter: blur(6px); }

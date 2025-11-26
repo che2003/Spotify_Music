@@ -5,6 +5,7 @@ import java.util.List;
 public class SongUploadRequest {
 
     private Long id;
+    private Long songId;
     private Long albumId;
     private Long artistId;
     private String title;
@@ -21,6 +22,14 @@ public class SongUploadRequest {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getSongId() {
+        return songId;
+    }
+
+    public void setSongId(Long songId) {
+        this.songId = songId;
     }
 
     public Long getAlbumId() {

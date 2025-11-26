@@ -127,13 +127,14 @@ public class SongController {
         return Result.success(songMapper.selectSongVoByGenreId(genreId, limit));
     }
 
-    @PostMapping("/update")
+    @RequestMapping(value = "/update", method = {RequestMethod.POST, RequestMethod.PUT})
     public Result<?> updateSong(@RequestBody SongUploadRequest request) {
-        if (request.getId() == null) {
+        Long songId = request.getSongId() != null ? request.getSongId() : request.getId();
+        if (songId == null) {
             return Result.error("缺少歌曲ID");
         }
 
-        Song existing = songService.getById(request.getId());
+        Song existing = songService.getById(songId);
         if (existing == null) {
             return Result.error("歌曲不存在");
         }
@@ -157,7 +158,9 @@ public class SongController {
         existing.setCoverUrl(request.getCoverUrl());
         existing.setDuration(request.getDuration());
         existing.setGenre(request.getGenre());
-        existing.setLyrics(request.getDescription());
+        if (request.getDescription() != null) {
+            existing.setLyrics(request.getDescription());
+        }
 
         songService.updateSongWithGenres(existing, request.getGenreIds());
         return Result.success("保存成功");
