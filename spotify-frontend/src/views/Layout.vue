@@ -35,6 +35,11 @@ const goToDetail = () => {
     router.push(`/song/${playerStore.currentSong.id}`)
   }
 }
+const goToArtistDetail = () => {
+  if (playerStore.currentSong.artistId) {
+    router.push(`/artist/${playerStore.currentSong.artistId}`)
+  }
+}
 
 const logout = () => {
   localStorage.clear()
@@ -147,9 +152,9 @@ const formatTime = (seconds: number) => {
               <svg role="img" height="20" width="20" viewBox="0 0 24 24" fill="white"><path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/></svg>
             </div>
           </div>
-          <div class="track-text">
-            <div class="track-title" @click="goToDetail">{{ playerStore.currentSong.title }}</div>
-            <div class="track-artist">{{ playerStore.currentSong.artistName }}</div>
+            <div class="track-text">
+              <div class="track-title" @click="goToDetail">{{ playerStore.currentSong.title }}</div>
+            <div class="track-artist" @click="goToArtistDetail">{{ playerStore.currentSong.artistName }}</div>
           </div>
 
           <button class="icon-btn like-btn"

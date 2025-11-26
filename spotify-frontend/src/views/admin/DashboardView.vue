@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import request from '@/utils/request'
 import * as echarts from 'echarts'
 
@@ -9,6 +9,7 @@ const stats = ref({
   artistCount: 0,
   totalPlays: 0
 })
+const loading = ref(true)
 
 // 初始化图表
 const initCharts = (data: any) => {
@@ -61,9 +62,12 @@ const fetchData = async () => {
   try {
     const res = await request.get('/admin/stats/dashboard')
     stats.value = res.data
+    loading.value = false
     // 数据加载完后再渲染图表
-    setTimeout(() => initCharts(res.data), 100)
+    await nextTick()
+    initCharts(res.data)
   } catch (e) { console.error(e) }
+  finally { loading.value = false }
 }
 
 onMounted(fetchData)
@@ -73,7 +77,10 @@ onMounted(fetchData)
   <div class="dashboard-container">
     <h2 class="page-title">数据看板 (Dashboard)</h2>
 
-    <div class="stats-grid">
+    <div class="stats-grid" v-if="loading">
+      <el-skeleton v-for="i in 4" :key="i" animated :rows="2" class="stat-card" />
+    </div>
+    <div class="stats-grid" v-else>
       <div class="stat-card">
         <div class="stat-value">{{ stats.userCount }}</div>
         <div class="stat-label">注册用户</div>
@@ -96,7 +103,11 @@ onMounted(fetchData)
       </div>
     </div>
 
-    <div class="charts-row">
+    <div class="charts-row" v-if="loading">
+      <el-skeleton animated :rows="6" class="chart-box" />
+      <el-skeleton animated :rows="6" class="chart-box" />
+    </div>
+    <div class="charts-row" v-else>
       <div class="chart-box" id="barChart"></div>
       <div class="chart-box" id="pieChart"></div>
     </div>
