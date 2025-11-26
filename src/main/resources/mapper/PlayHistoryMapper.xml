@@ -57,4 +57,50 @@
         LIMIT #{limit}
     </select>
 
+    <select id="countUniqueListenersByArtist" resultType="long">
+        SELECT COUNT(DISTINCT ph.user_id)
+        FROM play_history ph
+        LEFT JOIN music_song s ON ph.song_id = s.id
+        WHERE s.artist_id = #{artistId}
+    </select>
+
+    <select id="selectPlayTrendByArtist" resultType="org.example.spotify_music.vo.TrendPointVo">
+        SELECT
+            DATE(ph.play_time) AS date,
+            COUNT(*) AS plays,
+            COUNT(DISTINCT ph.user_id) AS listeners
+        FROM play_history ph
+        LEFT JOIN music_song s ON ph.song_id = s.id
+        WHERE s.artist_id = #{artistId}
+          AND ph.play_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE(ph.play_time)
+        ORDER BY date
+    </select>
+
+    <select id="selectTopPlayedSongsByArtist" resultType="org.example.spotify_music.vo.SongMetricVo">
+        SELECT
+            s.id,
+            s.title,
+            s.cover_url,
+            COUNT(*) AS playCount,
+            COALESCE(ui.likeCount, 0) AS likeCount,
+            ui.avgRating
+        FROM play_history ph
+        LEFT JOIN music_song s ON ph.song_id = s.id
+        LEFT JOIN (
+            SELECT song_id,
+                   SUM(CASE WHEN type = 3 THEN 1 ELSE 0 END) AS likeCount,
+                   AVG(rating) AS avgRating
+            FROM user_interaction
+            GROUP BY song_id
+        ) ui ON ui.song_id = s.id
+        WHERE s.artist_id = #{artistId}
+          <if test="days != null and days &gt; 0">
+              AND ph.play_time &gt;= DATE_SUB(NOW(), INTERVAL #{days} DAY)
+          </if>
+        GROUP BY s.id, s.title, s.cover_url
+        ORDER BY playCount DESC
+        LIMIT #{limit}
+    </select>
+
 </mapper>

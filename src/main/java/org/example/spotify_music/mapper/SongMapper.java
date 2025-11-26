@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.example.spotify_music.entity.Song;
+import org.example.spotify_music.vo.SongMetricVo;
 import org.example.spotify_music.vo.SongVo;
 
 import java.util.List;
@@ -33,4 +34,8 @@ public interface SongMapper extends BaseMapper<Song> {
     List<SongVo> selectSongVoByGenreId(@Param("genreId") Long genreId, @Param("limit") Integer limit);
 
     Integer countSongByGenreId(@Param("genreId") Long genreId);
+
+    Long sumPlayCountByArtist(@Param("artistId") Long artistId);
+
+    List<SongMetricVo> selectSongMetricsByArtist(@Param("artistId") Long artistId);
 }
