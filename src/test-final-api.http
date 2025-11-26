@@ -1,0 +1,284 @@
+# ==================================================================================
+#                 Spotify Music - 全功能自动化集成测试
+# ==================================================================================
+# 场景说明：
+# 1. [管理员] 登录，查看系统状态。
+# 2. [音乐人] 注册/登录，发布新歌，测试删除权限。
+# 3. [普通用户] 注册/登录，听歌，搜歌，建歌单，改资料，获取 AI 推荐。
+# ==================================================================================
+
+### --------------------------------------------------------------------
+### 1. 角色准备：管理员 (Admin)
+### --------------------------------------------------------------------
+
+### 1.1 管理员登录 (获取 Admin Token)
+# @name login_admin
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("admin_token", response.body.data.token);
+    client.test("Admin Login Success", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### 1.2 [RBAC] 管理员查看所有用户 (测试管理员权限)
+GET http://localhost:8080/admin/users
+Authorization: Bearer {{admin_token}}
+
+
+### --------------------------------------------------------------------
+### 2. 角色准备：音乐人 (Musician) - 负责生产内容
+### --------------------------------------------------------------------
+
+### 2.1 注册音乐人账号
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "real_musician",
+  "password": "123456",
+  "nickname": "原创歌手",
+  "email": "music@test.com"
+}
+
+### 2.2 音乐人登录
+# @name login_musician
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "username": "real_musician",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("musician_token", response.body.data.token);
+%}
+
+### 2.3 [RBAC] 提权：让管理员把刚才注册的人设为音乐人 (模拟后台操作)
+# 注意：这一步需要管理员权限
+POST http://localhost:8080/admin/user/role
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "userId": 4,
+  "role": "musician"
+}
+
+
+### 2.4 音乐人发布新歌 (模拟 /song/add)
+# @name add_song
+POST http://localhost:8080/song/add
+Content-Type: application/json
+Authorization: Bearer {{musician_token}}
+
+{
+  "title": "自动化测试单曲",
+  "artistId": 1,
+  "albumId": 1,
+  "fileUrl": "http://music.163.com/song/media/outer/url?id=123.mp3",
+  "coverUrl": "https://p2.music.126.net/cover.jpg",
+  "genre": "Jazz",
+  "duration": 210
+}
+
+### 2.5 [RBAC] 音乐人删除自己的歌 (测试权限)
+# 为了不影响后续测试，我们先不执行删除，或者你可以取消注释来测试
+# POST http://localhost:8080/song/delete?id=100
+# Authorization: Bearer {{musician_token}}
+
+
+### --------------------------------------------------------------------
+### 3. 角色准备：普通用户 (User) - 负责消费内容
+### --------------------------------------------------------------------
+
+### 3.1 注册普通用户
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "active_user",
+  "password": "123456",
+  "nickname": "活跃听众",
+  "email": "listener@test.com"
+}
+
+### 3.2 普通用户登录
+# @name login_user
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "username": "active_user",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("user_token", response.body.data.token);
+    client.log("User Token: " + response.body.data.token);
+%}
+
+
+### --------------------------------------------------------------------
+### 4. 核心业务：发现与搜索
+### --------------------------------------------------------------------
+
+### 4.1 [AI] 获取每日推荐 (调用 Python NCF)
+GET http://localhost:8080/recommend/daily
+Authorization: Bearer {{user_token}}
+
+> {%
+    client.test("AI Recommendation Success", function() {
+        client.assert(response.status === 200, "AI Service failed");
+        client.assert(response.body.data.length > 0, "No recommendations returned");
+    });
+%}
+
+### 4.2 搜索歌曲 (模糊查询)
+GET http://localhost:8080/search?keyword=作品
+Authorization: Bearer {{user_token}}
+
+
+### --------------------------------------------------------------------
+### 5. 核心业务：歌单管理 (CRUD)
+### --------------------------------------------------------------------
+
+### 5.1 创建歌单
+# @name create_playlist
+POST http://localhost:8080/playlist/create
+Content-Type: application/json
+Authorization: Bearer {{user_token}}
+
+{
+  "title": "我的跑步歌单",
+  "description": "运动时候听的",
+  "isPublic": true
+}
+
+> {%
+    client.global.set("playlist_id", response.body.data.id);
+%}
+
+### 5.2 修改歌单信息 (Update)
+POST http://localhost:8080/playlist/update
+Content-Type: application/json
+Authorization: Bearer {{user_token}}
+
+{
+  "id": {{playlist_id}},
+  "title": "我的夜跑歌单 Pro",
+  "description": "升级版描述",
+  "isPublic": false
+}
+
+### 5.3 收藏歌曲到歌单
+POST http://localhost:8080/playlist/addSong
+Content-Type: application/json
+Authorization: Bearer {{user_token}}
+
+{
+  "playlistId": {{playlist_id}},
+  "songId": 1
+}
+
+### 5.4 查看我的歌单列表
+GET http://localhost:8080/playlist/my
+Authorization: Bearer {{user_token}}
+
+### 5.5 查看歌单详情 (包含歌曲)
+GET http://localhost:8080/playlist/{{playlist_id}}/songs
+Authorization: Bearer {{user_token}}
+
+### 5.6 从歌单移除歌曲
+DELETE http://localhost:8080/playlist/removeSong?playlistId={{playlist_id}}&songId=1
+Authorization: Bearer {{user_token}}
+
+
+### --------------------------------------------------------------------
+### 6. 核心业务：交互与评论
+### --------------------------------------------------------------------
+
+### 6.1 [AI数据] 记录播放行为 (Type=1)
+POST http://localhost:8080/interaction/record
+Content-Type: application/json
+Authorization: Bearer {{user_token}}
+
+{
+  "songId": 1,
+  "type": 1
+}
+
+### 6.2 [AI数据] 点赞歌曲 (Type=3)
+POST http://localhost:8080/interaction/record
+Content-Type: application/json
+Authorization: Bearer {{user_token}}
+
+{
+  "songId": 1,
+  "type": 3
+}
+
+### 6.3 获取我喜欢的歌曲列表 (验证点赞是否生效)
+GET http://localhost:8080/interaction/liked
+Authorization: Bearer {{user_token}}
+
+### 6.4 发布评论
+POST http://localhost:8080/comment/add
+Content-Type: application/json
+Authorization: Bearer {{user_token}}
+
+{
+  "songId": 1,
+  "content": "这首歌太好听了！AI 推荐得真准！"
+}
+
+### 6.5 查看歌曲评论列表
+GET http://localhost:8080/comment/list?songId=1
+Authorization: Bearer {{user_token}}
+
+
+### --------------------------------------------------------------------
+### 7. 个人中心管理
+### --------------------------------------------------------------------
+
+### 7.1 获取个人资料
+GET http://localhost:8080/user/profile
+Authorization: Bearer {{user_token}}
+
+### 7.2 修改个人资料
+POST http://localhost:8080/user/update
+Content-Type: application/json
+Authorization: Bearer {{user_token}}
+
+{
+  "nickname": "超级活跃听众",
+  "email": "new_email@test.com",
+  "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=new"
+}
+
+### 7.3 修改密码 (慎用，改了之后下面的 token 可能会失效)
+# POST http://localhost:8080/user/changePassword
+# Content-Type: application/json
+# Authorization: Bearer {{user_token}}
+#
+# {
+#   "oldPassword": "123456",
+#   "newPassword": "123"
+# }
+
+
+### --------------------------------------------------------------------
+### 8. 清理工作 (可选)
+### --------------------------------------------------------------------
+
+### 8.1 删除刚才创建的歌单
+DELETE http://localhost:8080/playlist/delete/{{playlist_id}}
+Authorization: Bearer {{user_token}}

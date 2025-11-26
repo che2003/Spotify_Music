@@ -4,7 +4,10 @@ import router from '@/router' // 引入路由实例
 
 // 1. 创建 axios 实例
 const request = axios.create({
-    baseURL: '/api',
+    // 【修改这里】自动判断环境：
+    // 如果是开发模式(npm run dev)，走 /api 代理
+    // 如果是生产模式(打包后)，直接访问当前路径 '' (即不加前缀，直接找后端)
+    baseURL: import.meta.env.MODE === 'development' ? '/api' : '',
     timeout: 5000
 })
 

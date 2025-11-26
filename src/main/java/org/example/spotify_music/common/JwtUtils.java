@@ -14,17 +14,21 @@ import java.util.Map;
 @Component
 public class JwtUtils {
 
-    // 密钥 (实际开发中应该更复杂，这里为了演示简单点)
+    // 密钥 (每次重启生成新密钥，生产环境应固定)
     private static final Key KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     // 过期时间 24小时
     private static final long EXPIRATION = 1000 * 60 * 60 * 24;
 
     /**
-     * 生成 Token
+     * 生成 Token (已修正：支持传入 role 参数)
+     * @param username 用户名
+     * @param userId 用户ID
+     * @param role 角色 (如 "admin", "musician", "user")
      */
-    public String generateToken(String username, Long userId) {
+    public String generateToken(String username, Long userId, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
+        claims.put("role", role); // 【关键】把角色存入 Token
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -42,7 +46,10 @@ public class JwtUtils {
         return extractClaims(token).getSubject();
     }
 
-    private Claims extractClaims(String token) {
+    /**
+     * 解析 Token 获取通用 Claims
+     */
+    public Claims extractClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(KEY)
                 .build()

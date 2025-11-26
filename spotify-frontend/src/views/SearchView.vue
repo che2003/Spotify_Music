@@ -1,93 +1,88 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
+import { usePlayerStore } from '@/stores/player'
 
 const keyword = ref('')
 const searchResults = ref<any[]>([])
+const activeTab = ref('all') // all, songs, artists
+const playerStore = usePlayerStore()
 
-// 搜索逻辑
 const handleSearch = async () => {
-  if (!keyword.value) {
-    searchResults.value = []
-    return
-  }
-
+  if (!keyword.value) return
   try {
-    // 调用后端 /search 接口
     const res = await request.get(`/search?keyword=${keyword.value}`)
     searchResults.value = res.data
-    ElMessage.success(`找到 ${res.data.length} 首歌曲`)
-  } catch (error) {
-    ElMessage.error('搜索失败')
-    console.error(error)
-  }
+  } catch (error) { console.error(error) }
 }
+
+// 前端过滤逻辑
+const filteredResults = computed(() => {
+  if (activeTab.value === 'all') return searchResults.value
+  // 这里简单通过是否有 fileUrl 区分 (其实 SongVo 都是歌曲，暂无纯艺人搜索接口)
+  // 如果要搜艺人，需要在后端加 Artist 搜索接口。这里仅做演示 UI。
+  return searchResults.value
+})
+
+const playSong = (song: any) => { playerStore.setSong(song) }
 </script>
 
 <template>
   <div class="search-container">
-    <div class="search-input-wrapper">
+    <div class="search-header">
       <el-input
           v-model="keyword"
-          placeholder="搜索歌曲、专辑、艺人"
+          placeholder="想听什么？"
           size="large"
+          class="search-bar"
           @keyup.enter="handleSearch"
       >
-        <template #prefix>
-          <el-icon><i class="el-icon-search"></i></el-icon>
-        </template>
+        <template #prefix><el-icon><i class="el-icon-search"></i></el-icon></template>
       </el-input>
-      <el-button
-          type="success"
-          size="large"
-          @click="handleSearch"
-          style="margin-left: 10px;"
-      >搜索</el-button>
+    </div>
+
+    <div class="filter-tags">
+      <span :class="{active: activeTab==='all'}" @click="activeTab='all'">全部</span>
+      <span :class="{active: activeTab==='songs'}" @click="activeTab='songs'">歌曲</span>
+      <span :class="{active: activeTab==='artists'}" @click="activeTab='artists'">艺人</span>
     </div>
 
     <div v-if="searchResults.length > 0" class="results-list">
-      <h3 class="results-title">搜索结果</h3>
-      <el-table :data="searchResults" stripe style="width: 100%; background: #121212;">
-        <el-table-column type="index" label="#" width="50" />
-        <el-table-column prop="title" label="歌曲名" />
-        <el-table-column prop="artistId" label="歌手 ID" width="100" />
-        <el-table-column prop="genre" label="流派" width="100" />
-        <el-table-column label="操作" width="100">
+      <el-table :data="filteredResults" stripe style="width: 100%">
+        <el-table-column type="index" width="50" />
+        <el-table-column label="封面" width="80">
           <template #default="scope">
-            <el-button link type="success" size="small">播放</el-button>
+            <img :src="scope.row.coverUrl" style="width: 40px; height: 40px; border-radius: 4px;"/>
+          </template>
+        </el-table-column>
+        <el-table-column prop="title" label="歌曲" />
+        <el-table-column prop="artistName" label="艺人" />
+        <el-table-column prop="duration" label="时长" width="100">
+          <template #default="scope">{{ Math.floor(scope.row.duration/60) }}:{{ (scope.row.duration%60).toString().padStart(2,'0') }}</template>
+        </el-table-column>
+        <el-table-column width="100">
+          <template #default="scope">
+            <el-button circle type="success" size="small" @click="playSong(scope.row)">▶</el-button>
           </template>
         </el-table-column>
       </el-table>
-    </div>
-
-    <div v-else-if="keyword" style="color: #b3b3b3; margin-top: 20px;">
-      未找到相关结果。
     </div>
   </div>
 </template>
 
 <style scoped>
-.search-input-wrapper {
-  display: flex;
-  margin-bottom: 30px;
-  max-width: 600px;
+.search-header { margin-bottom: 20px; }
+.search-bar { max-width: 400px; --el-input-bg-color: #242424; --el-input-border-color: transparent; --el-input-text-color: white; }
+.filter-tags { display: flex; gap: 10px; margin-bottom: 20px; }
+.filter-tags span {
+  padding: 6px 16px; background: #242424; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.2s;
 }
+.filter-tags span.active, .filter-tags span:hover { background: white; color: black; }
 
-.results-title {
-  color: white;
-  margin-bottom: 15px;
-}
-
-/* 覆盖 Element Plus 的表格默认样式，使其适应深色背景 */
-:deep(.el-table) {
-  --el-table-row-hover-bg-color: #282828 !important;
-  --el-table-bg-color: #121212 !important;
-  --el-table-border-color: #333333;
-  color: white;
-}
-:deep(.el-table th) {
-  background-color: #181818 !important;
-  color: #b3b3b3;
-}
+/* Table 适配 */
+:deep(.el-table) { background: transparent; --el-table-tr-bg-color: transparent; --el-table-header-bg-color: transparent; color: #b3b3b3; --el-table-row-hover-bg-color: #2a2a2a; --el-table-border-color: transparent; }
+:deep(.el-table th) { border-bottom: 1px solid #333; color: white; }
+:deep(.el-table td) { border-bottom: none; }
+:deep(.el-input__wrapper) { border-radius: 50px; }
 </style>

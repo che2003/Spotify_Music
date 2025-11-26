@@ -49,7 +49,8 @@ const handleLogin = () => {
       </el-button>
 
       <div class="links">
-        <span>没有账号？去注册</span>
+        <span>没有账号？</span>
+        <span class="link-text" @click="router.push('/register')">去注册</span>
       </div>
     </div>
   </div>
@@ -104,4 +105,6 @@ p {
   color: white;
   text-decoration: underline;
 }
+.link-text { color: white; font-weight: bold; cursor: pointer; margin-left: 5px; }
+.link-text:hover { text-decoration: underline; }
 </style>

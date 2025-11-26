@@ -1,15 +1,18 @@
 package org.example.spotify_music.vo;
 
-// 用于向前端展示的歌曲信息 (包含歌手名)
 public class SongVo {
     private Long id;
     private String title;
     private String fileUrl;
     private String coverUrl;
     private String genre;
-    private String artistName; // 【新增字段】
+    private String artistName;
+    private Long artistId; // 【新增】艺人ID
+    private Integer duration;
+    private String lyrics;
+    private Long playCount;
 
-    // 手动 Getter/Setter
+    // Getter/Setter
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getTitle() { return title; }
@@ -22,4 +25,14 @@ public class SongVo {
     public void setGenre(String genre) { this.genre = genre; }
     public String getArtistName() { return artistName; }
     public void setArtistName(String artistName) { this.artistName = artistName; }
+    public Integer getDuration() { return duration; }
+    public void setDuration(Integer duration) { this.duration = duration; }
+    public String getLyrics() { return lyrics; }
+    public void setLyrics(String lyrics) { this.lyrics = lyrics; }
+    public Long getPlayCount() { return playCount; }
+    public void setPlayCount(Long playCount) { this.playCount = playCount; }
+
+    // 新增 artistId 的 Getter/Setter
+    public Long getArtistId() { return artistId; }
+    public void setArtistId(Long artistId) { this.artistId = artistId; }
 }

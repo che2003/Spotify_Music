@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.spotify_music.mapper.SongMapper">
+
+    <sql id="Base_Column_List_Vo">
+        s.id, s.title, s.file_url, s.cover_url, s.genre, s.duration, s.lyrics, s.play_count,
+        s.artist_id, a.name AS artistName
+    </sql>
+
+    <select id="selectSongVoList" resultType="org.example.spotify_music.vo.SongVo">
+        SELECT <include refid="Base_Column_List_Vo"/>
+        FROM music_song s
+        LEFT JOIN music_artist a ON s.artist_id = a.id
+        ORDER BY s.play_count DESC
+    </select>
+
+    <select id="selectSongVoByKeyword" resultType="org.example.spotify_music.vo.SongVo">
+        SELECT <include refid="Base_Column_List_Vo"/>
+        FROM music_song s
+        LEFT JOIN music_artist a ON s.artist_id = a.id
+        WHERE s.title LIKE CONCAT('%', #{keyword}, '%')
+        OR a.name LIKE CONCAT('%', #{keyword}, '%')
+    </select>
+
+    <select id="selectSongVoListByIds" resultType="org.example.spotify_music.vo.SongVo">
+        SELECT <include refid="Base_Column_List_Vo"/>
+        FROM music_song s
+        LEFT JOIN music_artist a ON s.artist_id = a.id
+        WHERE s.id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="selectSongVoByArtistId" resultType="org.example.spotify_music.vo.SongVo">
+        SELECT <include refid="Base_Column_List_Vo"/>
+        FROM music_song s
+        LEFT JOIN music_artist a ON s.artist_id = a.id
+        WHERE s.artist_id = #{artistId}
+    </select>
+
+    <update id="incrementPlayCount">
+        UPDATE music_song SET play_count = play_count + 1 WHERE id = #{id}
+    </update>
+</mapper>

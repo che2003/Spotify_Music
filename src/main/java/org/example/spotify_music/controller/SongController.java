@@ -2,10 +2,17 @@ package org.example.spotify_music.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.example.spotify_music.common.Result;
+import org.example.spotify_music.entity.Artist;
 import org.example.spotify_music.entity.Song;
+import org.example.spotify_music.entity.User;
+import org.example.spotify_music.mapper.ArtistMapper;
 import org.example.spotify_music.mapper.SongMapper;
-import org.example.spotify_music.vo.SongVo; // 引入 SongVo
+import org.example.spotify_music.mapper.UserMapper;
+import org.example.spotify_music.service.SongService;
+import org.example.spotify_music.vo.SongVo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,43 +21,79 @@ import java.util.List;
 @RequestMapping("/song")
 public class SongController {
 
-    @Autowired
-    private SongMapper songMapper; // 用于调用联表查询方法
+    @Autowired private SongService songService;
+    @Autowired private SongMapper songMapper;
+    @Autowired private UserMapper userMapper;
+    @Autowired private ArtistMapper artistMapper;
 
-    /**
-     * 获取所有歌曲列表 (返回 SongVo，包含歌手名)
-     */
+    private Long getCurrentUserId() {
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userMapper.selectOne(new QueryWrapper<User>().eq("username", username));
+        return user.getId();
+    }
+
+    // 1. 获取所有歌曲 (公共)
     @GetMapping("/list")
     public Result<List<SongVo>> list() {
-        // 调用 SongMapper 中联表查询的方法
-        List<SongVo> songs = songMapper.selectSongVoList();
-        return Result.success(songs);
+        return Result.success(songMapper.selectSongVoList());
     }
 
-    /**
-     * 新增歌曲 (仍接收 Song 实体，因为是写入数据库)
-     */
+    // 2. 【新增】获取当前音乐人发布的歌曲
+    @GetMapping("/my")
+    public Result<List<SongVo>> myUploads() {
+        Long userId = getCurrentUserId();
+        // 查找该用户绑定的艺人身份
+        Artist artist = artistMapper.selectOne(new QueryWrapper<Artist>().eq("user_id", userId));
+
+        if (artist == null) {
+            return Result.success(List.of()); // 不是艺人或没绑定，返回空
+        }
+        return Result.success(songMapper.selectSongVoByArtistId(artist.getId()));
+    }
+
+    // 3. 添加歌曲
     @PostMapping("/add")
     public Result<?> addSong(@RequestBody Song song) {
-        songMapper.insert(song);
-        return Result.success("歌曲添加成功");
+        songService.save(song);
+        return Result.success("添加成功");
     }
 
-    /**
-     * 根据 ID 获取歌曲详情 (可选：可以返回 SongVo)
-     */
+    // 4. 删除歌曲 (带权限控制)
+    @PostMapping("/delete")
+    public Result<?> delete(@RequestParam Long id) {
+        Long currentUserId = getCurrentUserId();
+
+        // 判断是否是管理员
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            songService.removeById(id);
+            return Result.success("管理员删除成功");
+        }
+
+        // 判断是否是音乐人并检查归属
+        boolean isMusician = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_MUSICIAN"));
+
+        if (isMusician) {
+            Song song = songService.getById(id);
+            if (song == null) return Result.error("歌曲不存在");
+
+            Artist artist = artistMapper.selectById(song.getArtistId());
+            if (artist != null && currentUserId.equals(artist.getUserId())) {
+                songService.removeById(id);
+                return Result.success("删除成功");
+            } else {
+                return Result.error("无权删除他人的作品");
+            }
+        }
+
+        return Result.error("权限不足");
+    }
+
     @GetMapping("/{id}")
     public Result<Song> getById(@PathVariable Long id) {
-        Song song = songMapper.selectById(id);
-        return Result.success(song);
-    }
-
-    /**
-     * 删除歌曲
-     */
-    @DeleteMapping("/{id}")
-    public Result<?> delete(@PathVariable Long id) {
-        songMapper.deleteById(id);
-        return Result.success("歌曲删除成功");
+        return Result.success(songMapper.selectById(id));
     }
 }

@@ -1,0 +1,93 @@
+:root {
+    --spotify-black: #000000;
+    --spotify-dark-gray: #121212;
+    --spotify-light-gray: #181818;
+    --spotify-hover-gray: #282828;
+    --spotify-green: #1db954;
+    --spotify-white: #ffffff;
+    --spotify-text-sub: #b3b3b3;
+    --el-color-primary: #1db954 !important; /* 覆盖 Element 主色 */
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--spotify-dark-gray);
+    color: var(--spotify-white);
+    font-family: 'Circular', -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden; /* 禁止 body 滚动，由 layout 内部滚动 */
+}
+
+/* --- 自定义滚动条 (Spotify 风格) --- */
+::-webkit-scrollbar {
+    width: 12px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background-color: hsla(0,0%,100%,.3);
+    border-radius: 10px;
+    border: 3px solid transparent; /* 让滚动条看起来细一点 */
+    background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: hsla(0,0%,100%,.5);
+}
+
+/* --- 覆盖 Element Plus 默认样式 --- */
+/* 去掉表格边框和背景 */
+.el-table, .el-table__expanded-cell {
+    background-color: transparent !important;
+    --el-table-tr-bg-color: transparent !important;
+    --el-table-header-bg-color: transparent !important;
+    --el-table-row-hover-bg-color: hsla(0,0%,100%,.1) !important;
+    --el-table-border-color: transparent !important;
+    color: var(--spotify-text-sub) !important;
+}
+.el-table th {
+    border-bottom: 1px solid #282828 !important;
+    font-weight: normal;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.el-table td {
+    border-bottom: none !important;
+}
+.el-table__inner-wrapper::before {
+    display: none !important; /* 去掉表格最下面的横线 */
+}
+
+/* 按钮圆角 */
+.el-button {
+    border-radius: 500px !important; /* 胶囊形状 */
+    font-weight: 700 !important;
+    border: none !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.el-button--success {
+    background-color: var(--spotify-green) !important;
+    color: black !important;
+}
+.el-button--success:hover {
+    background-color: #1ed760 !important; /* 亮一点的绿 */
+    transform: scale(1.04); /* 微放大效果 */
+}
+
+/* 输入框深色化 */
+.el-input__wrapper {
+    background-color: #242424 !important;
+    border-radius: 500px !important;
+    box-shadow: none !important;
+    padding-left: 20px !important;
+}
+.el-input__inner {
+    color: white !important;
+}
+.el-input__wrapper:hover, .el-input__wrapper.is-focus {
+    background-color: #2a2a2a !important;
+    box-shadow: 0 0 0 1px white !important; /* 聚焦时白边框 */
+}

@@ -3,7 +3,6 @@ FullName
 --------                                                                                                                     
 D:\学习\Spotify_Music\.gitattributes                                                                                           
 D:\学习\Spotify_Music\.gitignore                                                                                               
-D:\学习\Spotify_Music\filelist.txt                                                                                             
 D:\学习\Spotify_Music\files.txt                                                                                                
 D:\学习\Spotify_Music\HELP.md                                                                                                  
 D:\学习\Spotify_Music\mvnw                                                                                                     
@@ -18,16 +17,6 @@ D:\学习\Spotify_Music\.idea\jarRepositories.xml
 D:\学习\Spotify_Music\.idea\misc.xml                                                                                           
 D:\学习\Spotify_Music\.idea\vcs.xml                                                                                            
 D:\学习\Spotify_Music\.idea\workspace.xml                                                                                      
-D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T190729.403.json                                                            
-D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T190745.403.json                                                            
-D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T191027-1.200.json                                                          
-D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T191027.200.json                                                            
-D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T191028-1.200.json                                                          
-D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T191028-2.200.json                                                          
-D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T191028-3.200.json                                                          
-D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T191028-4.200.json                                                          
-D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T191028-5.200.json                                                          
-D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T191028.200.json                                                            
 D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T192651-1.200.json                                                          
 D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T192651-10.200.json                                                         
 D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T192651-2.200.json                                                          
@@ -38,7 +27,6 @@ D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T192651-6.200.json
 D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T192651-7.200.json                                                          
 D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T192651-8.200.json                                                          
 D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T192651-9.200.json                                                          
-D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T192651.200.json                                                            
 D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T192901-1.200.json                                                          
 D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T192901-2.200.json                                                          
 D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T192901-3.200.json                                                          
@@ -68,6 +56,17 @@ D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T211426-2.200.json
 D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T211426-3.200.json                                                          
 D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T211426.200.json                                                            
 D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T211426.404.json                                                            
+D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T222813-1.200.json                                                          
+D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T222813-10.200.json                                                         
+D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T222813-2.200.json                                                          
+D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T222813-3.200.json                                                          
+D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T222813-4.200.json                                                          
+D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T222813-5.200.json                                                          
+D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T222813-6.200.json                                                          
+D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T222813-7.200.json                                                          
+D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T222813-8.200.json                                                          
+D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T222813-9.200.json                                                          
+D:\学习\Spotify_Music\.idea\httpRequests\2025-11-25T222813.200.json                                                            
 D:\学习\Spotify_Music\.idea\httpRequests\http-client.cookies                                                                   
 D:\学习\Spotify_Music\.idea\httpRequests\http-requests-log.http                                                                
 D:\学习\Spotify_Music\.mvn\wrapper\maven-wrapper.properties                                                                    
@@ -17981,6 +17980,7 @@ D:\学习\Spotify_Music\spotify-frontend\src\main.ts
 D:\学习\Spotify_Music\spotify-frontend\src\assets\base.css                                                                     
 D:\学习\Spotify_Music\spotify-frontend\src\assets\logo.svg                                                                     
 D:\学习\Spotify_Music\spotify-frontend\src\assets\main.css                                                                     
+D:\学习\Spotify_Music\spotify-frontend\src\components\CommentBox.vue                                                           
 D:\学习\Spotify_Music\spotify-frontend\src\components\HelloWorld.vue                                                           
 D:\学习\Spotify_Music\spotify-frontend\src\components\TheWelcome.vue                                                           
 D:\学习\Spotify_Music\spotify-frontend\src\components\WelcomeItem.vue                                                          
@@ -18000,7 +18000,23 @@ D:\学习\Spotify_Music\spotify-frontend\src\views\LoginView.vue
 D:\学习\Spotify_Music\spotify-frontend\src\views\MyLibraryView.vue                                                             
 D:\学习\Spotify_Music\spotify-frontend\src\views\PlaylistDetailView.vue                                                        
 D:\学习\Spotify_Music\spotify-frontend\src\views\SearchView.vue                                                                
+D:\学习\Spotify_Music\spotify-frontend\src\views\SongDetailView.vue                                                            
 D:\学习\Spotify_Music\spotify-frontend\src\views\home\Discover.vue                                                             
+D:\学习\Spotify_Music\Spotify_NCF\data_reader.py                                                                               
+D:\学习\Spotify_Music\Spotify_NCF\main_service.py                                                                              
+D:\学习\Spotify_Music\Spotify_NCF\mappings.json                                                                                
+D:\学习\Spotify_Music\Spotify_NCF\ncf_model.pth                                                                                
+D:\学习\Spotify_Music\Spotify_NCF\ncf_model.py                                                                                 
+D:\学习\Spotify_Music\Spotify_NCF\train.py                                                                                     
+D:\学习\Spotify_Music\Spotify_NCF\.idea\.gitignore                                                                             
+D:\学习\Spotify_Music\Spotify_NCF\.idea\misc.xml                                                                               
+D:\学习\Spotify_Music\Spotify_NCF\.idea\modules.xml                                                                            
+D:\学习\Spotify_Music\Spotify_NCF\.idea\Spotify_NCF.iml                                                                        
+D:\学习\Spotify_Music\Spotify_NCF\.idea\vcs.xml                                                                                
+D:\学习\Spotify_Music\Spotify_NCF\.idea\workspace.xml                                                                          
+D:\学习\Spotify_Music\Spotify_NCF\.idea\inspectionProfiles\profiles_settings.xml                                               
+D:\学习\Spotify_Music\Spotify_NCF\__pycache__\data_reader.cpython-310.pyc                                                      
+D:\学习\Spotify_Music\Spotify_NCF\__pycache__\ncf_model.cpython-310.pyc                                                        
 D:\学习\Spotify_Music\src\test-api.http                                                                                        
 D:\学习\Spotify_Music\src\test-role-api.http                                                                                   
 D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\SpotifyMusicApplication.java                                     
@@ -18013,6 +18029,8 @@ D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\controller\AuthC
 D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\controller\CommentController.java                                
 D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\controller\InteractionController.java                            
 D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\controller\PlaylistController.java                               
+D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\controller\RecommendationController.java                         
+D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\controller\SearchController.java                                 
 D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\controller\SongController.java                                   
 D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\controller\StorageController.java                                
 D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\controller\UserController.java                                   
@@ -18043,9 +18061,12 @@ D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\service\SongServ
 D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\service\UserRoleService.java                                     
 D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\service\impl\SongServiceImpl.java                                
 D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\service\impl\UserRoleServiceImpl.java                            
+D:\学习\Spotify_Music\src\main\java\org\example\spotify_music\vo\SongVo.java                                                   
 D:\学习\Spotify_Music\src\main\resources\application.yml                                                                       
+D:\学习\Spotify_Music\src\main\resources\mapper\SongMapper.xml                                                                 
 D:\学习\Spotify_Music\src\test\java\org\example\spotify_music\SpotifyMusicApplicationTests.java                                
 D:\学习\Spotify_Music\target\classes\application.yml                                                                           
+D:\学习\Spotify_Music\target\classes\mapper\SongMapper.xml                                                                     
 D:\学习\Spotify_Music\target\classes\org\example\spotify_music\SpotifyMusicApplication.class                                   
 D:\学习\Spotify_Music\target\classes\org\example\spotify_music\common\JwtUtils.class                                           
 D:\学习\Spotify_Music\target\classes\org\example\spotify_music\common\Result.class                                             
@@ -18056,6 +18077,8 @@ D:\学习\Spotify_Music\target\classes\org\example\spotify_music\controller\Auth
 D:\学习\Spotify_Music\target\classes\org\example\spotify_music\controller\CommentController.class                              
 D:\学习\Spotify_Music\target\classes\org\example\spotify_music\controller\InteractionController.class                          
 D:\学习\Spotify_Music\target\classes\org\example\spotify_music\controller\PlaylistController.class                             
+D:\学习\Spotify_Music\target\classes\org\example\spotify_music\controller\RecommendationController.class                       
+D:\学习\Spotify_Music\target\classes\org\example\spotify_music\controller\SearchController.class                               
 D:\学习\Spotify_Music\target\classes\org\example\spotify_music\controller\SongController.class                                 
 D:\学习\Spotify_Music\target\classes\org\example\spotify_music\controller\StorageController.class                              
 D:\学习\Spotify_Music\target\classes\org\example\spotify_music\controller\UserController.class                                 
@@ -18086,6 +18109,7 @@ D:\学习\Spotify_Music\target\classes\org\example\spotify_music\service\SongSer
 D:\学习\Spotify_Music\target\classes\org\example\spotify_music\service\UserRoleService.class                                   
 D:\学习\Spotify_Music\target\classes\org\example\spotify_music\service\impl\SongServiceImpl.class                              
 D:\学习\Spotify_Music\target\classes\org\example\spotify_music\service\impl\UserRoleServiceImpl.class                          
+D:\学习\Spotify_Music\target\classes\org\example\spotify_music\vo\SongVo.class                                                 
 D:\学习\Spotify_Music\target\test-classes\org\example\spotify_music\SpotifyMusicApplicationTests.class                         
 
 

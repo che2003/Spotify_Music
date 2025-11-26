@@ -3,24 +3,23 @@ package org.example.spotify_music.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity; // 引入方法安全
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // 引入密码编码器
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true) // ✅ 开启方法安全，支持 @PreAuthorize
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     @Autowired
     private JwtFilter jwtFilter;
 
-    // 暴露密码编码器，供登录和加密使用
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -29,13 +28,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable) // 禁用 CSRF
                 .authorizeHttpRequests(auth -> auth
-                        // 【修复安全漏洞】只有 /auth 和 /error 允许公共访问！
-                        .requestMatchers("/auth/**", "/error").permitAll()
-                        .anyRequest().authenticated()            // 其他必须带 Token
+                        // 1. 放行认证接口
+                        .requestMatchers("/auth/**").permitAll()
+
+                        // 2. 放行错误页面 (防止出现 Whitelabel Error 403)
+                        .requestMatchers("/error").permitAll()
+
+                        // 3. 放行 Swagger (如果有的话，可选)
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
+                        // 4. 【关键】放行静态资源 (前端打包后的文件)
+                        // 如果你把 dist 放入了 static，必须放行这些：
+                        .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
+                        .requestMatchers("/assets/**", "/static/**", "/images/**").permitAll()
+
+                        // 5. 其他接口必须验证 Token
+                        .anyRequest().authenticated()
                 )
-                // 注册 JWT 过滤器
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
