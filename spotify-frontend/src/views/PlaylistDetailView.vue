@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import request from '@/utils/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import SharePopover from '@/components/SharePopover.vue'
 import { usePlayerStore } from '@/stores/player'
 
 const route = useRoute()
@@ -121,6 +122,14 @@ onMounted(() => {
         <h1 class="playlist-title">{{ playlist.title }}</h1>
         <p class="playlist-desc">{{ playlist.description || '暂无描述' }}</p>
         <p class="playlist-creator">创建者: User #{{ playlist.creatorId }}</p>
+        <div class="playlist-share-actions">
+          <SharePopover
+              v-if="playlist.id"
+              resource-type="playlist"
+              :resource-id="playlist.id"
+              :title="playlist.title"
+          />
+        </div>
       </div>
     </div>
 
@@ -186,6 +195,7 @@ onMounted(() => {
 .playlist-title { font-size: 48px; font-weight: bold; margin: 0; }
 .playlist-desc { color: #b3b3b3; margin: 5px 0 10px 0; }
 .playlist-creator { font-size: 14px; }
+.playlist-share-actions { margin-top: 10px; }
 .songs-title { color: white; font-size: 20px; margin: 0; }
 .songs-section { margin-top: 24px; }
 .songs-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }

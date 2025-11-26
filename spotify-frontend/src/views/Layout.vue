@@ -2,6 +2,7 @@
 import { RouterView, useRouter } from 'vue-router'
 import { ref, watch, computed, onMounted } from 'vue'
 import { usePlayerStore } from '@/stores/player'
+import SharePopover from '@/components/SharePopover.vue'
 
 const router = useRouter()
 const playerStore = usePlayerStore()
@@ -29,6 +30,8 @@ const toggleLike = () => {
     playerStore.toggleLike(playerStore.currentSong.id)
   }
 }
+
+const isShareReady = computed(() => Boolean(playerStore.currentSong.id))
 
 const goToDetail = () => {
   if (playerStore.currentSong.id) {
@@ -163,13 +166,22 @@ const formatTime = (seconds: number) => {
             <div class="track-artist" @click="goToArtistDetail">{{ playerStore.currentSong.artistName }}</div>
           </div>
 
-          <button class="icon-btn like-btn"
-                  :class="{ 'is-active': playerStore.likedSongIds.has(playerStore.currentSong.id) }"
-                  @click="toggleLike"
-          >
-            <svg v-if="!playerStore.likedSongIds.has(playerStore.currentSong.id)" role="img" height="16" width="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1.69 2A4.582 4.582 0 018 2.023 4.583 4.583 0 0111.88.817h.002a4.618 4.618 0 013.782 3.65v.003a4.543 4.543 0 01-1.011 3.84L9.35 14.629a1.765 1.765 0 01-2.093.464 1.762 1.762 0 01-.605-.463L1.348 8.309A4.582 4.582 0 011.689 2zm3.158.252c-.896 0-1.747.466-2.201 1.255v.002a3.312 3.312 0 00.16 2.815l5.185 6.12a.25.25 0 00.386-.002l5.31-6.26a3.315 3.315 0 00.175-2.675V3.5a3.318 3.318 0 00-2.712-2.62 3.324 3.324 0 00-3.332.884l-.45.45-.45-.45a3.313 3.313 0 00-2.07-.91z"></path></svg>
-            <svg v-else role="img" height="16" width="16" viewBox="0 0 16 16" fill="#1db954"><path d="M15.724 4.22A4.313 4.313 0 0012.192.814a4.269 4.269 0 00-3.622 1.13.837.837 0 01-1.14 0 4.272 4.272 0 00-3.626-1.13 4.313 4.313 0 00-3.531 3.406c-.253 1.64.577 4.08 4.653 7.913l.063.061.063-.061c4.076-3.833 4.906-6.273 4.653-7.913z"></path></svg>
-          </button>
+          <div class="player-quick-actions">
+            <button class="icon-btn like-btn"
+                    :class="{ 'is-active': playerStore.likedSongIds.has(playerStore.currentSong.id) }"
+                    @click="toggleLike"
+            >
+              <svg v-if="!playerStore.likedSongIds.has(playerStore.currentSong.id)" role="img" height="16" width="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1.69 2A4.582 4.582 0 018 2.023 4.583 4.583 0 0111.88.817h.002a4.618 4.618 0 013.782 3.65v.003a4.543 4.543 0 01-1.011 3.84L9.35 14.629a1.765 1.765 0 01-2.093.464 1.762 1.762 0 01-.605-.463L1.348 8.309A4.582 4.582 0 011.689 2zm3.158.252c-.896 0-1.747.466-2.201 1.255v.002a3.312 3.312 0 00-.16 2.815l5.185 6.12a.25.25 0 00.386-.002l5.31-6.26a3.315 3.315 0 00.175-2.675V3.5a3.318 3.318 0 00-2.712-2.62 3.324 3.324 0 00-3.332.884l-.45.45-.45-.45a3.313 3.313 0 00-2.07-.91z"></path></svg>
+              <svg v-else role="img" height="16" width="16" viewBox="0 0 16 16" fill="#1db954"><path d="M15.724 4.22A4.313 4.313 0 0012.192.814a4.269 4.269 0 00-3.622 1.13.837.837 0 01-1.14 0 4.272 4.272 0 00-3.626-1.13 4.313 4.313 0 00-3.531 3.406c-.253 1.645.577 4.08 4.653 7.913l.063.061.063-.061c4.076-3.833 4.906-6.273 4.653-7.913z"></path></svg>
+            </button>
+            <SharePopover
+                v-if="isShareReady"
+                resource-type="song"
+                :resource-id="playerStore.currentSong.id"
+                :title="playerStore.currentSong.title"
+                :artist-name="playerStore.currentSong.artistName"
+            />
+          </div>
         </div>
         <div class="track-info" v-else>
           <div class="placeholder-box"></div>
@@ -297,6 +309,7 @@ const formatTime = (seconds: number) => {
 .track-title:hover { text-decoration: underline; }
 .track-artist { font-size: 11px; color: #b3b3b3; margin-top: 3px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .track-artist:hover { color: white; text-decoration: underline; }
+.player-quick-actions { display: flex; align-items: center; gap: 8px; margin-left: 10px; }
 
 /* 中间 */
 .center-controls { width: 40%; max-width: 722px; display: flex; flex-direction: column; align-items: center; justify-content: center; }

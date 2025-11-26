@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
 import CommentBox from '@/components/CommentBox.vue'
+import SharePopover from '@/components/SharePopover.vue'
 import { usePlayerStore } from '@/stores/player'
 
 const route = useRoute()
@@ -151,6 +152,13 @@ onMounted(() => { fetchSongDetails() })
           <div class="play-btn-large" @click="playSong">
             <svg role="img" height="28" width="28" viewBox="0 0 28 28" fill="black"><path d="M3 1.713a.7.7 0 011.05-.607l19.918 11.5a.7.7 0 010 1.214L4.05 25.319A.7.7 0 013 24.712V1.713z"></path></svg>
           </div>
+          <SharePopover
+              v-if="song.id"
+              resource-type="song"
+              :resource-id="song.id"
+              :title="song.title"
+              :artist-name="song.artistName"
+          />
         </div>
 
         <CommentBox :song-id="song.id" />
@@ -174,7 +182,7 @@ onMounted(() => { fetchSongDetails() })
 .song-title { font-size: 72px; font-weight: 900; margin: 0 0 8px 0; line-height: 1; letter-spacing: -1px; }
 .song-artist { font-size: 24px; font-weight: 700; cursor: pointer; }
 .song-artist:hover { text-decoration: underline; }
-.actions { margin-top: 30px; }
+.actions { margin-top: 30px; display: flex; align-items: center; gap: 12px; }
 .play-btn-large { width: 56px; height: 56px; border-radius: 50%; background: var(--spotify-green); color: black; font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; }
 .play-btn-large:hover { transform: scale(1.05); background: #1ed760; }
 .content-section { margin-top: 20px; }
