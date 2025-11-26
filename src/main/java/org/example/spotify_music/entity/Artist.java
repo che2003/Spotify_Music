@@ -7,6 +7,8 @@ public class Artist extends BaseEntity {
     private String bio; // 简介
     private String avatarUrl;
     private Long userId;
+    private Integer totalFans;
+    private Long totalPlays;
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
 
@@ -16,4 +18,8 @@ public class Artist extends BaseEntity {
     public void setBio(String bio) { this.bio = bio; }
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+    public Integer getTotalFans() { return totalFans; }
+    public void setTotalFans(Integer totalFans) { this.totalFans = totalFans; }
+    public Long getTotalPlays() { return totalPlays; }
+    public void setTotalPlays(Long totalPlays) { this.totalPlays = totalPlays; }
 }

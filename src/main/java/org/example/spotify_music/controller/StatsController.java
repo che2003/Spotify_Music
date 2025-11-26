@@ -3,6 +3,7 @@ package org.example.spotify_music.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.example.spotify_music.common.Result;
 import org.example.spotify_music.entity.Song;
+import org.example.spotify_music.entity.Artist;
 import org.example.spotify_music.mapper.ArtistMapper;
 import org.example.spotify_music.mapper.SongMapper;
 import org.example.spotify_music.mapper.UserMapper;
@@ -31,6 +32,20 @@ public class StatsController {
         data.put("userCount", userMapper.selectCount(null));
         data.put("songCount", songMapper.selectCount(null));
         data.put("artistCount", artistMapper.selectCount(null));
+
+        List<Artist> allArtists = artistMapper.selectList(null);
+        long totalArtistFans = allArtists.stream()
+                .map(Artist::getTotalFans)
+                .filter(v -> v != null)
+                .mapToLong(Integer::longValue)
+                .sum();
+        long totalArtistPlays = allArtists.stream()
+                .map(Artist::getTotalPlays)
+                .filter(v -> v != null)
+                .mapToLong(Long::longValue)
+                .sum();
+        data.put("totalArtistFans", totalArtistFans);
+        data.put("totalArtistPlays", totalArtistPlays);
 
         // 计算总播放量 (所有歌曲 playCount 之和)
         // 这里用流处理简单计算，数据量大时建议写 XML SQL: SELECT SUM(play_count) FROM music_song
