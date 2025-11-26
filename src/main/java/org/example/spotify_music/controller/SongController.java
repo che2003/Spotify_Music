@@ -2,6 +2,7 @@ package org.example.spotify_music.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.example.spotify_music.common.Result;
+import org.example.spotify_music.dto.SongUploadRequest;
 import org.example.spotify_music.entity.Artist;
 import org.example.spotify_music.entity.User;
 import org.example.spotify_music.mapper.ArtistMapper;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.example.spotify_music.entity.Song;
+import org.springframework.beans.BeanUtils;
 
 import java.util.List;
 
@@ -62,8 +64,13 @@ public class SongController {
 
     // 3. 添加歌曲
     @PostMapping("/add")
-    public Result<?> addSong(@RequestBody Song song) {
-        songService.save(song);
+    public Result<?> addSong(@RequestBody SongUploadRequest request) {
+        Song song = new Song();
+        BeanUtils.copyProperties(request, song);
+        // 将描述信息复用到歌词字段，便于详情页展示
+        song.setLyrics(request.getDescription());
+
+        songService.saveSongWithGenres(song, request.getGenreIds());
         return Result.success("添加成功");
     }
 
