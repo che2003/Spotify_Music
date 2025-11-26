@@ -21,4 +21,14 @@ public interface SongMapper extends BaseMapper<Song> {
 
     // 【新增】播放量 +1
     void incrementPlayCount(@Param("id") Long id);
+
+    SongVo selectSongVoById(@Param("id") Long id);
+
+    List<SongVo> selectSongVoByAlbumId(@Param("albumId") Long albumId);
+
+    List<SongVo> selectLatestSongVos(@Param("limit") Integer limit);
+
+    List<SongVo> selectTopSongVos(@Param("limit") Integer limit);
+
+    List<SongVo> selectSongVoByGenreId(@Param("genreId") Long genreId, @Param("limit") Integer limit);
 }

@@ -5,8 +5,10 @@ import org.example.spotify_music.common.Result;
 import org.example.spotify_music.entity.Interaction;
 import org.example.spotify_music.entity.User;
 import org.example.spotify_music.mapper.InteractionMapper;
+import org.example.spotify_music.mapper.PlayHistoryMapper;
 import org.example.spotify_music.mapper.SongMapper;
 import org.example.spotify_music.mapper.UserMapper;
+import org.example.spotify_music.entity.PlayHistory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,7 @@ public class InteractionController {
     @Autowired private InteractionMapper interactionMapper;
     @Autowired private UserMapper userMapper;
     @Autowired private SongMapper songMapper;
+    @Autowired private PlayHistoryMapper playHistoryMapper;
 
     private Long getCurrentUserId() {
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -50,6 +53,12 @@ public class InteractionController {
 
         if (isPlay && interaction.getSongId() != null) {
             songMapper.incrementPlayCount(interaction.getSongId());
+
+            PlayHistory history = new PlayHistory();
+            history.setSongId(interaction.getSongId());
+            history.setUserId(interaction.getUserId());
+            history.setPlayTime(java.time.LocalDateTime.now());
+            playHistoryMapper.insert(history);
         }
 
         return Result.success("行为已记录");

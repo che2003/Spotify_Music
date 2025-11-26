@@ -44,6 +44,54 @@
         WHERE s.artist_id = #{artistId}
     </select>
 
+    <select id="selectSongVoById" resultType="org.example.spotify_music.vo.SongVo">
+        SELECT <include refid="Base_Column_List_Vo"/>
+        FROM music_song s
+        LEFT JOIN music_artist a ON s.artist_id = a.id
+        LEFT JOIN music_album alb ON s.album_id = alb.id
+        WHERE s.id = #{id}
+    </select>
+
+    <select id="selectSongVoByAlbumId" resultType="org.example.spotify_music.vo.SongVo">
+        SELECT <include refid="Base_Column_List_Vo"/>
+        FROM music_song s
+        LEFT JOIN music_artist a ON s.artist_id = a.id
+        LEFT JOIN music_album alb ON s.album_id = alb.id
+        WHERE s.album_id = #{albumId}
+        ORDER BY s.create_time DESC
+    </select>
+
+    <select id="selectLatestSongVos" resultType="org.example.spotify_music.vo.SongVo">
+        SELECT <include refid="Base_Column_List_Vo"/>
+        FROM music_song s
+        LEFT JOIN music_artist a ON s.artist_id = a.id
+        LEFT JOIN music_album alb ON s.album_id = alb.id
+        ORDER BY s.create_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectTopSongVos" resultType="org.example.spotify_music.vo.SongVo">
+        SELECT <include refid="Base_Column_List_Vo"/>
+        FROM music_song s
+        LEFT JOIN music_artist a ON s.artist_id = a.id
+        LEFT JOIN music_album alb ON s.album_id = alb.id
+        ORDER BY s.play_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectSongVoByGenreId" resultType="org.example.spotify_music.vo.SongVo">
+        SELECT <include refid="Base_Column_List_Vo"/>
+        FROM music_song s
+        LEFT JOIN music_song_genre msg ON s.id = msg.song_id
+        LEFT JOIN music_artist a ON s.artist_id = a.id
+        LEFT JOIN music_album alb ON s.album_id = alb.id
+        WHERE msg.genre_id = #{genreId}
+        ORDER BY s.create_time DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
     <update id="incrementPlayCount">
         UPDATE music_song SET play_count = play_count + 1 WHERE id = #{id}
     </update>

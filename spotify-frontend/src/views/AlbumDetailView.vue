@@ -5,44 +5,30 @@ import request from '@/utils/request'
 import { usePlayerStore } from '@/stores/player'
 import { ElMessage } from 'element-plus'
 
-interface SongVo {
-  id: number
-  title: string
-  artistName: string
-  artistId: number
-  coverUrl: string
-  fileUrl: string
-  albumId?: number
-  albumTitle?: string
-  albumCover?: string
-  duration?: number
-}
-
 const route = useRoute()
 const router = useRouter()
-const songs = ref<SongVo[]>([])
+const songs = ref<any[]>([])
+const albumInfo = ref<any>(null)
 const loading = ref(true)
 const playerStore = usePlayerStore()
 
-const albumSongs = computed(() => songs.value.filter(song => song.albumId === Number(route.params.id)))
-const albumMeta = computed(() => {
-  const sample = albumSongs.value[0]
-  return {
-    title: sample?.albumTitle || `专辑 #${route.params.id}`,
-    cover: sample?.albumCover || sample?.coverUrl,
-    artistName: sample?.artistName,
-    artistId: sample?.artistId
-  }
-})
+const albumSongs = computed(() => songs.value)
+const albumMeta = computed(() => ({
+  title: albumInfo.value?.title || `专辑 #${route.params.id}`,
+  cover: albumInfo.value?.coverUrl,
+  artistName: albumInfo.value?.artistName,
+  artistId: albumInfo.value?.artistId,
+  releaseDate: albumInfo.value?.releaseDate,
+  description: albumInfo.value?.description
+}))
 
 const fetchSongs = async () => {
   loading.value = true
   try {
-    const res = await request.get('/song/list')
-    songs.value = res.data
-    if (!albumSongs.value.length) {
-      ElMessage.warning('该专辑暂无歌曲')
-    }
+    const res = await request.get(`/album/${route.params.id}`)
+    if (!res.data) { ElMessage.error('专辑不存在'); return }
+    songs.value = res.data.songs || []
+    albumInfo.value = res.data
   } catch (e) {
     ElMessage.error('加载专辑失败')
   } finally {
@@ -64,7 +50,8 @@ onMounted(fetchSongs)
         <p class="type-label">专辑</p>
         <h1 class="title">{{ albumMeta.title }}</h1>
         <p class="artist" v-if="albumMeta.artistName" @click="goArtist">{{ albumMeta.artistName }}</p>
-        <p class="subtitle">{{ albumSongs.length }} 首歌曲</p>
+        <p class="subtitle">{{ albumSongs.length }} 首歌曲 · {{ albumMeta.releaseDate || '发行时间未知' }}</p>
+        <p class="description" v-if="albumMeta.description">{{ albumMeta.description }}</p>
       </div>
     </div>
 
@@ -98,6 +85,7 @@ onMounted(fetchSongs)
 .artist { color: #b3b3b3; cursor: pointer; }
 .artist:hover { color: #fff; text-decoration: underline; }
 .subtitle { color: #b3b3b3; }
+.description { color: #d0d0d0; margin-top: 6px; max-width: 560px; line-height: 1.4; }
 .tracklist { background: #181818; border-radius: 12px; padding: 10px; }
 .track { display: grid; grid-template-columns: 1fr 100px 80px; align-items: center; padding: 10px; border-radius: 8px; transition: background 0.2s; }
 .track:hover { background: #262626; }
