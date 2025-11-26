@@ -42,34 +42,64 @@ const router = createRouter({
       component: Layout, // 主布局
       redirect: '/discover',
       children: [
-        { path: 'discover', name: 'discover', component: Discover },
-        { path: 'new', name: 'newReleases', component: NewReleasesView },
-        { path: 'search', name: 'search', component: Search },
+        { path: 'discover', name: 'discover', component: Discover, meta: { requiresAuth: true } },
+        { path: 'new', name: 'newReleases', component: NewReleasesView, meta: { requiresAuth: true } },
+        { path: 'search', name: 'search', component: Search, meta: { requiresAuth: true } },
 
-        { path: 'charts', name: 'charts', component: ChartsView },
+        { path: 'charts', name: 'charts', component: ChartsView, meta: { requiresAuth: true } },
 
-        { path: 'genres', name: 'genres', component: GenreBrowseView },
-        { path: 'library', name: 'library', component: MyLibrary },
-        { path: 'history', name: 'history', component: HistoryView },
+        { path: 'genres', name: 'genres', component: GenreBrowseView, meta: { requiresAuth: true } },
+        { path: 'library', name: 'library', component: MyLibrary, meta: { requiresAuth: true } },
+        { path: 'history', name: 'history', component: HistoryView, meta: { requiresAuth: true } },
 
         // 详情页
-        { path: 'playlist/:id', name: 'playlistDetail', component: PlaylistDetail },
-        { path: 'song/:id', name: 'songDetail', component: SongDetail },
-        { path: 'artist/:id', name: 'artistDetail', component: ArtistDetail },
-        { path: 'album/:id', name: 'albumDetail', component: AlbumDetail },
+        { path: 'playlist/:id', name: 'playlistDetail', component: PlaylistDetail, meta: { requiresAuth: true } },
+        { path: 'song/:id', name: 'songDetail', component: SongDetail, meta: { requiresAuth: true } },
+        { path: 'artist/:id', name: 'artistDetail', component: ArtistDetail, meta: { requiresAuth: true } },
+        { path: 'album/:id', name: 'albumDetail', component: AlbumDetail, meta: { requiresAuth: true } },
 
         // 个人中心
-        { path: 'profile', name: 'profile', component: ProfileView },
+        { path: 'profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true } },
 
         // 音乐人功能
-        { path: 'upload', name: 'upload', component: UploadView },
-        { path: 'musician/stats', name: 'musicianStats', component: StatsDashboard },
-        { path: 'musician/works', name: 'myWorks', component: MyWorksView },
+        {
+          path: 'upload',
+          name: 'upload',
+          component: UploadView,
+          meta: { requiresAuth: true, roles: ['musician', 'admin'] }
+        },
+        {
+          path: 'musician/stats',
+          name: 'musicianStats',
+          component: StatsDashboard,
+          meta: { requiresAuth: true, roles: ['musician', 'admin'] }
+        },
+        {
+          path: 'musician/works',
+          name: 'myWorks',
+          component: MyWorksView,
+          meta: { requiresAuth: true, roles: ['musician', 'admin'] }
+        },
 
         // 管理员功能
-        { path: 'admin/users', name: 'adminUsers', component: UserManageView },
-        { path: 'admin/songs', name: 'adminSongs', component: SongManageView },
-        { path: 'admin/dashboard', name: 'adminDashboard', component: DashboardView }
+        {
+          path: 'admin/users',
+          name: 'adminUsers',
+          component: UserManageView,
+          meta: { requiresAuth: true, roles: ['admin'] }
+        },
+        {
+          path: 'admin/songs',
+          name: 'adminSongs',
+          component: SongManageView,
+          meta: { requiresAuth: true, roles: ['admin'] }
+        },
+        {
+          path: 'admin/dashboard',
+          name: 'adminDashboard',
+          component: DashboardView,
+          meta: { requiresAuth: true, roles: ['admin'] }
+        }
       ]
     },
     // 404 路由 (可选)
@@ -77,17 +107,27 @@ const router = createRouter({
   ]
 })
 
-// 路由守卫：未登录拦截
+// 路由守卫：未登录或权限不足时拦截
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
-  const publicPages = ['login', 'register'] // 白名单
-  const authRequired = !publicPages.includes(to.name as string)
+  const publicPages = ['login', 'register']
+  const authRequired = !publicPages.includes((to.name as string) || '')
 
   if (authRequired && !token) {
     next({ name: 'login' })
-  } else {
-    next()
+    return
   }
+
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const roles: string[] = Array.isArray(user.roles) ? user.roles : []
+  const requiredRoles = (to.meta?.roles as string[]) || []
+
+  if (requiredRoles.length > 0 && !requiredRoles.some((role) => roles.includes(role))) {
+    next({ name: 'discover' })
+    return
+  }
+
+  next()
 })
 
 export default router
