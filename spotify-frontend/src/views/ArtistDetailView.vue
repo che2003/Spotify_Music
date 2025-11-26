@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import request from '@/utils/request'
 import { usePlayerStore } from '@/stores/player'
@@ -31,6 +32,9 @@ const playerStore = usePlayerStore()
 const loading = ref(true)
 const artist = ref<Artist | null>(null)
 const songs = ref<SongVo[]>([])
+const isFollowing = ref(false)
+const followLoading = ref(false)
+let fetchToken = 0
 
 const artistSongs = computed(() => songs.value.filter(song => song.artistId === Number(route.params.id)))
 const albums = computed(() => {
@@ -51,28 +55,75 @@ const albums = computed(() => {
 })
 
 const fetchData = async () => {
+
+  const requestId = ++fetchToken
   loading.value = true
+  artist.value = null
+  songs.value = []
+  isFollowing.value = false
   try {
     const [artistRes, songRes] = await Promise.all([
       request.get('/artist/list'),
       request.get('/song/list')
     ])
-    artist.value = artistRes.data.find((item: Artist) => item.id === Number(route.params.id)) || null
+
+
+    if (requestId !== fetchToken) return
+
+    const currentId = Number(route.params.id)
+    artist.value = artistRes.data.find((item: Artist) => item.id === currentId) || null
     songs.value = songRes.data
-    if (!artist.value) {
+
+    if (artist.value?.id) {
+      await checkFollowStatus(artist.value.id)
+    } else {
       ElMessage.error('未找到该艺人')
     }
   } catch (e) {
-    ElMessage.error('加载艺人信息失败')
+    if (requestId === fetchToken) {
+      ElMessage.error('加载艺人信息失败')
+    }
   } finally {
-    loading.value = false
+    if (requestId === fetchToken) {
+      loading.value = false
+    }
   }
 }
 
 const playSong = (song: SongVo) => playerStore.setSong(song)
 const goAlbum = (albumId?: number) => { if (albumId) router.push(`/album/${albumId}`) }
 
-onMounted(fetchData)
+const checkFollowStatus = async (artistId: number) => {
+  try {
+    const res = await request.get(`/follow/check?artistId=${artistId}`)
+    if (artistId === artist.value?.id) {
+      isFollowing.value = res.data
+    }
+  } catch (e) {}
+}
+
+const toggleFollow = async () => {
+  if (!artist.value?.id) return
+  followLoading.value = true
+  try {
+    await request.post(`/follow/artist?artistId=${artist.value.id}`)
+    isFollowing.value = !isFollowing.value
+    ElMessage.success(isFollowing.value ? '关注成功' : '已取消关注')
+  } catch (e) {
+    ElMessage.error('操作失败 (可能艺人未入驻)')
+  } finally {
+    followLoading.value = false
+  }
+}
+
+watch(
+  () => route.params.id,
+  () => {
+    fetchData()
+  },
+  { immediate: true }
+)
+
 </script>
 
 <template>
@@ -82,6 +133,20 @@ onMounted(fetchData)
       <div class="hero-text">
         <p class="type-label">艺人</p>
         <h1 class="name">{{ artist.name }}</h1>
+        <div class="actions">
+          <el-button
+              size="small"
+              round
+              class="follow-btn"
+              :type="isFollowing ? 'default' : 'success'"
+              plain
+              :loading="followLoading"
+              @click="toggleFollow"
+          >
+            {{ isFollowing ? '已关注' : '关注' }}
+          </el-button>
+        </div>
+
         <p class="bio" v-if="artist.bio">{{ artist.bio }}</p>
       </div>
     </div>
@@ -127,6 +192,7 @@ onMounted(fetchData)
 .hero { display: flex; align-items: flex-end; gap: 24px; margin-bottom: 32px; }
 .avatar { width: 200px; height: 200px; object-fit: cover; border-radius: 50%; box-shadow: 0 8px 30px rgba(0,0,0,0.35); }
 .hero-text { display: flex; flex-direction: column; gap: 8px; }
+.actions { display: flex; gap: 8px; align-items: center; }
 .type-label { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; opacity: 0.8; }
 .name { font-size: 48px; font-weight: 900; margin: 0; letter-spacing: -1px; }
 .bio { max-width: 720px; color: #b3b3b3; line-height: 1.6; }

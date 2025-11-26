@@ -5,7 +5,7 @@ import org.example.spotify_music.common.Result;
 import org.example.spotify_music.entity.Interaction;
 import org.example.spotify_music.entity.User;
 import org.example.spotify_music.mapper.InteractionMapper;
-import org.example.spotify_music.mapper.SongMapper; // 【新增】
+import org.example.spotify_music.mapper.SongMapper;
 import org.example.spotify_music.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,7 +21,7 @@ public class InteractionController {
 
     @Autowired private InteractionMapper interactionMapper;
     @Autowired private UserMapper userMapper;
-    @Autowired private SongMapper songMapper; // 【新增注入】
+    @Autowired private SongMapper songMapper;
 
     private Long getCurrentUserId() {
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -34,19 +34,24 @@ public class InteractionController {
     public Result<?> record(@RequestBody Interaction interaction) {
         interaction.setUserId(getCurrentUserId());
 
-        // 默认评分逻辑
-        if (interaction.getRating() == null) {
-            if (interaction.getType() == 3) interaction.setRating(new BigDecimal("5.0"));
-            else if (interaction.getType() == 1) {
-                interaction.setRating(new BigDecimal("3.0"));
+        boolean isPlay = interaction.getType() != null && interaction.getType() == 1;
 
-                // 【核心逻辑】如果是播放(type=1)，则歌曲热度+1
-                songMapper.incrementPlayCount(interaction.getSongId());
+        if (interaction.getRating() == null) {
+            if (interaction.getType() == 3) {
+                interaction.setRating(new BigDecimal("5.0"));
+            } else if (isPlay) {
+                interaction.setRating(new BigDecimal("3.0"));
+            } else {
+                interaction.setRating(new BigDecimal("1.0"));
             }
-            else interaction.setRating(new BigDecimal("1.0"));
         }
 
         interactionMapper.insert(interaction);
+
+        if (isPlay && interaction.getSongId() != null) {
+            songMapper.incrementPlayCount(interaction.getSongId());
+        }
+
         return Result.success("行为已记录");
     }
 
