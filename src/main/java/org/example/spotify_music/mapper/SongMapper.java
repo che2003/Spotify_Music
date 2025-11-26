@@ -31,4 +31,6 @@ public interface SongMapper extends BaseMapper<Song> {
     List<SongVo> selectTopSongVos(@Param("limit") Integer limit);
 
     List<SongVo> selectSongVoByGenreId(@Param("genreId") Long genreId, @Param("limit") Integer limit);
+
+    Integer countSongByGenreId(@Param("genreId") Long genreId);
 }
