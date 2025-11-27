@@ -5,8 +5,9 @@
  * 【更新说明】:
  * 1. 扩展 music_song 支持歌词。
  * 2. 扩展 music_artist 支持数据统计 (total_fans, total_plays)。
- * 3. 新增 6 张表：play_history, music_genre, music_song_genre, 
+ * 3. 新增 6 张表：play_history, music_genre, music_song_genre,
  * user_artist_like, user_album_like, sys_banner。
+ * 4. 改进歌单与队列模型：支持协作、标签、播放队列持久化。
  * ========================================
  */
 
@@ -153,10 +154,23 @@ CREATE TABLE `music_playlist` (
   `title` VARCHAR(100) NOT NULL COMMENT '歌单名',
   `cover_url` VARCHAR(255) DEFAULT NULL,
   `description` VARCHAR(500) DEFAULT NULL,
-  `is_public` TINYINT(1) DEFAULT 1 COMMENT '是否公开',
+  `visibility` ENUM('public','private','link') DEFAULT 'public' COMMENT '可见性: public-公开, private-仅自己, link-链接可见',
+  `is_collaborative` TINYINT(1) DEFAULT 0 COMMENT '是否协作歌单',
+  `status` TINYINT(1) DEFAULT 1 COMMENT '状态:1=正常,0=禁用',
+  `category` VARCHAR(50) DEFAULT NULL COMMENT '分类',
+  `mood` VARCHAR(50) DEFAULT NULL COMMENT '情绪标签',
+  `background_color` VARCHAR(20) DEFAULT NULL COMMENT '主题颜色',
+  `follower_count` INT DEFAULT 0 COMMENT '收藏/关注数',
+  `like_count` INT DEFAULT 0 COMMENT '点赞数',
+  `play_count` BIGINT DEFAULT 0 COMMENT '播放次数',
+  `share_count` INT DEFAULT 0 COMMENT '分享次数',
+  `last_played_at` DATETIME DEFAULT NULL COMMENT '最近播放时间',
+  `last_modified_by` BIGINT DEFAULT NULL COMMENT '最后修改人',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_creator` (`creator_id`),
+  KEY `idx_visibility_status` (`visibility`, `status`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COMMENT='用户歌单表';
 
 -- 歌单-歌曲关联表 (music_playlist_song)
@@ -165,11 +179,36 @@ CREATE TABLE `music_playlist_song` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `playlist_id` BIGINT NOT NULL,
   `song_id` BIGINT NOT NULL,
-  `sort_order` INT DEFAULT 0,
+  `position` DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '排序位置，支持插队',
+  `added_by` BIGINT DEFAULT NULL COMMENT '添加者ID',
+  `added_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '添加时间',
+  `status` TINYINT(1) DEFAULT 1 COMMENT '状态:1=正常,0=禁用',
+  `version` INT DEFAULT 1 COMMENT '版本号',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_playlist_song` (`playlist_id`, `song_id`)
+  UNIQUE KEY `uk_playlist_position` (`playlist_id`, `position`),
+  KEY `idx_playlist_song` (`playlist_id`, `song_id`),
+  KEY `idx_added_by` (`added_by`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='歌单歌曲关联表';
+
+-- 歌单标签表 (playlist_tag)
+DROP TABLE IF EXISTS `playlist_tag`;
+CREATE TABLE `playlist_tag` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(50) NOT NULL COMMENT '标签名',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='歌单标签表';
+
+-- 歌单标签关系表 (playlist_tag_rel)
+DROP TABLE IF EXISTS `playlist_tag_rel`;
+CREATE TABLE `playlist_tag_rel` (
+  `playlist_id` BIGINT NOT NULL COMMENT '歌单ID',
+  `tag_id` BIGINT NOT NULL COMMENT '标签ID',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`playlist_id`, `tag_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='歌单-标签关联表';
 
 -- 用户交互行为表 (user_interaction)
 DROP TABLE IF EXISTS `user_interaction`;
@@ -206,6 +245,43 @@ CREATE TABLE `play_history` (
   PRIMARY KEY (`id`),
   INDEX `idx_user_time` (`user_id`, `play_time` DESC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户播放历史记录表';
+
+-- 播放队列会话表 (play_queue)
+DROP TABLE IF EXISTS `play_queue`;
+CREATE TABLE `play_queue` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT NOT NULL COMMENT '用户ID',
+  `device_id` VARCHAR(64) DEFAULT NULL COMMENT '设备标识',
+  `source_type` VARCHAR(20) DEFAULT 'custom' COMMENT '来源类型: playlist/album/radio/search/custom',
+  `source_id` BIGINT DEFAULT NULL COMMENT '来源ID',
+  `is_shuffle` TINYINT(1) DEFAULT 0 COMMENT '是否随机播放',
+  `repeat_mode` ENUM('off','one','all') DEFAULT 'off' COMMENT '循环模式',
+  `current_index` INT DEFAULT 0 COMMENT '当前播放索引',
+  `current_position_ms` INT DEFAULT 0 COMMENT '当前播放进度(ms)',
+  `last_progressed_at` DATETIME DEFAULT NULL COMMENT '上次进度更新时间',
+  `version` INT DEFAULT 1 COMMENT '并发控制版本号',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_device` (`user_id`, `device_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='播放队列上下文表';
+
+-- 播放队列项表 (play_queue_item)
+DROP TABLE IF EXISTS `play_queue_item`;
+CREATE TABLE `play_queue_item` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `queue_id` BIGINT NOT NULL COMMENT '队列ID',
+  `song_id` BIGINT NOT NULL COMMENT '歌曲ID',
+  `position` DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '排序位置',
+  `is_played` TINYINT(1) DEFAULT 0 COMMENT '是否已播放',
+  `inserted_by` BIGINT DEFAULT NULL COMMENT '插入者ID',
+  `inserted_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '插入时间',
+  `expire_at` DATETIME DEFAULT NULL COMMENT '过期时间(临时插播)',
+  `metadata` JSON DEFAULT NULL COMMENT '扩展字段(播客章节等)',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_queue_position` (`queue_id`, `position`),
+  KEY `idx_queue_played` (`queue_id`, `is_played`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='播放队列项表';
 
 -- 【新增】用户收藏艺人关系表 (user_artist_like) - (B1)
 DROP TABLE IF EXISTS `user_artist_like`;
@@ -282,9 +358,42 @@ INSERT INTO `music_album` (`id`, `artist_id`, `title`) VALUES
 (1, 1, '测试专辑 001');
 
 -- 插入歌曲 (用于测试权限和列表) - 【已修改】新增 lyrics 歌词 (A1)
-INSERT INTO `music_song` (`id`, `album_id`, `artist_id`, `title`, `file_url`, `cover_url`, `genre`, `lyrics`, `play_count`) VALUES 
+INSERT INTO `music_song` (`id`, `album_id`, `artist_id`, `title`, `file_url`, `cover_url`, `genre`, `lyrics`, `play_count`) VALUES
 (100, 1, 1, '音乐人的作品', 'http://xxx.mp3', 'https://p1.music.126.net/cover1.jpg', 'Pop', '[00:00.00] 歌词测试', 10000), -- Musician's own song
 (200, 1, 2, '别人的作品', 'http://xxx.mp3', 'https://p1.music.126.net/cover2.jpg', 'Rock', '[00:00.00] 歌词测试', 50); -- Other's song (Admin's)
+
+
+-- 插入基础歌单及标签数据，演示协作与排序
+INSERT INTO `music_playlist` (`id`, `creator_id`, `title`, `description`, `visibility`, `is_collaborative`, `status`, `category`, `mood`, `background_color`, `follower_count`, `like_count`, `play_count`, `share_count`, `last_modified_by`)
+VALUES
+(1, 1, '协作流行精选', '可协作的流行歌单', 'public', 1, 1, 'Pop', 'Happy', '#FFEEAA', 120, 35, 5200, 10, 1),
+(2, 4, '学习专注', '私密的白噪音/纯音乐', 'private', 0, 1, 'Study', 'Calm', '#DDEEFF', 5, 2, 300, 1, 4);
+
+INSERT INTO `playlist_tag` (`id`, `name`) VALUES
+(1, '流行'),
+(2, '协作'),
+(3, '学习'),
+(4, '纯音乐');
+
+INSERT INTO `playlist_tag_rel` (`playlist_id`, `tag_id`) VALUES
+(1, 1),
+(1, 2),
+(2, 3),
+(2, 4);
+
+INSERT INTO `music_playlist_song` (`playlist_id`, `song_id`, `position`, `added_by`, `status`, `version`) VALUES
+(1, 100, 10, 1, 1, 1),
+(1, 200, 20, 3, 1, 1),
+(2, 200, 10, 4, 1, 1);
+
+-- 播放队列示例
+INSERT INTO `play_queue` (`id`, `user_id`, `device_id`, `source_type`, `source_id`, `is_shuffle`, `repeat_mode`, `current_index`, `current_position_ms`, `version`)
+VALUES
+(1, 10, 'ios-001', 'playlist', 1, 0, 'all', 0, 0, 1);
+
+INSERT INTO `play_queue_item` (`queue_id`, `song_id`, `position`, `is_played`, `inserted_by`) VALUES
+(1, 100, 10, 1, 10),
+(1, 200, 20, 0, 10);
 
 
 SET FOREIGN_KEY_CHECKS = 1;
