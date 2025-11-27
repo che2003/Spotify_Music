@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import request from '@/utils/request'
 import { usePlayerStore } from '@/stores/player'
+import { ElMessage } from 'element-plus'
 
 interface ChartSong {
   id: number
@@ -59,6 +60,11 @@ const changeRange = (range: number | null) => {
 
 const playSong = (song: ChartSong) => {
   playerStore.setSong(song as any)
+}
+
+const playNext = (song: ChartSong) => {
+  playerStore.enqueueNext(song as any)
+  ElMessage.success('已添加为下一首')
 }
 
 const goSongDetail = (id: number) => router.push(`/song/${id}`)
@@ -121,7 +127,10 @@ onMounted(fetchCharts)
               </div>
             </div>
             <div class="plays">{{ song.playCount?.toLocaleString() }} 播放</div>
-            <el-button size="small" type="success" plain @click.stop="playSong(song)">播放</el-button>
+            <div class="row-actions">
+              <el-button size="small" type="success" plain @click.stop="playSong(song)">播放</el-button>
+              <el-button size="small" type="primary" plain @click.stop="playNext(song)">下一首</el-button>
+            </div>
           </div>
           <div v-if="!songs.length" class="empty">暂无播放数据</div>
         </div>
@@ -158,6 +167,7 @@ onMounted(fetchCharts)
 .artist:hover { color: white; }
 .album { margin-left: 4px; }
 .plays { color: #b3b3b3; font-size: 13px; }
+.row-actions { display: flex; gap: 8px; }
 
 .empty { color: #b3b3b3; text-align: center; padding: 20px 0; }
 .error-box { color: #f56c6c; background: #2b1c1c; padding: 12px; border-radius: 8px; }

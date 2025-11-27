@@ -143,6 +143,11 @@ const toggleFollow = async () => {
   }
 }
 const playSong = () => { if (song.value.id) playerStore.setSong(song.value) }
+const playNext = () => {
+  if (!song.value.id) return
+  playerStore.enqueueNext(song.value)
+  ElMessage.success('已添加为下一首播放')
+}
 onMounted(() => { fetchSongDetails() })
 watch(() => route.params.id, () => {
   userRating.value = 0
@@ -203,6 +208,7 @@ watch(() => route.params.id, () => {
           <div class="play-btn-large" @click="playSong">
             <svg role="img" height="28" width="28" viewBox="0 0 28 28" fill="black"><path d="M3 1.713a.7.7 0 011.05-.607l19.918 11.5a.7.7 0 010 1.214L4.05 25.319A.7.7 0 013 24.712V1.713z"></path></svg>
           </div>
+          <el-button class="secondary-action" round plain type="primary" @click="playNext">下一首播放</el-button>
           <div class="like-btn" :class="{ active: isLiked }" @click="toggleLike">
             <svg v-if="isLiked" viewBox="0 0 24 24" width="26" height="26" fill="#1db954">
               <path d="M12 21s-6.716-4.286-9.8-8.4C-0.964 8.5 1.246 3 6.2 3c2.512 0 4.2 2 4.2 2s1.688-2 4.2-2c4.954 0 7.163 5.5 4.001 9.6C18.716 16.714 12 21 12 21z" />
@@ -258,6 +264,7 @@ watch(() => route.params.id, () => {
 .song-artist { font-size: 24px; font-weight: 700; cursor: pointer; }
 .song-artist:hover { text-decoration: underline; }
 .actions { margin-top: 30px; display: flex; align-items: center; gap: 12px; }
+.secondary-action { height: 36px; }
 .play-btn-large { width: 56px; height: 56px; border-radius: 50%; background: var(--spotify-green); color: black; font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; }
 .play-btn-large:hover { transform: scale(1.05); background: #1ed760; }
 .like-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px; border-radius: 50%; border: 1px solid #2a2a2a; background: rgba(255,255,255,0.08); cursor: pointer; transition: 0.2s ease; color: #fff; }

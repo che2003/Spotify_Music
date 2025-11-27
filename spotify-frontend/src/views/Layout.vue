@@ -104,7 +104,11 @@ const onEnded = () => {
 
 // --- 控件事件 ---
 const onSliderChange = (val: number) => { if (audioRef.value) audioRef.value.currentTime = val }
-const onVolumeChange = (val: number) => { if (audioRef.value) audioRef.value.volume = val / 100 }
+const onVolumeChange = (val: number) => {
+  const volume = Math.min(Math.max(val, 0), 100)
+  playerStore.volume = volume
+  if (audioRef.value) audioRef.value.volume = volume / 100
+}
 
 // --- 队列弹窗 ---
 const isQueueOpen = ref(false)
@@ -131,6 +135,17 @@ watch(() => playerStore.currentSong, (newSong) => {
     audioRef.value.src = newSong.fileUrl
     audioRef.value.play().catch(()=>{})
     playerStore.isPlaying = true
+  }
+})
+watch(() => playerStore.volume, (newVolume) => {
+  if (audioRef.value) {
+    audioRef.value.volume = Math.min(Math.max(newVolume, 0), 100) / 100
+  }
+})
+
+onMounted(() => {
+  if (audioRef.value) {
+    audioRef.value.volume = Math.min(Math.max(playerStore.volume, 0), 100) / 100
   }
 })
 
@@ -265,9 +280,11 @@ const formatTime = (seconds: number) => {
           </div>
 
           <div class="player-quick-actions">
-            <button class="icon-btn like-btn"
-                    :class="{ 'is-active': playerStore.likedSongIds.has(playerStore.currentSong.id) }"
-                    @click="toggleLike"
+            <button
+                class="icon-btn like-btn"
+                :disabled="!playerStore.currentSong.id"
+                :class="{ 'is-active': playerStore.likedSongIds.has(playerStore.currentSong.id) }"
+                @click="toggleLike"
             >
               <svg v-if="!playerStore.likedSongIds.has(playerStore.currentSong.id)" role="img" height="16" width="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1.69 2A4.582 4.582 0 018 2.023 4.583 4.583 0 0111.88.817h.002a4.618 4.618 0 013.782 3.65v.003a4.543 4.543 0 01-1.011 3.84L9.35 14.629a1.765 1.765 0 01-2.093.464 1.762 1.762 0 01-.605-.463L1.348 8.309A4.582 4.582 0 011.689 2zm3.158.252c-.896 0-1.747.466-2.201 1.255v.002a3.312 3.312 0 00-.16 2.815l5.185 6.12a.25.25 0 00.386-.002l5.31-6.26a3.315 3.315 0 00.175-2.675V3.5a3.318 3.318 0 00-2.712-2.62 3.324 3.324 0 00-3.332.884l-.45.45-.45-.45a3.313 3.313 0 00-2.07-.91z"></path></svg>
               <svg v-else role="img" height="16" width="16" viewBox="0 0 16 16" fill="#1db954"><path d="M15.724 4.22A4.313 4.313 0 0012.192.814a4.269 4.269 0 00-3.622 1.13.837.837 0 01-1.14 0 4.272 4.272 0 00-3.626-1.13 4.313 4.313 0 00-3.531 3.406c-.253 1.645.577 4.08 4.653 7.913l.063.061.063-.061c4.076-3.833 4.906-6.273 4.653-7.913z"></path></svg>
@@ -279,6 +296,14 @@ const formatTime = (seconds: number) => {
                 :title="playerStore.currentSong.title"
                 :artist-name="playerStore.currentSong.artistName"
             />
+            <button
+                class="icon-btn"
+                :disabled="!playerStore.currentSong.id"
+                title="将当前歌曲设为下一首再次播放"
+                @click="playerStore.enqueueNext(playerStore.currentSong)"
+            >
+              <svg role="img" height="16" width="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 3.25A1.25 1.25 0 012.25 2h8.5A1.25 1.25 0 0112 3.25v1a.75.75 0 11-1.5 0v-.75h-8v9h8V11a.75.75 0 011.5 0v1.75A1.25 1.25 0 0110.75 14h-8.5A1.25 1.25 0 011 12.75z"></path><path d="M13.22 5.47a.75.75 0 011.06 0l1.97 1.97a.75.75 0 010 1.06l-1.97 1.97a.75.75 0 01-1.06-1.06l.689-.69H7.25a.75.75 0 010-1.5h6.659l-.689-.69a.75.75 0 010-1.06z"></path></svg>
+            </button>
           </div>
         </div>
         <div class="track-info" v-else>
@@ -482,8 +507,8 @@ const formatTime = (seconds: number) => {
 
 /* 右侧 */
 .right-controls { width: 30%; min-width: 180px; display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
-.volume-group { display: flex; align-items: center; width: 125px; }
-.volume-slider-wrapper { flex-grow: 1; margin-left: 8px; }
+.volume-group { display: flex; align-items: center; width: 160px; padding: 6px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 24px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
+.volume-slider-wrapper { flex-grow: 1; margin-left: 10px; }
 
 /* 按钮样式 */
 .icon-btn {
@@ -491,6 +516,7 @@ const formatTime = (seconds: number) => {
   width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: color 0.2s; padding: 0;
 }
+.icon-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .icon-btn:hover { color: white; }
 .icon-btn.is-active { color: var(--spotify-green); position: relative; }
 .icon-btn.is-active::after { content: '•'; position: absolute; bottom: 3px; font-size: 18px; line-height: 0; }
