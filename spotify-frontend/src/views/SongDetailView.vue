@@ -121,6 +121,11 @@ const toggleLike = async () => {
     const res = await request.post(`/interaction/song/toggleLike`, null, { params: { songId: song.value.id } })
     isLiked.value = res.data?.liked ?? !isLiked.value
     likeCount.value = res.data?.likeCount ?? likeCount.value
+    if (res.data?.liked) {
+      playerStore.likedSongIds.add(song.value.id)
+    } else {
+      playerStore.likedSongIds.delete(song.value.id)
+    }
   } catch (e) {
     ElMessage.error('操作失败，请重试')
   }

@@ -9,6 +9,7 @@ import org.example.spotify_music.mapper.PlaylistMapper;
 import org.example.spotify_music.mapper.PlaylistSongMapper;
 import org.example.spotify_music.mapper.SongMapper;
 import org.example.spotify_music.mapper.UserMapper;
+import org.example.spotify_music.service.PlaylistService;
 import org.example.spotify_music.vo.SongVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +33,7 @@ public class PlaylistController {
     @Autowired private PlaylistSongMapper playlistSongMapper;
     @Autowired private UserMapper userMapper;
     @Autowired private SongMapper songMapper;
+    @Autowired private PlaylistService playlistService;
 
     private Long getCurrentUserId() {
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -76,7 +78,9 @@ public class PlaylistController {
     // 3. 获取我的歌单列表
     @GetMapping("/my")
     public Result<List<Playlist>> myPlaylists() {
-        return Result.success(playlistMapper.selectList(new QueryWrapper<Playlist>().eq("creator_id", getCurrentUserId())));
+        Long userId = getCurrentUserId();
+        playlistService.ensureLikedPlaylist(userId);
+        return Result.success(playlistMapper.selectList(new QueryWrapper<Playlist>().eq("creator_id", userId)));
     }
 
     // 4. 收藏歌曲到歌单
