@@ -31,15 +31,16 @@ export const usePlayerStore = defineStore('player', () => {
     // 切换喜欢状态
     const toggleLike = async (songId: number) => {
         if (!songId) return
-
-        if (likedSongIds.value.has(songId)) {
-            // 取消喜欢 (前端视觉去除)
-            likedSongIds.value.delete(songId)
-            // 真实项目中应调用 delete 接口，这里暂时略过
-        } else {
-            // 添加喜欢
-            likedSongIds.value.add(songId)
-            await request.post('/interaction/record', { songId, type: 3 })
+        try {
+            const res = await request.post('/interaction/song/toggleLike', null, { params: { songId } })
+            const liked = res.data?.liked ?? !likedSongIds.value.has(songId)
+            if (liked) {
+                likedSongIds.value.add(songId)
+            } else {
+                likedSongIds.value.delete(songId)
+            }
+        } catch (e) {
+            console.error('切换喜欢状态失败', e)
         }
     }
 
