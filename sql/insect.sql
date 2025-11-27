@@ -123,8 +123,24 @@ INSERT INTO `music_artist` (`id`, `name`, `bio`, `avatar_url`, `user_id`, `total
 -- ==========================================
 
 -- 确保历史环境已经包含歌曲简介列，避免插入时出现 Unknown column 'description'
-ALTER TABLE `music_song`
-    ADD COLUMN IF NOT EXISTS `description` TEXT COMMENT '歌曲简介/创作故事' AFTER `lyrics`;
+SET @db_name := DATABASE();
+SET @has_description := (
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @db_name
+      AND TABLE_NAME = 'music_song'
+      AND COLUMN_NAME = 'description'
+);
+
+SET @alter_sql := IF(
+    @has_description = 0,
+    'ALTER TABLE `music_song` ADD COLUMN `description` TEXT COMMENT ''歌曲简介/创作故事'' AFTER `lyrics`;',
+    'SELECT "music_song.description exists, skip alter";'
+);
+
+PREPARE stmt FROM @alter_sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- 4.1 插入专辑 Placeholder
 INSERT INTO `music_album` (`id`, `artist_id`, `title`, `cover_url`, `release_date`)
