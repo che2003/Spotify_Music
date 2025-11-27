@@ -5,3 +5,4 @@
 *.jpg filter=lfs diff=lfs merge=lfs -text
 music_load/music_information/所有歌曲(MP3)/*.mp3 filter=lfs diff=lfs merge=lfs -text
 music_load/music_information/所有封面(Covers)/*.jpg filter=lfs diff=lfs merge=lfs -text
+*.flac filter=lfs diff=lfs merge=lfs -text
