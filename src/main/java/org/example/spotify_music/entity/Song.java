@@ -14,6 +14,7 @@ public class Song extends BaseEntity {
     private Integer duration;
     private String genre;
     private String lyrics;
+    private String description;
     private Long playCount;
 
     // 2. 手动补充 Getter / Setter
@@ -40,6 +41,9 @@ public class Song extends BaseEntity {
 
     public String getLyrics() { return lyrics; }
     public void setLyrics(String lyrics) { this.lyrics = lyrics; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     public Long getPlayCount() { return playCount; }
     public void setPlayCount(Long playCount) { this.playCount = playCount; }

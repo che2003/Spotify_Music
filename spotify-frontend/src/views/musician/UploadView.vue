@@ -14,6 +14,7 @@ interface GenreOption {
 const uploadUrl = '/api/storage/upload' // 对应后端 StorageController
 const fileList = ref([])
 const coverList = ref([])
+const lyricsFileList = ref([])
 const genreOptions = ref<GenreOption[]>([])
 const albumOptions = ref<any[]>([])
 const isEditMode = computed(() => Boolean(route.params.id || route.query.id))
@@ -25,6 +26,7 @@ const form = reactive({
   genre: '',
   genreIds: [] as number[],
   description: '',
+  lyrics: '',
   artistId: null as number | null,
   albumId: null as number | null,
   fileUrl: '',
@@ -77,7 +79,8 @@ const loadSongDetail = async () => {
     form.genre = data.genre || ''
     form.albumId = data.albumId || null
     form.artistId = data.artistId || null
-    form.description = data.lyrics || ''
+    form.description = data.description || ''
+    form.lyrics = data.lyrics || ''
     form.fileUrl = data.fileUrl || ''
     form.coverUrl = data.coverUrl || ''
     form.duration = data.duration || 0
@@ -118,6 +121,21 @@ const handleCoverSuccess = (response: any) => {
   }
 }
 
+// 读取 LRC 歌词文件
+const handleLyricsSelect = (file: any) => {
+  const raw = file.raw || file
+  if (!raw) return false
+
+  const reader = new FileReader()
+  reader.onload = () => {
+    form.lyrics = (reader.result as string) || ''
+    lyricsFileList.value = [{ name: file.name }]
+  }
+  reader.onerror = () => ElMessage.error('读取歌词文件失败')
+  reader.readAsText(raw, 'utf-8')
+  return false
+}
+
 // 提交歌曲信息
 const submitSong = async () => {
   if (!form.title || !form.fileUrl) {
@@ -130,6 +148,7 @@ const submitSong = async () => {
       ...form,
       songId: form.id || undefined,
       description: form.description,
+      lyrics: form.lyrics,
       genreIds: form.genreIds
     }
 
@@ -243,16 +262,40 @@ const submitSong = async () => {
         </el-upload>
       </el-form-item>
 
-      <el-form-item label="歌曲描述 / 创作故事">
-        <el-input
-            v-model="form.description"
-            type="textarea"
-            :rows="4"
-            maxlength="500"
-            show-word-limit
-            placeholder="介绍歌曲的创作背景、风格或想传达的情绪"
-        />
-      </el-form-item>
+    <el-form-item label="歌曲简介 (Description)">
+      <el-input
+          v-model="form.description"
+          type="textarea"
+          :rows="4"
+          maxlength="500"
+          show-word-limit
+          placeholder="介绍歌曲的创作背景、制作人员或想传达的情绪"
+      />
+      <div class="helper-text">此处将展示在歌曲详情页，讲述创作故事或鸣谢名单</div>
+    </el-form-item>
+
+    <el-form-item label="歌词上传 / 录入">
+      <el-upload
+          class="upload-demo"
+          action="#"
+          :auto-upload="false"
+          :limit="1"
+          accept=".lrc,text/plain"
+          :on-change="handleLyricsSelect"
+          :file-list="lyricsFileList"
+      >
+        <el-button>上传 .lrc 文件</el-button>
+        <template #tip>
+          <div class="el-upload__tip">支持本地 LRC 歌词文件，上传后自动填充到下方输入框</div>
+        </template>
+      </el-upload>
+      <el-input
+          v-model="form.lyrics"
+          type="textarea"
+          :rows="6"
+          placeholder="此处请粘贴 LRC 格式歌词，例如：[00:12.00] 主歌"
+      />
+    </el-form-item>
 
       <div class="submit-btn-wrapper">
         <el-button type="success" size="large" round class="submit-btn" @click="submitSong">

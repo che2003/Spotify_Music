@@ -13,6 +13,7 @@ public class SongUploadRequest {
     private String coverUrl;
     private Integer duration;
     private String genre;
+    private String lyrics;
     private String description;
     private List<Long> genreIds;
 
@@ -86,6 +87,14 @@ public class SongUploadRequest {
 
     public void setGenre(String genre) {
         this.genre = genre;
+    }
+
+    public String getLyrics() {
+        return lyrics;
+    }
+
+    public void setLyrics(String lyrics) {
+        this.lyrics = lyrics;
     }
 
     public String getDescription() {
