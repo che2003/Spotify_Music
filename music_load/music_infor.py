@@ -13,9 +13,17 @@ OUTPUT_FOLDER = "music_information"
 
 def sanitize_filename(name):
     """清理文件名中不合法的字符"""
-    return name.replace("/", "&").replace("\\", "&").replace(":", " ").replace("?", "").replace('"', '').replace('*',
-                                                                                                                 '').replace(
-        '<', '').replace('>', '').replace('|', '')
+    return (
+        name.replace("/", "&")
+        .replace("\\", "&")
+        .replace(":", " ")
+        .replace("?", "")
+        .replace('"', "")
+        .replace("*", "")
+        .replace("<", "")
+        .replace(">", "")
+        .replace("|", "")
+    )
 
 
 def process_music_flat(input_dir, output_root):
