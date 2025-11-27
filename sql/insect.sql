@@ -128,74 +128,75 @@ SELECT id + 100, id, CONCAT(name, ' Best Hits'), avatar_url, '2020-01-01' FROM m
 
 -- 4.2 插入歌曲 (部分手动，确保 lyrics 数据)
 -- Artist 1: 周杰伦
-INSERT INTO `music_song` (`album_id`, `artist_id`, `title`, `genre`, `file_url`, `cover_url`, `lyrics`) VALUES
-(101, 1, '七里香', 'Pop', 'http://music.163.com/song/media/outer/url?id=108420.mp3', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 七里香 - 周杰伦\n[00:05.00] 七里香歌词测试'),
-(101, 1, '青花瓷', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 青花瓷 - 周杰伦\n[00:05.00] 青花瓷歌词测试'),
-(101, 1, '稻香', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 稻香 - 周杰伦\n[00:05.00] 稻香歌词测试'),
-(101, 1, '夜曲', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 夜曲 - 周杰伦\n[00:05.00] 夜曲歌词测试'),
-(101, 1, '晴天', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 晴天 - 周杰伦\n[00:05.00] 晴天歌词测试'),
-(101, 1, '告白气球', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 告白气球 - 周杰伦\n[00:05.00] 告白气球歌词测试'),
-(101, 1, '一路向北', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 一路向北 - 周杰伦\n[00:05.00] 一路向北歌词测试'),
-(101, 1, '不能说的秘密', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 不能说的秘密 - 周杰伦\n[00:05.00] 不能说的秘密歌词测试'),
-(101, 1, '搁浅', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 搁浅 - 周杰伦\n[00:05.00] 搁浅歌词测试'),
-(101, 1, '简单爱', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 简单爱 - 周杰伦\n[00:05.00] 简单爱歌词测试');
+INSERT INTO `music_song` (`album_id`, `artist_id`, `title`, `genre`, `file_url`, `cover_url`, `lyrics`, `description`) VALUES
+(101, 1, '七里香', 'Pop', 'http://music.163.com/song/media/outer/url?id=108420.mp3', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 七里香 - 周杰伦\n[00:05.00] 七里香歌词测试', '周杰伦抒情代表作，记录夏日青春的味道。'),
+(101, 1, '青花瓷', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 青花瓷 - 周杰伦\n[00:05.00] 青花瓷歌词测试', '新中式风格融合流行旋律的示例简介。'),
+(101, 1, '稻香', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 稻香 - 周杰伦\n[00:05.00] 稻香歌词测试', '怀旧童年与田园气息的灵感故事。'),
+(101, 1, '夜曲', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 夜曲 - 周杰伦\n[00:05.00] 夜曲歌词测试', '暗黑华丽的钢琴夜曲，展现戏剧张力。'),
+(101, 1, '晴天', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 晴天 - 周杰伦\n[00:05.00] 晴天歌词测试', '校园恋爱的轻快记忆，送给每一个晴朗午后。'),
+(101, 1, '告白气球', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 告白气球 - 周杰伦\n[00:05.00] 告白气球歌词测试', '甜蜜小品，讲述勇敢告白的瞬间。'),
+(101, 1, '一路向北', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 一路向北 - 周杰伦\n[00:05.00] 一路向北歌词测试', '电影感公路故事，记录离别的背影。'),
+(101, 1, '不能说的秘密', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 不能说的秘密 - 周杰伦\n[00:05.00] 不能说的秘密歌词测试', '同名电影主题曲，穿越时空的钢琴旋律。'),
+(101, 1, '搁浅', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 搁浅 - 周杰伦\n[00:05.00] 搁浅歌词测试', '失恋心情的独白，略带摇滚质感。'),
+(101, 1, '简单爱', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 简单爱 - 周杰伦\n[00:05.00] 简单爱歌词测试', '直白告白的青春恋曲示例说明。');
 
 -- Artist 2: 陈奕迅
-INSERT INTO `music_song` (`album_id`, `artist_id`, `title`, `genre`, `file_url`, `cover_url`, `lyrics`) VALUES
-(102, 2, '十年', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 十年 - 陈奕迅\n[00:05.00] 十年歌词测试'),
-(102, 2, '浮夸', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 浮夸 - 陈奕迅\n[00:05.00] 浮夸歌词测试'),
-(102, 2, 'K歌之王', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] K歌之王 - 陈奕迅\n[00:05.00] K歌之王歌词测试'),
-(102, 2, '好久不见', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 好久不见 - 陈奕迅\n[00:05.00] 好久不见歌词测试'),
-(102, 2, '红玫瑰', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 红玫瑰 - 陈奕迅\n[00:05.00] 红玫瑰歌词测试'),
-(102, 2, '富士山下', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 富士山下 - 陈奕迅\n[00:05.00] 富士山下歌词测试'),
-(102, 2, '单车', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 单车 - 陈奕迅\n[00:05.00] 单车歌词测试'),
-(102, 2, '不要说话', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 不要说话 - 陈奕迅\n[00:05.00] 不要说话歌词测试'),
-(102, 2, '陪你度过漫长岁月', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 陪你度过漫长岁月 - 陈奕迅\n[00:05.00] 陪你度过漫长岁月歌词测试'),
-(102, 2, '爱情转移', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 爱情转移 - 陈奕迅\n[00:05.00] 爱情转移歌词测试');
+INSERT INTO `music_song` (`album_id`, `artist_id`, `title`, `genre`, `file_url`, `cover_url`, `lyrics`, `description`) VALUES
+(102, 2, '十年', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 十年 - 陈奕迅\n[00:05.00] 十年歌词测试', '回望十年人生的感慨，用于情感回忆的简介。'),
+(102, 2, '浮夸', 'Pop', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 浮夸 - 陈奕迅\n[00:05.00] 浮夸歌词测试', '戏剧张力十足的演绎，展示情绪起伏。'),
+(102, 2, 'K歌之王', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] K歌之王 - 陈奕迅\n[00:05.00] K歌之王歌词测试', '关于陪伴与夜生活的叙事小品。'),
+(102, 2, '好久不见', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 好久不见 - 陈奕迅\n[00:05.00] 好久不见歌词测试', '久别重逢的问候，抚平城市孤独。'),
+(102, 2, '红玫瑰', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 红玫瑰 - 陈奕迅\n[00:05.00] 红玫瑰歌词测试', '红白玫瑰意象下的爱情抉择。'),
+(102, 2, '富士山下', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 富士山下 - 陈奕迅\n[00:05.00] 富士山下歌词测试', '在旅行途中思考爱情走向的故事。'),
+(102, 2, '单车', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 单车 - 陈奕迅\n[00:05.00] 单车歌词测试', '写给父亲与少年的陪伴记忆。'),
+(102, 2, '不要说话', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 不要说话 - 陈奕迅\n[00:05.00] 不要说话歌词测试', '用沉默表达深爱的慢板歌曲简介。'),
+(102, 2, '陪你度过漫长岁月', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 陪你度过漫长岁月 - 陈奕迅\n[00:05.00] 陪你度过漫长岁月歌词测试', '陪伴是最长情的告白，温暖治愈。'),
+(102, 2, '爱情转移', 'Ballad', '', 'https://p2.music.126.net/1gNCwmADglq6d8Zz0g4jEQ==/109951165550297684.jpg', '[00:00.00] 爱情转移 - 陈奕迅\n[00:05.00] 爱情转移歌词测试', '城市爱情流动中的自我疗愈。');
 
 -- Artist 6: Taylor Swift
-INSERT INTO `music_song` (`album_id`, `artist_id`, `title`, `genre`, `file_url`, `cover_url`, `lyrics`) VALUES
-(106, 6, 'Love Story', 'Country', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Love Story - Taylor Swift'),
-(106, 6, 'Blank Space', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Blank Space - Taylor Swift'),
-(106, 6, 'Shake It Off', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Shake It Off - Taylor Swift'),
-(106, 6, 'Cruel Summer', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Cruel Summer - Taylor Swift'),
-(106, 6, 'Anti-Hero', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Anti-Hero - Taylor Swift'),
-(106, 6, 'Style', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Style - Taylor Swift'),
-(106, 6, 'You Belong With Me', 'Country', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] You Belong With Me - Taylor Swift'),
-(106, 6, 'Lover', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Lover - Taylor Swift'),
-(106, 6, 'Bad Blood', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Bad Blood - Taylor Swift'),
-(106, 6, 'Look What You Made Me Do', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Look What You Made Me Do - Taylor Swift');
+INSERT INTO `music_song` (`album_id`, `artist_id`, `title`, `genre`, `file_url`, `cover_url`, `lyrics`, `description`) VALUES
+(106, 6, 'Love Story', 'Country', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Love Story - Taylor Swift', '乡村公主时代的经典桥段，改编罗密欧与朱丽叶。'),
+(106, 6, 'Blank Space', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Blank Space - Taylor Swift', '自黑风格的流行舞曲，调侃外界标签。'),
+(106, 6, 'Shake It Off', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Shake It Off - Taylor Swift', '摆脱质疑、尽情舞动的宣言。'),
+(106, 6, 'Cruel Summer', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Cruel Summer - Taylor Swift', '炙热夏日的爱恋与秘密。'),
+(106, 6, 'Anti-Hero', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Anti-Hero - Taylor Swift', '自我审视与和解的午夜独白。'),
+(106, 6, 'Style', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Style - Taylor Swift', '复古霓虹与永不过时的爱情故事。'),
+(106, 6, 'You Belong With Me', 'Country', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] You Belong With Me - Taylor Swift', '邻家女孩视角的青春小甜歌。'),
+(106, 6, 'Lover', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Lover - Taylor Swift', '复古华尔兹节奏下的婚礼誓言。'),
+(106, 6, 'Bad Blood', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Bad Blood - Taylor Swift', '友谊破裂后的决绝宣言。'),
+(106, 6, 'Look What You Made Me Do', 'Pop', '', 'https://p1.music.126.net/K6c1X5n9j4x6j7x8x9x0xA==/109951165625561763.jpg', '[00:00.00] Look What You Made Me Do - Taylor Swift', '黑暗合成器风的复仇故事。');
 
 -- Artist 11: Linkin Park
-INSERT INTO `music_song` (`album_id`, `artist_id`, `title`, `genre`, `file_url`, `cover_url`, `lyrics`) VALUES
-(111, 11, 'In The End', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] In The End - Linkin Park'),
-(111, 11, 'Numb', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] Numb - Linkin Park'),
-(111, 11, 'Faint', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] Faint - Linkin Park'),
-(111, 11, 'Crawling', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] Crawling - Linkin Park'),
-(111, 11, 'One Step Closer', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] One Step Closer - Linkin Park'),
-(111, 11, 'Breaking The Habit', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] Breaking The Habit - Linkin Park'),
-(111, 11, 'Somewhere I Belong', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] Somewhere I Belong - Linkin Park'),
-(111, 11, 'What I\'ve Done', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] What I\'ve Done - Linkin Park'),
-(111, 11, 'New Divide', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] New Divide - Linkin Park'),
-(111, 11, 'Burn It Down', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] Burn It Down - Linkin Park');
+INSERT INTO `music_song` (`album_id`, `artist_id`, `title`, `genre`, `file_url`, `cover_url`, `lyrics`, `description`) VALUES
+(111, 11, 'In The End', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] In The End - Linkin Park', '新金属代表作，探讨无力感。'),
+(111, 11, 'Numb', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] Numb - Linkin Park', '写给代沟与自我挣扎的呐喊。'),
+(111, 11, 'Faint', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] Faint - Linkin Park', '快节奏的愤怒释放。'),
+(111, 11, 'Crawling', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] Crawling - Linkin Park', '探讨焦虑与自我怀疑。'),
+(111, 11, 'One Step Closer', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] One Step Closer - Linkin Park', '怒吼式摇滚入门曲。'),
+(111, 11, 'Breaking The Habit', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] Breaking The Habit - Linkin Park', '讲述戒断坏习惯的决心。'),
+(111, 11, 'Somewhere I Belong', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] Somewhere I Belong - Linkin Park', '寻找归属的旅程。'),
+(111, 11, 'What I\'ve Done', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] What I\'ve Done - Linkin Park', '对过去错误的忏悔。'),
+(111, 11, 'New Divide', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] New Divide - Linkin Park', '电影主题曲风格的科幻史诗。'),
+(111, 11, 'Burn It Down', 'Rock', '', 'https://p1.music.126.net/r7u0Hn27Vj1FpL0e6x9m0A==/109951165625561763.jpg', '[00:00.00] Burn It Down - Linkin Park', '电子摇滚融合的能量炸点。');
 
 -- 填充更多歌曲 (简单生成：Artist 3-5, 7-10, 12-20 的歌曲)
-INSERT INTO `music_song` (`album_id`, `artist_id`, `title`, `genre`, `file_url`, `cover_url`, `lyrics`)
-SELECT 
-    a.id + 100, 
-    a.id, 
-    CONCAT(a.name, ' Song ', n.num), 
-    CASE 
+INSERT INTO `music_song` (`album_id`, `artist_id`, `title`, `genre`, `file_url`, `cover_url`, `lyrics`, `description`)
+SELECT
+    a.id + 100,
+    a.id,
+    CONCAT(a.name, ' Song ', n.num),
+    CASE
         WHEN a.id BETWEEN 3 AND 5 THEN 'Pop'
         WHEN a.id BETWEEN 7 AND 10 THEN 'Pop'
         WHEN a.id BETWEEN 12 AND 15 THEN 'Rock'
         WHEN a.id BETWEEN 16 AND 17 THEN 'K-Pop'
         WHEN a.id = 18 THEN 'Hip-Hop'
         ELSE 'Mix'
-    END, 
-    '', 
+    END,
+    '',
     a.avatar_url,
-    CONCAT('[00:00.00] ', a.name, ' Song ', n.num, ' 歌词') /* 新增歌词内容 */
+    CONCAT('[00:00.00] ', a.name, ' Song ', n.num, ' 歌词') /* 新增歌词内容 */,
+    CONCAT('关于 ', a.name, ' Song ', n.num, ' 的创作故事')
 FROM music_artist a
 JOIN (
     SELECT 1 AS num UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5
