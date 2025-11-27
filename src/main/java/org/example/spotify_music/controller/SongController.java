@@ -3,9 +3,11 @@ package org.example.spotify_music.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.example.spotify_music.common.Result;
 import org.example.spotify_music.dto.SongUploadRequest;
+import org.example.spotify_music.entity.Album;
 import org.example.spotify_music.entity.Artist;
 import org.example.spotify_music.entity.User;
 import org.example.spotify_music.entity.SongGenre;
+import org.example.spotify_music.mapper.AlbumMapper;
 import org.example.spotify_music.mapper.ArtistMapper;
 import org.example.spotify_music.mapper.SongGenreMapper;
 import org.example.spotify_music.mapper.SongMapper;
@@ -27,6 +29,7 @@ public class SongController {
 
     @Autowired private SongService songService;
     @Autowired private SongMapper songMapper;
+    @Autowired private AlbumMapper albumMapper;
     @Autowired private UserMapper userMapper;
     @Autowired private ArtistMapper artistMapper;
     @Autowired private SongGenreMapper songGenreMapper;
@@ -79,8 +82,23 @@ public class SongController {
     // 3. 添加歌曲
     @PostMapping("/add")
     public Result<?> addSong(@RequestBody SongUploadRequest request) {
+        if (request.getAlbumId() == null) {
+            return Result.error("缺少专辑ID");
+        }
+
+        Album album = albumMapper.selectById(request.getAlbumId());
+        if (album == null) {
+            return Result.error("专辑不存在");
+        }
+
         Song song = new Song();
         BeanUtils.copyProperties(request, song);
+
+        if (song.getArtistId() == null) {
+            song.setArtistId(album.getArtistId());
+        } else if (!song.getArtistId().equals(album.getArtistId())) {
+            return Result.error("专辑与艺人不匹配");
+        }
 
         songService.saveSongWithGenres(song, request.getGenreIds());
         return Result.success("添加成功");
