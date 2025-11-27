@@ -122,8 +122,12 @@ INSERT INTO `music_artist` (`id`, `name`, `bio`, `avatar_url`, `user_id`, `total
 -- 4. 初始化歌曲 (200首) - 【已更新】增加 lyrics 字段 (A1)
 -- ==========================================
 
+-- 确保历史环境已经包含歌曲简介列，避免插入时出现 Unknown column 'description'
+ALTER TABLE `music_song`
+    ADD COLUMN IF NOT EXISTS `description` TEXT COMMENT '歌曲简介/创作故事' AFTER `lyrics`;
+
 -- 4.1 插入专辑 Placeholder
-INSERT INTO `music_album` (`id`, `artist_id`, `title`, `cover_url`, `release_date`) 
+INSERT INTO `music_album` (`id`, `artist_id`, `title`, `cover_url`, `release_date`)
 SELECT id + 100, id, CONCAT(name, ' Best Hits'), avatar_url, '2020-01-01' FROM music_artist;
 
 -- 4.2 插入歌曲 (部分手动，确保 lyrics 数据)
