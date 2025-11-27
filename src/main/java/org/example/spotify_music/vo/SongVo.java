@@ -15,6 +15,7 @@ public class SongVo {
     private String albumCover; // 专辑封面
     private Integer duration;
     private String lyrics;
+    private String description;
     private Long playCount;
     private LocalDateTime releaseTime;
 
@@ -41,6 +42,8 @@ public class SongVo {
     public void setDuration(Integer duration) { this.duration = duration; }
     public String getLyrics() { return lyrics; }
     public void setLyrics(String lyrics) { this.lyrics = lyrics; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
     public Long getPlayCount() { return playCount; }
     public void setPlayCount(Long playCount) { this.playCount = playCount; }
 
