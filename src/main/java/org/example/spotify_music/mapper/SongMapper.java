@@ -38,4 +38,6 @@ public interface SongMapper extends BaseMapper<Song> {
     Long sumPlayCountByArtist(@Param("artistId") Long artistId);
 
     List<SongMetricVo> selectSongMetricsByArtist(@Param("artistId") Long artistId);
+
+    String selectFirstCoverByAlbum(@Param("albumId") Long albumId);
 }

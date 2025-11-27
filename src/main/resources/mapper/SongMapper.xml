@@ -5,7 +5,19 @@
     <sql id="Base_Column_List_Vo">
         s.id, s.title, s.file_url, s.cover_url, s.genre, s.duration, s.lyrics, s.description, s.play_count,
         s.artist_id, a.name AS artistName,
-        s.album_id AS albumId, alb.title AS albumTitle, alb.cover_url AS albumCover,
+        s.album_id AS albumId, alb.title AS albumTitle,
+        COALESCE(
+            alb.cover_url,
+            (
+                SELECT s2.cover_url
+                FROM music_song s2
+                WHERE s2.album_id = alb.id
+                  AND s2.cover_url IS NOT NULL
+                  AND s2.cover_url <> ''
+                ORDER BY s2.create_time ASC, s2.id ASC
+                LIMIT 1
+            )
+        ) AS albumCover,
         s.create_time AS releaseTime
     </sql>
 
@@ -105,6 +117,16 @@
 
     <select id="sumPlayCountByArtist" resultType="long">
         SELECT COALESCE(SUM(play_count), 0) FROM music_song WHERE artist_id = #{artistId}
+    </select>
+
+    <select id="selectFirstCoverByAlbum" resultType="java.lang.String">
+        SELECT cover_url
+        FROM music_song
+        WHERE album_id = #{albumId}
+          AND cover_url IS NOT NULL
+          AND cover_url <> ''
+        ORDER BY create_time ASC, id ASC
+        LIMIT 1
     </select>
 
     <select id="selectSongMetricsByArtist" resultType="org.example.spotify_music.vo.SongMetricVo">
