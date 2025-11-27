@@ -14,6 +14,8 @@ const playerStore = usePlayerStore()
 const isFollowing = ref(false)
 const isLiked = ref(false)
 const likeCount = ref<number | null>(null)
+const userRating = ref<number>(0)
+const ratingSubmitting = ref(false)
 const lyrics = ref<Array<{ time: number; text: string }>>([])
 const lyricRefs = ref<HTMLDivElement[]>([])
 const loading = ref(true)
@@ -46,6 +48,7 @@ const fetchSongDetails = async () => {
       return
     }
     song.value = res.data
+    userRating.value = 0
     if (song.value.artistId) {
       checkFollowStatus(song.value.artistId)
     }
@@ -83,6 +86,23 @@ const parseLyrics = (raw: string) => {
 
 const goToArtist = () => { if (song.value.artistId) router.push(`/artist/${song.value.artistId}`) }
 const goToAlbum = () => { if (song.value.albumId) router.push(`/album/${song.value.albumId}`) }
+
+const handleRatingChange = async (value: number) => {
+  if (!song.value.id || !value) return
+  try {
+    ratingSubmitting.value = true
+    await request.post(`/interaction/record`, {
+      songId: song.value.id,
+      rating: value,
+      type: 2,
+    })
+    ElMessage.success('感谢评分！您的反馈将帮助优化推荐')
+  } catch (e) {
+    ElMessage.error('评分失败，请重试')
+  } finally {
+    ratingSubmitting.value = false
+  }
+}
 
 const loadLikeStatus = async (songId: number) => {
   try {
@@ -124,6 +144,10 @@ const toggleFollow = async () => {
 }
 const playSong = () => { if (song.value.id) playerStore.setSong(song.value) }
 onMounted(() => { fetchSongDetails() })
+watch(() => route.params.id, () => {
+  userRating.value = 0
+  fetchSongDetails()
+})
 </script>
 
 <template>
@@ -197,6 +221,21 @@ onMounted(() => { fetchSongDetails() })
           />
         </div>
 
+        <div class="rating-card" v-if="song.id">
+          <div class="rating-header">
+            <h3 class="section-title">为这首歌打分</h3>
+            <span class="rating-hint">评分越高，推荐给你的相似歌曲会更多</span>
+          </div>
+          <el-rate
+              v-model="userRating"
+              allow-half
+              show-score
+              :disabled="ratingSubmitting"
+              @change="handleRatingChange"
+              score-template="{value} 分"
+          />
+        </div>
+
         <CommentBox :song-id="song.id" />
       </div>
     </div>
@@ -262,5 +301,25 @@ onMounted(() => { fetchSongDetails() })
   color: white;
   background-color: #1db954;
   border-color: #1db954;
+}
+.rating-card {
+  margin-top: 12px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #fff;
+}
+.rating-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rating-hint {
+  color: #b3b3b3;
+  font-size: 14px;
 }
 </style>
