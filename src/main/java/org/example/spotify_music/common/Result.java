@@ -37,8 +37,12 @@ public class Result<T> {
     }
 
     public static <T> Result<T> error(String msg) {
+        return error(500, msg);
+    }
+
+    public static <T> Result<T> error(int code, String msg) {
         Result<T> r = new Result<>();
-        r.setCode(500);
+        r.setCode(code);
         r.setMsg(msg);
         return r;
     }
