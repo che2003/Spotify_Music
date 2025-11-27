@@ -45,17 +45,126 @@ export const usePlayerStore = defineStore('player', () => {
 
     // --- 播放控制 ---
     const setSong = (song: any) => {
-        if (currentSong.value.id === song.id) { togglePlay(); return }
+        if (!song) return
+
+        // 若已在队列中，直接跳转；否则追加到队尾
         const index = playList.value.findIndex(s => s.id === song.id)
-        if (index !== -1) currentIndex.value = index
-        else {
-            if (currentIndex.value === -1) currentIndex.value = 0
-            playList.value.splice(currentIndex.value + 1, 0, song)
-            currentIndex.value++
+        if (index !== -1) {
+            currentIndex.value = index
+        } else {
+            playList.value.push(song)
+            currentIndex.value = playList.value.length - 1
         }
+
         currentSong.value = song
         isPlaying.value = true
         historyRecorded.value = false
+    }
+
+    const setQueue = (songs: any[], startIndex = 0) => {
+        playList.value = songs ? [...songs] : []
+        if (playList.value.length === 0) {
+            currentSong.value = {}
+            currentIndex.value = -1
+            isPlaying.value = false
+            return
+        }
+
+        const safeIndex = Math.min(Math.max(startIndex, 0), playList.value.length - 1)
+        currentIndex.value = safeIndex
+        currentSong.value = playList.value[safeIndex]
+        isPlaying.value = true
+        historyRecorded.value = false
+    }
+
+    const addSongsToQueue = (songs: any[]) => {
+        if (!songs || songs.length === 0) return
+        songs.forEach(song => {
+            const exists = playList.value.some(item => item.id === song.id)
+            if (!exists) {
+                playList.value.push(song)
+            }
+        })
+
+        if (currentIndex.value === -1 && playList.value.length > 0) {
+            currentIndex.value = 0
+            currentSong.value = playList.value[0]
+            isPlaying.value = false
+        }
+    }
+
+    const playAt = (index: number) => {
+        if (index < 0 || index >= playList.value.length) return
+        currentIndex.value = index
+        currentSong.value = playList.value[index]
+        isPlaying.value = true
+        historyRecorded.value = false
+    }
+
+    const enqueueNext = (song: any) => {
+        if (!song) return
+        const existingIndex = playList.value.findIndex(s => s.id === song.id)
+        const insertIndex = currentIndex.value === -1 ? 0 : currentIndex.value + 1
+
+        if (existingIndex !== -1) {
+            playList.value.splice(existingIndex, 1)
+        }
+
+        playList.value.splice(insertIndex, 0, song)
+
+        if (currentIndex.value === -1) {
+            currentIndex.value = 0
+            currentSong.value = song
+            isPlaying.value = true
+        } else if (existingIndex === currentIndex.value) {
+            currentSong.value = song
+        }
+    }
+
+    const removeFromQueue = (index: number) => {
+        if (index < 0 || index >= playList.value.length) return
+        playList.value.splice(index, 1)
+
+        if (playList.value.length === 0) {
+            currentIndex.value = -1
+            currentSong.value = {}
+            isPlaying.value = false
+            return
+        }
+
+        if (index < currentIndex.value) {
+            currentIndex.value -= 1
+        } else if (index === currentIndex.value) {
+            const safeIndex = Math.min(currentIndex.value, playList.value.length - 1)
+            currentIndex.value = safeIndex
+            currentSong.value = playList.value[safeIndex]
+        }
+    }
+
+    const reorderQueue = (from: number, to: number) => {
+        if (from === to) return
+        if (from < 0 || to < 0 || from >= playList.value.length || to >= playList.value.length) return
+
+        const updated = [...playList.value]
+        const [moved] = updated.splice(from, 1)
+        updated.splice(to, 0, moved)
+
+        playList.value = updated
+
+        if (currentIndex.value === from) {
+            currentIndex.value = to
+        } else if (from < currentIndex.value && to >= currentIndex.value) {
+            currentIndex.value -= 1
+        } else if (from > currentIndex.value && to <= currentIndex.value) {
+            currentIndex.value += 1
+        }
+    }
+
+    const clearQueue = () => {
+        playList.value = []
+        currentSong.value = {}
+        currentIndex.value = -1
+        isPlaying.value = false
     }
 
     const togglePlay = () => { isPlaying.value = !isPlaying.value }
@@ -105,6 +214,7 @@ export const usePlayerStore = defineStore('player', () => {
         currentSong, isPlaying, playList, currentIndex,
         duration, currentTime, volume, mode, historyRecorded,
         likedSongIds, fetchLikedSongs, toggleLike,
-        setSong, togglePlay, next, prev, toggleMode, recordPlayHistory
+        setSong, setQueue, addSongsToQueue, enqueueNext, playAt, removeFromQueue, reorderQueue, clearQueue,
+        togglePlay, next, prev, toggleMode, recordPlayHistory
     }
 })
