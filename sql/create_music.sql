@@ -116,9 +116,10 @@ CREATE TABLE `music_song` (
   `file_url` VARCHAR(255) NOT NULL COMMENT '音乐文件链接',
   `cover_url` VARCHAR(255) DEFAULT NULL,
   `duration` INT DEFAULT 0 COMMENT '时长(秒)',
-  `genre` VARCHAR(50) DEFAULT NULL,
-  `lyrics` TEXT COMMENT '歌词内容', /* 更新注释 (A1) */
-  `play_count` BIGINT DEFAULT 0 COMMENT '总播放量',
+    `genre` VARCHAR(50) DEFAULT NULL,
+    `lyrics` TEXT COMMENT '歌词内容', /* 更新注释 (A1) */
+    `description` TEXT COMMENT '歌曲简介/创作故事',
+    `play_count` BIGINT DEFAULT 0 COMMENT '总播放量',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -358,9 +359,9 @@ INSERT INTO `music_album` (`id`, `artist_id`, `title`) VALUES
 (1, 1, '测试专辑 001');
 
 -- 插入歌曲 (用于测试权限和列表) - 【已修改】新增 lyrics 歌词 (A1)
-INSERT INTO `music_song` (`id`, `album_id`, `artist_id`, `title`, `file_url`, `cover_url`, `genre`, `lyrics`, `play_count`) VALUES
-(100, 1, 1, '音乐人的作品', 'http://xxx.mp3', 'https://p1.music.126.net/cover1.jpg', 'Pop', '[00:00.00] 歌词测试', 10000), -- Musician's own song
-(200, 1, 2, '别人的作品', 'http://xxx.mp3', 'https://p1.music.126.net/cover2.jpg', 'Rock', '[00:00.00] 歌词测试', 50); -- Other's song (Admin's)
+INSERT INTO `music_song` (`id`, `album_id`, `artist_id`, `title`, `file_url`, `cover_url`, `genre`, `lyrics`, `description`, `play_count`) VALUES
+(100, 1, 1, '音乐人的作品', 'http://xxx.mp3', 'https://p1.music.126.net/cover1.jpg', 'Pop', '[00:00.00] 歌词测试', '创作于冬夜的流行小品，写给怀旧的听众。', 10000), -- Musician's own song
+(200, 1, 2, '别人的作品', 'http://xxx.mp3', 'https://p1.music.126.net/cover2.jpg', 'Rock', '[00:00.00] 歌词测试', '一首管理员账户发布的摇滚示例曲目。', 50); -- Other's song (Admin's)
 
 
 -- 插入基础歌单及标签数据，演示协作与排序

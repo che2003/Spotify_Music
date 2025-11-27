@@ -8,18 +8,19 @@ const loading = ref(false)
 const searchKeyword = ref('')
 const editDialogVisible = ref(false)
 
-const editForm = reactive({
-  id: 0,
-  title: '',
-  artistId: null as number | null,
-  albumId: null as number | null,
-  genre: '',
-  duration: 0,
-  coverUrl: '',
-  fileUrl: '',
-  description: '',
-  genreIds: [] as number[]
-})
+  const editForm = reactive({
+    id: 0,
+    title: '',
+    artistId: null as number | null,
+    albumId: null as number | null,
+    genre: '',
+    duration: 0,
+    coverUrl: '',
+    fileUrl: '',
+    description: '',
+    lyrics: '',
+    genreIds: [] as number[]
+  })
 
 const genreOptions = ref<any[]>([])
 const artistOptions = ref<any[]>([])
@@ -46,16 +47,17 @@ const fetchAllSongs = async () => {
   } catch (e) { console.error(e) } finally { loading.value = false }
 }
 
-const openEdit = async (row: any) => {
-  editForm.id = row.id
-  editForm.title = row.title
-  editForm.artistId = row.artistId
-  editForm.albumId = row.albumId
-  editForm.genre = row.genre
-  editForm.duration = row.duration
-  editForm.coverUrl = row.coverUrl
-  editForm.fileUrl = row.fileUrl
-  editForm.description = row.lyrics
+  const openEdit = async (row: any) => {
+    editForm.id = row.id
+    editForm.title = row.title
+    editForm.artistId = row.artistId
+    editForm.albumId = row.albumId
+    editForm.genre = row.genre
+    editForm.duration = row.duration
+    editForm.coverUrl = row.coverUrl
+    editForm.fileUrl = row.fileUrl
+    editForm.description = row.description
+    editForm.lyrics = row.lyrics
   try {
     const res = await request.get(`/song/${row.id}/genres`)
     editForm.genreIds = res.data || []
@@ -72,11 +74,12 @@ const resetEditForm = () => {
   editForm.albumId = null
   editForm.genre = ''
   editForm.duration = 0
-  editForm.coverUrl = ''
-  editForm.fileUrl = ''
-  editForm.description = ''
-  editForm.genreIds = []
-}
+    editForm.coverUrl = ''
+    editForm.fileUrl = ''
+    editForm.description = ''
+    editForm.lyrics = ''
+    editForm.genreIds = []
+  }
 
 const submitEdit = async () => {
   if (!editForm.id) return
@@ -181,8 +184,11 @@ onMounted(async () => {
         <el-form-item label="封面链接">
           <el-input v-model="editForm.coverUrl" placeholder="请输入封面地址" />
         </el-form-item>
-        <el-form-item label="描述 / 歌词">
+        <el-form-item label="歌曲简介">
           <el-input type="textarea" :rows="3" v-model="editForm.description" />
+        </el-form-item>
+        <el-form-item label="歌词 (LRC)">
+          <el-input type="textarea" :rows="4" v-model="editForm.lyrics" placeholder="[00:00.00] 示例歌词行" />
         </el-form-item>
       </el-form>
       <template #footer>
