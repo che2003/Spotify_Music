@@ -6,7 +6,211 @@
   <component name="ChangeListManager">
     <list default="true" id="5f78db8f-d5f7-41aa-a7a0-1323986f0be2" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/music_information/歌曲信息汇总.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/music_information/歌曲信息汇总.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/A-SOUL - Quiet.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/Gracie Abrams - 21.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/Justin Bieber&amp;Daniel Caesar&amp;GIVĒON - Peaches (Explicit).lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/RADWIMPS (ラッドウィンプス) - 愛にできることはまだあるかい (爱能做到的还有什么).lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/Rosa Walton&amp;Hallie Coggins - I Really Want to Stay at Your House.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/The Kid LAROI&amp;Justin Bieber - STAY (Explicit).lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/Twins - 下一站天后.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/刘若英 - 后来.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/卢巧音 - 好心分手.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/古巨基 - 必杀技.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/古巨基 - 恋无可恋.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/周华健 - 亲亲我的宝贝.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/周杰伦 - 七里香.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/周杰伦 - 夜曲.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/周杰伦 - 等你下课 (with 杨瑞代).lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/周杰伦 - 迷迭香.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/容祖儿 - 16号爱人.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/容祖儿 - 习惯失恋.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/容祖儿 - 岁月如歌 (Live).lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/容祖儿 - 心淡.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/容祖儿 - 破相.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/张学友 - 李香兰.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/张敬轩 - 我的天.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/张敬轩 - 断点.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/张敬轩 - 春秋.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/张敬轩 - 追风筝的孩子.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/张敬轩 - 酷爱.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/张智霖 - 岁月如歌.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/张杰 - 明天过后.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/张远 - 嘉宾.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/房东的猫 - 云烟成雨.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/旅行团乐队 - 逝去的歌.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/李克勤 - 开学礼.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/李克勤 - 护花使者.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/李克勤 - 月半小夜曲.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/杨千嬅 - 再见二丁目.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/杨千嬅 - 勇 (Live).lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/杨千嬅 - 勇.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/杨千嬅 - 处处吻.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/杨千嬅 - 少女的祈祷.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/杨千嬅 - 野孩子.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/柳爽 - 漠河舞厅.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/毛不易 - 消愁 (Live).lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/苏打绿 - 小情歌.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/萨吉 - On My Way.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/谢安琪 - 钟无艳.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/谭咏麟 - 一生中最爱.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/谭咏麟 - 夏日寒风.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/谭咏麟 - 朋友.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/谭咏麟 - 爱情陷阱.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/谭咏麟 - 讲不出再见.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/赤野 IceDrink - 停留在风花之时.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/陈奕迅 - Shall We Talk.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/陈奕迅 - 单车.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/陈奕迅 - 四季.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/陈奕迅 - 夕阳无限好.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/陈奕迅 - 完.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/陈奕迅 - 富士山下.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/陈奕迅 - 岁月如歌.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/陈奕迅 - 无条件.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/陈奕迅 - 落花流水.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/陈奕迅&amp;苦荣 - 孤儿仔.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/陈慧娴 - 傻女 (Album Version).lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/lrc/所有歌词(Lyrics)/陈慧琳 - 多啦A梦.lrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/A-SOUL - Quiet.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/Gracie Abrams - 21.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/Justin Bieber&amp;Daniel Caesar&amp;GIVĒON - Peaches (Explicit).jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/RADWIMPS (ラッドウィンプス) - 愛にできることはまだあるかい (爱能做到的还有什么).jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/Rosa Walton&amp;Hallie Coggins - I Really Want to Stay at Your House.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/The Kid LAROI&amp;Justin Bieber - STAY (Explicit).jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/Twins - 下一站天后.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/三浦透子 (みうら とうこ)&amp;RADWIMPS (ラッドウィンプス) - グランドエスケープ (逃离地面) (Movie edit).jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/卢巧音 - 好心分手.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/古巨基 - 必杀技.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/古巨基 - 恋无可恋.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/周华健 - 亲亲我的宝贝.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/周杰伦 - 七里香.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/周杰伦 - 以父之名.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/周杰伦 - 反方向的钟.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/周杰伦 - 夜曲.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/周杰伦 - 大笨钟.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/周杰伦 - 手写的从前.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/周杰伦 - 晴天.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/周杰伦 - 最伟大的作品.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/周杰伦 - 等你下课 (with 杨瑞代).jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/周杰伦 - 花海.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/容祖儿 - 16号爱人.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/容祖儿 - 习惯失恋.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/容祖儿 - 岁月如歌 (Live).jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/容祖儿 - 心淡.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/容祖儿 - 破相.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/张学友 - 李香兰.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/张敬轩 - 我的天.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/张敬轩 - 断点.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/张敬轩 - 春秋.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/张敬轩 - 追风筝的孩子.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/张敬轩 - 酷爱.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/张智霖 - 岁月如歌.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/张杰 - 明天过后.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/张远 - 嘉宾.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/房东的猫 - 云烟成雨.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/旅行团乐队 - 逝去的歌.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/李克勤 - 月半小夜曲.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/杨千嬅 - 再见二丁目.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/杨千嬅 - 勇 (Live).jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/杨千嬅 - 勇.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/杨千嬅 - 处处吻.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/杨千嬅 - 少女的祈祷.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/杨千嬅 - 野孩子.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/柳爽 - 漠河舞厅.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/毛不易 - 消愁 (Live).jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/苏打绿 - 小情歌.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/萨吉 - On My Way.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/谢安琪 - 钟无艳.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/谭咏麟 - 一生中最爱.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/谭咏麟 - 夏日寒风.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/谭咏麟 - 朋友.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/谭咏麟 - 爱情陷阱.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/谭咏麟 - 讲不出再见.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/赤野 IceDrink - 停留在风花之时.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/陈奕迅 - Shall We Talk.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/陈奕迅 - 单车.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/陈奕迅 - 四季.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/陈奕迅 - 夕阳无限好.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/陈奕迅 - 完.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/陈奕迅 - 富士山下.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/陈奕迅 - 岁月如歌.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/陈奕迅 - 无条件.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/陈奕迅 - 落花流水.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/陈奕迅&amp;苦荣 - 孤儿仔.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/陈慧娴 - 傻女 (Album Version).jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有封面(Covers)/陈慧琳 - 多啦A梦.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/A-SOUL - Quiet.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/Gracie Abrams - 21.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/Justin Bieber&amp;Daniel Caesar&amp;GIVĒON - Peaches (Explicit).mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/RADWIMPS (ラッドウィンプス) - 愛にできることはまだあるかい (爱能做到的还有什么).mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/Rosa Walton&amp;Hallie Coggins - I Really Want to Stay at Your House.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/The Kid LAROI&amp;Justin Bieber - STAY (Explicit).mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/Twins - 下一站天后.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/三浦透子 (みうら とうこ)&amp;RADWIMPS (ラッドウィンプス) - グランドエスケープ (逃离地面) (Movie edit).mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/刘若英 - 后来.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/卢巧音 - 好心分手.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/古巨基 - 必杀技.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/古巨基 - 恋无可恋.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/周华健 - 亲亲我的宝贝.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/周杰伦 - 七里香.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/周杰伦 - 以父之名.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/周杰伦 - 反方向的钟.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/周杰伦 - 夜曲.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/周杰伦 - 大笨钟.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/周杰伦 - 手写的从前.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/周杰伦 - 晴天.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/周杰伦 - 最伟大的作品.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/周杰伦 - 等你下课 (with 杨瑞代).mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/周杰伦 - 花海.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/周杰伦 - 迷迭香.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/容祖儿 - 16号爱人.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/容祖儿 - 习惯失恋.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/容祖儿 - 岁月如歌 (Live).mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/容祖儿 - 心淡.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/容祖儿 - 破相.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/张学友 - 李香兰.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/张敬轩 - 我的天.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/张敬轩 - 断点.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/张敬轩 - 春秋.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/张敬轩 - 追风筝的孩子.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/张敬轩 - 酷爱.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/张智霖 - 岁月如歌.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/张杰 - 明天过后.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/张远 - 嘉宾.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/房东的猫 - 云烟成雨.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/旅行团乐队 - 逝去的歌.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/李克勤 - 开学礼.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/李克勤 - 护花使者.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/李克勤 - 月半小夜曲.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/杨千嬅 - 再见二丁目.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/杨千嬅 - 勇 (Live).mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/杨千嬅 - 勇.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/杨千嬅 - 处处吻.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/杨千嬅 - 少女的祈祷.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/杨千嬅 - 野孩子.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/柳爽 - 漠河舞厅.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/毛不易 - 消愁 (Live).mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/苏打绿 - 小情歌.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/萨吉 - On My Way.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/谢安琪 - 钟无艳.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/谭咏麟 - 一生中最爱.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/谭咏麟 - 夏日寒风.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/谭咏麟 - 朋友.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/谭咏麟 - 爱情陷阱.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/谭咏麟 - 讲不出再见.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/赤野 IceDrink - 停留在风花之时.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/陈奕迅 - Shall We Talk.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/陈奕迅 - 单车.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/陈奕迅 - 四季.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/陈奕迅 - 夕阳无限好.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/陈奕迅 - 完.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/陈奕迅 - 富士山下.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/陈奕迅 - 岁月如歌.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/陈奕迅 - 无条件.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/陈奕迅 - 落花流水.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/陈奕迅&amp;苦荣 - 孤儿仔.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/陈慧娴 - 傻女 (Album Version).mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/所有歌曲(MP3)/陈慧琳 - 多啦A梦.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/music_information/歌曲信息汇总.xlsx" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,21 +240,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.download_music_lrc.executor": "Run",
-    "Python.music_infor.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "D:/学习/Spotify_Music/music_load/music/flac"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.download_music_lrc.executor&quot;: &quot;Run&quot;,
+    &quot;Python.music_infor.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/学习/Spotify_Music/music_load/music/flac&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\学习\Spotify_Music\music_load\music\flac" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.download_music_lrc">
+  <component name="RunManager" selected="Python.music_infor">
     <configuration name="download_music_lrc" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="music_load" />
       <option name="ENV_FILES" value="" />
@@ -97,8 +301,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.download_music_lrc" />
         <item itemvalue="Python.music_infor" />
+        <item itemvalue="Python.download_music_lrc" />
       </list>
     </recent_temporary>
   </component>
