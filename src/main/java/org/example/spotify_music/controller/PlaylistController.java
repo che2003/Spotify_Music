@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,11 @@ public class PlaylistController {
     @PostMapping("/create")
     public Result<?> create(@RequestBody Playlist playlist) {
         playlist.setCreatorId(getCurrentUserId());
-        playlist.setIsPublic(true);
+        if (playlist.getVisibility() == null && playlist.getIsPublic() == null) {
+            playlist.setVisibility("public");
+        } else if (playlist.getVisibility() == null && playlist.getIsPublic() != null) {
+            playlist.setIsPublic(playlist.getIsPublic());
+        }
         playlistMapper.insert(playlist);
         return Result.success(playlist);
     }
@@ -58,7 +63,11 @@ public class PlaylistController {
 
         existing.setTitle(playlist.getTitle());
         existing.setDescription(playlist.getDescription());
-        existing.setIsPublic(playlist.getIsPublic());
+        if (playlist.getVisibility() != null) {
+            existing.setVisibility(playlist.getVisibility());
+        } else if (playlist.getIsPublic() != null) {
+            existing.setIsPublic(playlist.getIsPublic());
+        }
 
         playlistMapper.updateById(existing);
         return Result.success("歌单更新成功");
@@ -83,11 +92,13 @@ public class PlaylistController {
 
         QueryWrapper<PlaylistSong> sortQuery = new QueryWrapper<>();
         sortQuery.eq("playlist_id", playlistSong.getPlaylistId())
-                .orderByDesc("sort_order")
+                .orderByDesc("position")
                 .last("LIMIT 1");
 
         PlaylistSong last = playlistSongMapper.selectOne(sortQuery);
-        int nextOrder = last != null && last.getSortOrder() != null ? last.getSortOrder() + 1 : 1;
+        BigDecimal nextOrder = (last != null && last.getSortOrder() != null)
+                ? last.getSortOrder().add(BigDecimal.ONE)
+                : BigDecimal.ONE;
         playlistSong.setSortOrder(nextOrder);
 
         playlistSongMapper.insert(playlistSong);
@@ -126,7 +137,7 @@ public class PlaylistController {
     @GetMapping("/{id}/songs")
     public Result<List<SongVo>> getPlaylistSongs(@PathVariable Long id) {
         QueryWrapper<PlaylistSong> wrapper = new QueryWrapper<>();
-        wrapper.eq("playlist_id", id).orderByAsc("sort_order");
+        wrapper.eq("playlist_id", id).orderByAsc("position");
         List<PlaylistSong> associations = playlistSongMapper.selectList(wrapper);
 
         if (associations.isEmpty()) return Result.success(List.of());
@@ -162,7 +173,7 @@ public class PlaylistController {
 
         for (int i = 0; i < songIds.size(); i++) {
             PlaylistSong update = new PlaylistSong();
-            update.setSortOrder(i + 1);
+            update.setSortOrder(BigDecimal.valueOf(i + 1));
 
             QueryWrapper<PlaylistSong> updateWrapper = new QueryWrapper<>();
             updateWrapper.eq("playlist_id", id).eq("song_id", songIds.get(i));

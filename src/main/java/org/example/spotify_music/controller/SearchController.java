@@ -69,7 +69,7 @@ public class SearchController {
 
         List<Playlist> playlists = playlistMapper.selectList(
                 new QueryWrapper<Playlist>()
-                        .eq("is_public", true)
+                        .eq("visibility", "public")
                         .like("title", trimmed)
         );
 
