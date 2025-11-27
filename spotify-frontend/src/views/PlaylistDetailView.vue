@@ -65,6 +65,34 @@ const playSong = (song: any) => {
   playerStore.setSong(song)
 }
 
+const playAll = () => {
+  if (songs.value.length === 0) {
+    ElMessage.info('歌单暂无歌曲')
+    return
+  }
+  playerStore.setQueue(songs.value, 0)
+  ElMessage.success('已开始播放歌单')
+}
+
+const appendAllToQueue = () => {
+  if (songs.value.length === 0) {
+    ElMessage.info('歌单暂无歌曲')
+    return
+  }
+  playerStore.addSongsToQueue(songs.value)
+  ElMessage.success('已将歌单加入播放队列')
+}
+
+const addSongToQueue = (song: any) => {
+  playerStore.addSongsToQueue([song])
+  ElMessage.success('已加入播放队列')
+}
+
+const playNext = (song: any) => {
+  playerStore.enqueueNext(song)
+  ElMessage.success('已设为下一首播放')
+}
+
 const persistOrder = async () => {
   if (!songs.value.length) return
   savingOrder.value = true
@@ -123,6 +151,8 @@ onMounted(() => {
         <p class="playlist-desc">{{ playlist.description || '暂无描述' }}</p>
         <p class="playlist-creator">创建者: User #{{ playlist.creatorId }}</p>
         <div class="playlist-share-actions">
+          <el-button type="primary" plain size="small" @click="playAll">播放全部</el-button>
+          <el-button plain size="small" @click="appendAllToQueue">加入队列</el-button>
           <SharePopover
               v-if="playlist.id"
               resource-type="playlist"
@@ -158,7 +188,10 @@ onMounted(() => {
             <div class="meta">{{ song.artistName || '未知歌手' }}</div>
           </div>
           <div class="song-actions">
+            <el-tag v-if="playerStore.currentSong.id === song.id" size="small" type="success" effect="dark">正在播放</el-tag>
             <el-button link type="success" size="small" @click="playSong(song)">播放</el-button>
+            <el-button link size="small" @click="playNext(song)">下一首</el-button>
+            <el-button link size="small" @click="addSongToQueue(song)">入队</el-button>
             <el-button link type="danger" size="small" @click="removeSong(song.id, song.title)">移除</el-button>
           </div>
         </div>
@@ -195,7 +228,7 @@ onMounted(() => {
 .playlist-title { font-size: 48px; font-weight: bold; margin: 0; }
 .playlist-desc { color: #b3b3b3; margin: 5px 0 10px 0; }
 .playlist-creator { font-size: 14px; }
-.playlist-share-actions { margin-top: 10px; }
+.playlist-share-actions { margin-top: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .songs-title { color: white; font-size: 20px; margin: 0; }
 .songs-section { margin-top: 24px; }
 .songs-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
@@ -207,5 +240,5 @@ onMounted(() => {
 .song-index { color: #b3b3b3; text-align: center; }
 .song-main .title { color: white; font-weight: 700; }
 .song-main .meta { color: #b3b3b3; font-size: 12px; margin-top: 4px; }
-.song-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.song-actions { display: flex; gap: 8px; justify-content: flex-end; align-items: center; flex-wrap: wrap; }
 </style>
