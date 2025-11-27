@@ -104,31 +104,48 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="admin-container">
-    <div class="header">
-      <h2 class="title">全站内容管理 (Admin)</h2>
-      <el-input v-model="searchKeyword" placeholder="搜索歌曲..." @keyup.enter="fetchAllSongs" style="width: 300px;" clearable @clear="fetchAllSongs">
-        <template #append><el-button @click="fetchAllSongs">搜索</el-button></template>
-      </el-input>
-    </div>
+  <div class="page-shell admin-container">
+    <div class="section-card">
+      <div class="section-heading">
+        <div class="heading-text">
+          <span class="heading-eyebrow">Admin · Songs</span>
+          <h2 class="heading-title">全站内容管理</h2>
+          <p class="heading-subtitle">审阅、编辑并即时下线异常内容，表格沿用 Spotify 深色调。</p>
+        </div>
+        <div class="header-actions">
+          <el-input
+              v-model="searchKeyword"
+              placeholder="搜索歌曲..."
+              @keyup.enter="fetchAllSongs"
+              clearable
+              @clear="fetchAllSongs"
+              class="search-input"
+          >
+            <template #append><el-button @click="fetchAllSongs">搜索</el-button></template>
+          </el-input>
+        </div>
+      </div>
 
-    <el-table :data="allSongs" v-loading="loading" height="600" style="width: 100%">
-      <el-table-column prop="id" label="ID" width="60" />
-      <el-table-column label="封面" width="70">
-        <template #default="{ row }">
-          <img :src="row.coverUrl" style="width:40px; height:40px; border-radius:4px;" />
-        </template>
-      </el-table-column>
-      <el-table-column prop="title" label="歌名" />
-      <el-table-column prop="artistName" label="歌手" />
-      <el-table-column prop="albumTitle" label="所属专辑" />
-      <el-table-column label="操作" width="120">
-        <template #default="{ row }">
-          <el-button size="small" @click="openEdit(row)">编辑</el-button>
-          <el-button type="danger" size="small" @click="adminDelete(row.id)" style="margin-left: 8px">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+      <div class="table-surface">
+        <el-table :data="allSongs" v-loading="loading" height="600" style="width: 100%">
+          <el-table-column prop="id" label="ID" width="60" />
+          <el-table-column label="封面" width="70">
+            <template #default="{ row }">
+              <img :src="row.coverUrl" class="thumb" />
+            </template>
+          </el-table-column>
+          <el-table-column prop="title" label="歌名" />
+          <el-table-column prop="artistName" label="歌手" />
+          <el-table-column prop="albumTitle" label="所属专辑" />
+          <el-table-column label="操作" width="140">
+            <template #default="{ row }">
+              <el-button size="small" @click="openEdit(row)">编辑</el-button>
+              <el-button type="danger" size="small" @click="adminDelete(row.id)" style="margin-left: 8px">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
 
     <el-dialog v-model="editDialogVisible" title="编辑歌曲" width="640px" @close="resetEditForm">
       <el-form :model="editForm" label-width="96px">
@@ -177,11 +194,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.admin-container { padding: 40px; color: white; }
-.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-.title { font-size: 24px; font-weight: bold; margin: 0; }
-:deep(.el-table) { background: transparent; color: #ccc; --el-table-row-hover-bg-color: #282828; --el-table-border-color: #333; }
-:deep(.el-table th), :deep(.el-table tr) { background: transparent; border-bottom: 1px solid #333; }
-:deep(.el-table td) { border-bottom: 1px solid #333; }
-:deep(.el-input__wrapper) { background-color: #242424; }
+.admin-container { color: white; gap: 18px; }
+.heading-subtitle { color: #9ea0a5; }
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.search-input { width: 320px; }
+.thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; box-shadow: 0 6px 12px rgba(0,0,0,0.35); }
+.el-dialog { border-radius: 16px; }
 </style>
