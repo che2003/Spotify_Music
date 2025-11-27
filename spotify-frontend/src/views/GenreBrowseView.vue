@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import request from '@/utils/request'
 import { usePlayerStore } from '@/stores/player'
+import { ElMessage } from 'element-plus'
 
 interface GenreItem {
   id: number
@@ -120,6 +121,10 @@ const applyMood = (mood: string) => {
 }
 
 const playSong = (song: SongVo) => playerStore.setSong(song)
+const playNext = (song: SongVo) => {
+  playerStore.enqueueNext(song as any)
+  ElMessage.success('已设为下一首播放')
+}
 const goSongDetail = (id: number) => router.push(`/song/${id}`)
 const goArtistDetail = (id?: number) => { if (id) router.push(`/artist/${id}`) }
 
@@ -251,6 +256,7 @@ onMounted(() => {
           <div class="song-actions">
             <span class="duration">{{ formatDuration(song.duration) }}</span>
             <el-button type="success" size="small" @click.stop="playSong(song)">播放</el-button>
+            <el-button type="primary" plain size="small" @click.stop="playNext(song)">下一首</el-button>
           </div>
         </div>
         <div v-if="!activeSongs.length" class="empty-state">该流派暂无歌曲，试试其他标签吧。</div>
