@@ -337,7 +337,7 @@ INSERT INTO `sys_role` (`id`, `role_key`, `role_name`) VALUES
 
 -- 插入三个测试用户 (ID 1, 3, 4 对应之前的测试)
 INSERT INTO `sys_user` (`id`, `username`, `password`, `nickname`, `email`) VALUES 
-(1, 'music_lover_001', @pwd_hash, '管理员账号', 'admin@spotify.com'),
+(1, 'admin', @pwd_hash, '管理员账号', 'admin@spotify.com'),
 (3, 'jay_chou', @pwd_hash, '周杰伦', 'jay@spotify.com'),
 (4, 'poor_user', @pwd_hash, '普通用户', 'poor@spotify.com');
 
