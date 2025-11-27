@@ -6,6 +6,7 @@ import org.example.spotify_music.entity.Interaction;
 import org.example.spotify_music.mapper.InteractionMapper;
 import org.example.spotify_music.mapper.SongMapper;
 import org.example.spotify_music.service.InteractionService;
+import org.example.spotify_music.service.PlaylistService;
 import org.example.spotify_music.vo.LikeStatusVo;
 import org.example.spotify_music.vo.SongVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ public class InteractionServiceImpl extends ServiceImpl<InteractionMapper, Inter
     @Autowired
     private SongMapper songMapper;
 
+    @Autowired
+    private PlaylistService playlistService;
+
     @Override
     @Transactional
     public LikeStatusVo toggleSongLike(Long songId, Long userId) {
@@ -36,6 +40,7 @@ public class InteractionServiceImpl extends ServiceImpl<InteractionMapper, Inter
         if (existing != null) {
             interactionMapper.delete(query);
             liked = false;
+            playlistService.removeSongFromLikedPlaylist(userId, songId);
         } else {
             Interaction interaction = new Interaction();
             interaction.setUserId(userId);
@@ -43,6 +48,7 @@ public class InteractionServiceImpl extends ServiceImpl<InteractionMapper, Inter
             interaction.setType(3);
             interactionMapper.insert(interaction);
             liked = true;
+            playlistService.addSongToLikedPlaylist(userId, songId);
         }
 
         long likeCount = interactionMapper.countLikesBySong(songId);
