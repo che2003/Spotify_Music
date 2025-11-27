@@ -229,8 +229,9 @@ WHERE a.id NOT IN (1, 2, 6, 11);
 -- 5. 初始化流派数据 (music_genre) - 【新增】(A4)
 -- ==========================================
 INSERT INTO `music_genre` (`id`, `name`) VALUES
-(1, 'Pop'), (2, 'Ballad'), (3, 'Rock'), (4, 'Hip-Hop'), 
-(5, 'K-Pop'), (6, 'Country'), (7, 'Electronic'), (8, 'Jazz');
+(1, 'Pop'), (2, 'Ballad'), (3, 'Rock'), (4, 'Hip-Hop'),
+(5, 'K-Pop'), (6, 'Country'), (7, 'Electronic'), (8, 'Jazz'),
+(9, 'Imported');
 
 -- ==========================================
 -- 6. 关联歌曲与流派 (music_song_genre) - 【新增】(A4)
@@ -254,6 +255,10 @@ SELECT id, 5 FROM music_song WHERE genre = 'K-Pop';
 -- 关联 Hip-Hop
 INSERT INTO `music_song_genre` (`song_id`, `genre_id`)
 SELECT id, 4 FROM music_song WHERE genre = 'Hip-Hop';
+
+-- 关联 Imported (用于 music_load 批量导入)
+INSERT INTO `music_song_genre` (`song_id`, `genre_id`)
+SELECT id, 9 FROM music_song WHERE genre = 'Imported';
 
 
 -- ==========================================
