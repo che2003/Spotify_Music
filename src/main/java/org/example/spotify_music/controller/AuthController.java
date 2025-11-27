@@ -5,6 +5,7 @@ import org.example.spotify_music.common.JwtUtils;
 import org.example.spotify_music.common.Result;
 import org.example.spotify_music.entity.User;
 import org.example.spotify_music.mapper.UserMapper;
+import org.example.spotify_music.service.PlaylistService;
 import org.example.spotify_music.service.UserRoleService; // 引入角色服务
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +31,9 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private PlaylistService playlistService;
+
     // 注册
     @PostMapping("/register")
     public Result<?> register(@RequestBody User user) {
@@ -42,6 +46,9 @@ public class AuthController {
         } catch (Exception e) {
             return Result.error("注册失败，详细错误: " + e.getMessage());
         }
+
+        // 创建默认「我喜欢」歌单
+        playlistService.ensureLikedPlaylist(user.getId());
         return Result.success("注册成功");
     }
 
