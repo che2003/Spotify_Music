@@ -13,7 +13,7 @@
                 FROM music_song s2
                 WHERE s2.album_id = alb.id
                   AND s2.cover_url IS NOT NULL
-                  AND s2.cover_url <> ''
+                  AND s2.cover_url &lt;&gt; ''
                 ORDER BY s2.create_time ASC, s2.id ASC
                 LIMIT 1
             )
@@ -122,9 +122,9 @@
     <select id="selectFirstCoverByAlbum" resultType="java.lang.String">
         SELECT cover_url
         FROM music_song
-        WHERE album_id = #{albumId}
-          AND cover_url IS NOT NULL
-          AND cover_url <> ''
+          WHERE album_id = #{albumId}
+            AND cover_url IS NOT NULL
+            AND cover_url &lt;&gt; ''
         ORDER BY create_time ASC, id ASC
         LIMIT 1
     </select>
