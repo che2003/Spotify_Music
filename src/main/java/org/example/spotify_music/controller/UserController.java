@@ -114,7 +114,7 @@ public class UserController {
 
         List<Playlist> playlists = playlistMapper.selectList(new QueryWrapper<Playlist>()
                 .eq("creator_id", userId)
-                .eq("is_public", true));
+                .eq("visibility", "public"));
         profileVo.setPlaylists(playlists);
 
         List<UserArtistLike> artistLikes = userArtistLikeMapper.selectList(new QueryWrapper<UserArtistLike>()
