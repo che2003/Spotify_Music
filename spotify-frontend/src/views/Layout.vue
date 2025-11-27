@@ -38,6 +38,7 @@ const menuEntries = [
   '/admin/dashboard',
   '/admin/users',
   '/admin/songs',
+  '/admin/playlists',
   '/admin/albums',
   '/admin/banners'
 ]
@@ -195,6 +196,9 @@ const formatTime = (seconds: number) => {
             </el-menu-item>
             <el-menu-item index="/admin/songs">
               <el-icon><i class="el-icon-files"></i></el-icon><span>内容管理</span>
+            </el-menu-item>
+            <el-menu-item index="/admin/playlists">
+              <el-icon><i class="el-icon-notebook-2"></i></el-icon><span>歌单监管</span>
             </el-menu-item>
             <el-menu-item index="/admin/albums">
               <el-icon><i class="el-icon-collection"></i></el-icon><span>专辑管理</span>
