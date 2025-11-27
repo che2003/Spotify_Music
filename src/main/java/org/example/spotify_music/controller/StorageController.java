@@ -1,23 +1,30 @@
 package org.example.spotify_music.controller;
 
+import io.minio.BucketExistsArgs;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import org.example.spotify_music.common.Result;
+import org.example.spotify_music.config.MinioProperties;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/storage")
 public class StorageController {
 
-    // 文件将被存储在项目根目录下的 uploads 文件夹中
-    private static final String UPLOAD_PATH = "uploads";
+    private final MinioClient minioClient;
+    private final MinioProperties minioProperties;
+
+    public StorageController(MinioClient minioClient, MinioProperties minioProperties) {
+        this.minioClient = minioClient;
+        this.minioProperties = minioProperties;
+    }
 
     /**
      * 文件上传接口，支持图片或音频文件
@@ -31,38 +38,46 @@ public class StorageController {
         }
 
         try {
-            // 1. 确定文件存储的绝对路径 (项目根目录 + uploads)
-            String rootPath = System.getProperty("user.dir");
-            File uploadDir = new File(rootPath, UPLOAD_PATH);
+            ensureBucketExists();
 
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs(); // 如果 uploads 目录不存在，则创建
-            }
+            String objectName = buildObjectName(file.getOriginalFilename());
 
-            // 2. 构造新文件名 (UUID + 原始文件后缀名，防止重名)
-            String originalFilename = file.getOriginalFilename();
-            String extension = "";
-            if (originalFilename != null && originalFilename.contains(".")) {
-                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            }
-            String newFilename = UUID.randomUUID().toString().replace("-", "") + extension;
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(minioProperties.getBucket())
+                    .object(objectName)
+                    .stream(file.getInputStream(), file.getSize(), -1)
+                    .contentType(file.getContentType())
+                    .build());
 
-            // 3. 将文件写入磁盘
-            File dest = new File(uploadDir, newFilename);
-            file.transferTo(dest);
+            String fileUrl = String.format("%s/%s/%s",
+                    minioProperties.getEndpoint(),
+                    minioProperties.getBucket(),
+                    objectName);
 
-            // 4. 返回可访问的 URL (例如: http://localhost:8080/static/abcde123.mp3)
-            String baseUrl = ServletUriComponentsBuilder
-                    .fromCurrentContextPath()
-                    .path("/static/")
-                    .build()
-                    .toUriString();
-            String fileUrl = baseUrl + newFilename;
             return Result.success(fileUrl);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            return Result.error("文件写入磁盘失败: " + e.getMessage());
+            return Result.error("文件上传到 MinIO 失败: " + e.getMessage());
         }
+    }
+
+    private void ensureBucketExists() throws Exception {
+        boolean exists = minioClient.bucketExists(BucketExistsArgs.builder()
+                .bucket(minioProperties.getBucket())
+                .build());
+        if (!exists) {
+            minioClient.makeBucket(MakeBucketArgs.builder()
+                    .bucket(minioProperties.getBucket())
+                    .build());
+        }
+    }
+
+    private String buildObjectName(String originalFilename) {
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+        return UUID.randomUUID().toString().replace("-", "") + extension;
     }
 }

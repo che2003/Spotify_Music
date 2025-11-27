@@ -36,6 +36,12 @@ mybatis-plus:
       logic-delete-field: deleted
 
 # 开启日志方便调试
-logging:
-  level:
-    org.springframework.web: DEBUG
+  logging:
+    level:
+      org.springframework.web: DEBUG
+
+minio:
+  endpoint: http://localhost:9000
+  access-key: admin
+  secret-key: password123
+  bucket: spotifymusic
