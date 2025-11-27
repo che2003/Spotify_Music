@@ -232,6 +232,12 @@ watch(() => route.params.id, () => {
             </el-tag>
           </div>
 
+          <div class="description-panel">
+            <p class="eyebrow">创作故事</p>
+            <p v-if="song.description" class="description-text">{{ song.description }}</p>
+            <p v-else class="description-empty">暂无歌曲简介</p>
+          </div>
+
           <div class="lyrics-panel" v-if="lyrics.length">
             <div class="lyrics-scroll">
               <div
@@ -513,6 +519,25 @@ watch(() => route.params.id, () => {
   border: 1px solid rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(8px);
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+}
+
+.description-panel {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.description-text {
+  color: #e5e5e5;
+  margin: 4px 0 0;
+  line-height: 1.6;
+}
+
+.description-empty {
+  color: #9aa0a6;
+  margin: 4px 0 0;
 }
 
 .lyrics-header {
