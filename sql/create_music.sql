@@ -116,10 +116,10 @@ CREATE TABLE `music_song` (
   `file_url` VARCHAR(255) NOT NULL COMMENT '音乐文件链接',
   `cover_url` VARCHAR(255) DEFAULT NULL,
   `duration` INT DEFAULT 0 COMMENT '时长(秒)',
-    `genre` VARCHAR(50) DEFAULT NULL,
-    `lyrics` TEXT COMMENT '歌词内容', /* 更新注释 (A1) */
-    `description` TEXT COMMENT '歌曲简介/创作故事',
-    `play_count` BIGINT DEFAULT 0 COMMENT '总播放量',
+  `genre` VARCHAR(50) DEFAULT NULL COMMENT '歌曲风格',
+  `lyrics` TEXT COMMENT '歌词内容', /* 更新注释 (A1) */
+  `description` TEXT COMMENT '歌曲简介/创作故事', /* 与测试数据保持一致 */
+  `play_count` BIGINT DEFAULT 0 COMMENT '总播放量',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
