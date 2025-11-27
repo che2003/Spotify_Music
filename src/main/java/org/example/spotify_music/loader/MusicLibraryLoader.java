@@ -120,7 +120,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
     }
 
     private String resolveLyrics(MusicLoadRow entry) {
-        Optional<Path> candidate = findFirstExisting(entry.baseFileName(), lyricsRoot, ".lrc", ".txt");
+        Optional<Path> candidate = findLyricsPath(entry.baseFileName());
         if (candidate.isEmpty()) {
             return null;
         }
@@ -130,6 +130,27 @@ public class MusicLibraryLoader implements CommandLineRunner {
             log.warn("读取歌词失败：{}", candidate.get(), ex);
             return null;
         }
+    }
+
+    private Optional<Path> findLyricsPath(String baseName) {
+        if (!CharSequenceUtil.isNotBlank(lyricsRoot)) {
+            return Optional.empty();
+        }
+
+        List<String> candidateRoots = List.of(
+                lyricsRoot,
+                Paths.get(lyricsRoot, "所有歌词(Lyrics)").toString(),
+                Paths.get(lyricsRoot, "lrc", "所有歌词(Lyrics)").toString()
+        );
+
+        for (String root : candidateRoots) {
+            Optional<Path> candidate = findFirstExisting(baseName, root, ".lrc", ".txt");
+            if (candidate.isPresent()) {
+                return candidate;
+            }
+        }
+
+        return Optional.empty();
     }
 
     private Optional<Path> findFirstExisting(String baseName, String root, String... extensions) {

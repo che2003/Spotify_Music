@@ -5,16 +5,25 @@ import time
 
 # ================= 配置区域 =================
 INPUT_FOLDER = "./music/flac"  # FLAC 所在文件夹
-OUTPUT_FOLDER = "./music_information/lrc"  # 结果输出总目录
+# 与 music_infor.py 保持一致，避免多出一层目录导致 loader 找不到歌词
+OUTPUT_FOLDER = "./music_information"  # 结果输出总目录
 
 
 # ===========================================
 
 def sanitize_filename(name):
     """清理文件名，确保和之前的 MP3 命名一致"""
-    return name.replace("/", "&").replace("\\", "&").replace(":", " ").replace("?", "").replace('"', '').replace('*',
-                                                                                                                 '').replace(
-        '<', '').replace('>', '').replace('|', '')
+    return (
+        name.replace("/", "&")
+        .replace("\\", "&")
+        .replace(":", " ")
+        .replace("?", "")
+        .replace('"', "")
+        .replace("*", "")
+        .replace("<", "")
+        .replace(">", "")
+        .replace("|", "")
+    )
 
 
 def download_lyrics(input_dir, output_root):
