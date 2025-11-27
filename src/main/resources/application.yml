@@ -48,7 +48,7 @@ minio:
 
 music:
   loader:
-    enabled: false
+    enabled: true
     excel-path: music_load/music_information/歌曲信息汇总.xlsx
     audio-root: music_load/music_information/所有歌曲(MP3)
     cover-root: music_load/music_information/所有封面(Covers)
