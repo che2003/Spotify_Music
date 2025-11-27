@@ -54,3 +54,9 @@ music:
     cover-root: music_load/music_information/所有封面(Covers)
     lyrics-root: music_load/music_information/所有歌词(Lyrics)
     default-genre: Imported
+  banner:
+    seed:
+      enabled: true
+      limit: 4
+  cover:
+    backfill-enabled: true

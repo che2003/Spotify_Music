@@ -96,6 +96,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
             String lyrics = resolveLyrics(entry);
 
             inserted += insertSong(entry, artistId, albumId, fileUrl, coverUrl, lyrics);
+            updateAlbumCoverIfMissing(albumId, coverUrl);
         }
 
         log.info("音乐导入完成，本次新增 {} 首歌曲。", inserted);
@@ -305,5 +306,18 @@ public class MusicLibraryLoader implements CommandLineRunner {
         } catch (EmptyResultDataAccessException ignored) {
             return null;
         }
+    }
+
+    private void updateAlbumCoverIfMissing(long albumId, String coverUrl) {
+        if (CharSequenceUtil.isBlank(coverUrl)) {
+            return;
+        }
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(1) FROM music_album WHERE id = ? AND cover_url IS NOT NULL AND cover_url <> ''",
+                Integer.class, albumId);
+        if (count != null && count > 0) {
+            return;
+        }
+        jdbcTemplate.update("UPDATE music_album SET cover_url = ? WHERE id = ?", coverUrl, albumId);
     }
 }

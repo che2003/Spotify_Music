@@ -14,14 +14,15 @@ import org.example.spotify_music.vo.AlbumDetailVo;
 import org.example.spotify_music.vo.AlbumSimpleVo;
 import org.example.spotify_music.vo.SongVo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,6 +55,17 @@ public class AlbumController {
         return artistMapper.selectOne(new QueryWrapper<Artist>().eq("user_id", userId));
     }
 
+    private void fillAlbumCoverIfMissing(Album album) {
+        if (album == null || StringUtils.hasText(album.getCoverUrl())) {
+            return;
+        }
+        String cover = songMapper.selectFirstCoverByAlbum(album.getId());
+        if (StringUtils.hasText(cover)) {
+            album.setCoverUrl(cover);
+            albumMapper.updateById(album);
+        }
+    }
+
     @GetMapping("/list")
     public Result<List<Album>> listAll(@RequestParam(value = "artistId", required = false) Long artistId) {
         QueryWrapper<Album> wrapper = new QueryWrapper<>();
@@ -61,7 +73,9 @@ public class AlbumController {
             wrapper.eq("artist_id", artistId);
         }
         wrapper.orderByDesc("create_time");
-        return Result.success(albumMapper.selectList(wrapper));
+        List<Album> albums = albumMapper.selectList(wrapper);
+        albums.forEach(this::fillAlbumCoverIfMissing);
+        return Result.success(albums);
     }
 
     @GetMapping("/my")
@@ -70,7 +84,9 @@ public class AlbumController {
         if (artist == null) {
             return Result.success(List.of());
         }
-        return Result.success(albumMapper.selectList(new QueryWrapper<Album>().eq("artist_id", artist.getId())));
+        List<Album> albums = albumMapper.selectList(new QueryWrapper<Album>().eq("artist_id", artist.getId()));
+        albums.forEach(this::fillAlbumCoverIfMissing);
+        return Result.success(albums);
     }
 
     @GetMapping("/new")
@@ -91,6 +107,7 @@ public class AlbumController {
             AlbumSimpleVo vo = new AlbumSimpleVo();
             vo.setId(album.getId());
             vo.setTitle(album.getTitle());
+            fillAlbumCoverIfMissing(album);
             vo.setCoverUrl(album.getCoverUrl());
             vo.setDescription(album.getDescription());
             vo.setReleaseDate(album.getReleaseDate());
@@ -115,6 +132,7 @@ public class AlbumController {
         AlbumDetailVo vo = new AlbumDetailVo();
         vo.setId(album.getId());
         vo.setTitle(album.getTitle());
+        fillAlbumCoverIfMissing(album);
         vo.setCoverUrl(album.getCoverUrl());
         vo.setDescription(album.getDescription());
         vo.setReleaseDate(album.getReleaseDate());
