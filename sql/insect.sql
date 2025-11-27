@@ -22,9 +22,13 @@ SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE user_interaction;
 TRUNCATE TABLE music_playlist_song;
 TRUNCATE TABLE music_playlist;
+TRUNCATE TABLE playlist_tag_rel;      /* 新增 (歌单标签) */
+TRUNCATE TABLE playlist_tag;          /* 新增 (歌单标签) */
 TRUNCATE TABLE song_comment;
 TRUNCATE TABLE user_follow;
 TRUNCATE TABLE play_history;          /* 新增 (A2) */
+TRUNCATE TABLE play_queue_item;       /* 新增 播放队列 */
+TRUNCATE TABLE play_queue;            /* 新增 播放队列 */
 TRUNCATE TABLE music_genre;           /* 新增 (A4) */
 TRUNCATE TABLE music_song_genre;      /* 新增 (A4) */
 TRUNCATE TABLE user_artist_like;      /* 新增 (B1) */
@@ -297,10 +301,65 @@ AND RAND() < 0.1;
 
 
 -- ==========================================
--- 9. 补充收藏关系数据 (user_artist_like, user_album_like) - 【新增】(B1)
+-- 9. 补充歌单与播放队列数据 (playlist & queue)
+-- ==========================================
+-- 歌单数据（含协作、可见性与统计字段）
+INSERT INTO `music_playlist` (`id`, `creator_id`, `title`, `description`, `visibility`, `is_collaborative`, `status`, `category`, `mood`, `background_color`, `follower_count`, `like_count`, `play_count`, `share_count`, `last_played_at`, `last_modified_by`)
+VALUES
+(1, 1, '管理员协作精选', '管理员和音乐人共同维护的热门歌单', 'public', 1, 1, 'Pop', 'Happy', '#FFEEDD', 280, 90, 10200, 25, NOW() - INTERVAL 1 DAY, 2),
+(2, 10, '华语慢歌', '周杰伦、陈奕迅精选', 'public', 0, 1, 'Ballad', 'Calm', '#DDF0FF', 120, 45, 3600, 12, NOW() - INTERVAL 2 DAY, 10),
+(3, 20, '通勤摇滚', 'Linkin Park 励志摇滚合集', 'link', 0, 1, 'Rock', 'Energetic', '#CCDDEE', 60, 18, 1800, 6, NOW() - INTERVAL 3 DAY, 20);
+
+-- 歌单标签
+INSERT INTO `playlist_tag` (`id`, `name`) VALUES
+(1, '流行'),
+(2, '协作'),
+(3, '华语'),
+(4, '摇滚'),
+(5, '通勤');
+
+INSERT INTO `playlist_tag_rel` (`playlist_id`, `tag_id`) VALUES
+(1, 1), (1, 2),
+(2, 1), (2, 3),
+(3, 4), (3, 5);
+
+-- 歌单-歌曲关联，使用 position 支持插队
+INSERT INTO `music_playlist_song` (`playlist_id`, `song_id`, `position`, `added_by`, `status`, `version`)
+SELECT 1, id, 10, 1, 1, 1 FROM music_song WHERE title = '七里香' LIMIT 1;
+INSERT INTO `music_playlist_song` (`playlist_id`, `song_id`, `position`, `added_by`, `status`, `version`)
+SELECT 1, id, 20, 2, 1, 1 FROM music_song WHERE title = 'Love Story' LIMIT 1;
+INSERT INTO `music_playlist_song` (`playlist_id`, `song_id`, `position`, `added_by`, `status`, `version`)
+SELECT 1, id, 30, 2, 1, 1 FROM music_song WHERE title = 'Numb' LIMIT 1;
+INSERT INTO `music_playlist_song` (`playlist_id`, `song_id`, `position`, `added_by`, `status`, `version`)
+SELECT 2, id, 10, 10, 1, 1 FROM music_song WHERE title = '稻香' LIMIT 1;
+INSERT INTO `music_playlist_song` (`playlist_id`, `song_id`, `position`, `added_by`, `status`, `version`)
+SELECT 2, id, 20, 10, 1, 1 FROM music_song WHERE title = '好久不见' LIMIT 1;
+INSERT INTO `music_playlist_song` (`playlist_id`, `song_id`, `position`, `added_by`, `status`, `version`)
+SELECT 3, id, 10, 20, 1, 1 FROM music_song WHERE title = 'In The End' LIMIT 1;
+INSERT INTO `music_playlist_song` (`playlist_id`, `song_id`, `position`, `added_by`, `status`, `version`)
+SELECT 3, id, 20, 20, 1, 1 FROM music_song WHERE title = 'What I\'ve Done' LIMIT 1;
+
+-- 播放队列示例
+INSERT INTO `play_queue` (`id`, `user_id`, `device_id`, `source_type`, `source_id`, `is_shuffle`, `repeat_mode`, `current_index`, `current_position_ms`, `version`)
+VALUES
+(1, 10, 'ios-001', 'playlist', 2, 0, 'all', 0, 0, 1),
+(2, 20, 'web-001', 'playlist', 3, 1, 'off', 1, 45200, 1);
+
+INSERT INTO `play_queue_item` (`queue_id`, `song_id`, `position`, `is_played`, `inserted_by`)
+SELECT 1, id, 10, 1, 10 FROM music_song WHERE title = '稻香' LIMIT 1;
+INSERT INTO `play_queue_item` (`queue_id`, `song_id`, `position`, `is_played`, `inserted_by`)
+SELECT 1, id, 20, 0, 10 FROM music_song WHERE title = '好久不见' LIMIT 1;
+INSERT INTO `play_queue_item` (`queue_id`, `song_id`, `position`, `is_played`, `inserted_by`)
+SELECT 2, id, 10, 1, 20 FROM music_song WHERE title = 'In The End' LIMIT 1;
+INSERT INTO `play_queue_item` (`queue_id`, `song_id`, `position`, `is_played`, `inserted_by`)
+SELECT 2, id, 20, 0, 20 FROM music_song WHERE title = 'What I\'ve Done' LIMIT 1;
+
+
+-- ==========================================
+-- 10. 补充收藏关系数据 (user_artist_like, user_album_like) - 【新增】(B1)
 -- ==========================================
 -- User 10 (华语迷) 收藏 周杰伦 (Artist 1) 和他的专辑 (Album 101)
-INSERT INTO `user_artist_like` (`user_id`, `artist_id`) VALUES 
+INSERT INTO `user_artist_like` (`user_id`, `artist_id`) VALUES
 (10, 1), (11, 1), (12, 2);
 INSERT INTO `user_album_like` (`user_id`, `album_id`) VALUES 
 (10, 101), (11, 101), (12, 102);
@@ -317,7 +376,7 @@ INSERT INTO `user_album_like` (`user_id`, `album_id`) VALUES (30, 111);
 
 
 -- ==========================================
--- 10. 补充播放历史数据 (play_history) - 【新增】(A2)
+-- 11. 补充播放历史数据 (play_history) - 【新增】(A2)
 -- ==========================================
 -- User 10 最近播放记录 (Song 101: 七里香, Song 102: 青花瓷)
 INSERT INTO `play_history` (`user_id`, `song_id`, `play_time`) VALUES
