@@ -109,10 +109,18 @@ const onVolumeChange = (val: number) => { if (audioRef.value) audioRef.value.vol
 // --- 队列弹窗 ---
 const isQueueOpen = ref(false)
 const toggleQueue = () => { isQueueOpen.value = !isQueueOpen.value }
-const playFromQueue = (index: number) => {
-  const target = playerStore.playList[index]
-  if (target) playerStore.setSong(target)
+const playFromQueue = (index: number) => playerStore.playAt(index)
+const removeFromQueue = (index: number) => playerStore.removeFromQueue(index)
+const clearQueue = () => playerStore.clearQueue()
+
+const queueDraggingIndex = ref<number | null>(null)
+const onQueueDragStart = (index: number) => { queueDraggingIndex.value = index }
+const onQueueDragEnter = (index: number) => {
+  if (queueDraggingIndex.value === null || queueDraggingIndex.value === index) return
+  playerStore.reorderQueue(queueDraggingIndex.value, index)
+  queueDraggingIndex.value = index
 }
+const onQueueDragEnd = () => { queueDraggingIndex.value = null }
 
 // --- 状态监听 ---
 watch(() => playerStore.isPlaying, (playing) => {
@@ -333,21 +341,52 @@ const formatTime = (seconds: number) => {
 
   <el-drawer
       v-model="isQueueOpen"
-      title="播放队列"
-      size="360px"
+      size="380px"
       direction="rtl"
       destroy-on-close
+      :with-header="false"
   >
-    <div v-if="playerStore.playList.length === 0" class="queue-empty">暂无播放内容</div>
+    <div class="queue-header">
+      <div>
+        <div class="queue-heading">播放队列</div>
+        <div class="queue-subtitle">
+          共 {{ playerStore.playList.length }} 首 ·
+          {{ playerStore.currentSong.title ? `当前：${playerStore.currentSong.title}` : '等待播放' }}
+        </div>
+      </div>
+      <div class="queue-actions">
+        <el-button size="small" type="primary" plain @click="playerStore.next" :disabled="playerStore.playList.length === 0">下一首</el-button>
+        <el-button size="small" plain @click="clearQueue" :disabled="playerStore.playList.length === 0">清空</el-button>
+      </div>
+    </div>
+
+    <div v-if="playerStore.playList.length === 0" class="queue-empty">暂无播放内容，去挑选喜欢的歌吧</div>
     <ul v-else class="queue-list">
       <li
           v-for="(song, index) in playerStore.playList"
           :key="song.id || index"
           :class="{ active: playerStore.currentSong.id === song.id }"
+          draggable="true"
+          @dragstart="onQueueDragStart(index)"
+          @dragenter.prevent="onQueueDragEnter(index)"
+          @dragover.prevent
+          @dragend="onQueueDragEnd"
           @click="playFromQueue(index)"
       >
-        <div class="queue-title">{{ song.title || '未命名歌曲' }}</div>
-        <div class="queue-artist">{{ song.artistName || '未知歌手' }}</div>
+        <div class="queue-left">
+          <span class="queue-handle">⠿</span>
+          <div class="queue-texts">
+            <div class="queue-title">
+              <span class="queue-index">{{ index + 1 }}</span>
+              {{ song.title || '未命名歌曲' }}
+            </div>
+            <div class="queue-artist">{{ song.artistName || '未知歌手' }}</div>
+          </div>
+        </div>
+        <div class="queue-right">
+          <el-tag v-if="playerStore.currentSong.id === song.id" type="success" effect="dark" size="small">正在播放</el-tag>
+          <el-button link type="danger" size="small" @click.stop="removeFromQueue(index)">移除</el-button>
+        </div>
       </li>
     </ul>
   </el-drawer>
@@ -477,6 +516,18 @@ const formatTime = (seconds: number) => {
 :deep(.spotify-slider .el-slider__button-wrapper) { top: -15px; }
 
 /* 队列抽屉 */
+.queue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.queue-heading { color: white; font-size: 18px; font-weight: 700; }
+.queue-subtitle { color: #b3b3b3; font-size: 12px; margin-top: 4px; }
+.queue-actions { display: flex; gap: 8px; }
+
 .queue-empty {
   color: #b3b3b3;
   text-align: center;
@@ -489,17 +540,19 @@ const formatTime = (seconds: number) => {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
-
 .queue-list li {
-  padding: 10px 12px;
-  border-radius: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
   background: var(--spotify-surface);
   cursor: pointer;
   transition: background 0.2s, transform 0.2s, border-color 0.2s;
   border: 1px solid var(--spotify-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .queue-list li:hover {
@@ -513,6 +566,11 @@ const formatTime = (seconds: number) => {
   box-shadow: 0 10px 24px rgba(0,0,0,0.35);
 }
 
-.queue-title { color: white; font-weight: 700; font-size: 14px; }
-.queue-artist { color: #a7a7a7; font-size: 12px; margin-top: 2px; }
+.queue-left { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+.queue-handle { color: #6a6a6a; cursor: grab; user-select: none; font-size: 16px; }
+.queue-texts { display: flex; flex-direction: column; min-width: 0; }
+.queue-title { color: white; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+.queue-index { color: #9bd4aa; font-weight: 700; font-size: 12px; background: #1f1f1f; padding: 2px 6px; border-radius: 6px; }
+.queue-artist { color: #a7a7a7; font-size: 12px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.queue-right { display: flex; align-items: center; gap: 8px; }
 </style>
