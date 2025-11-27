@@ -1,12 +1,12 @@
 package org.example.spotify_music.controller;
 
 import org.example.spotify_music.common.Result;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,13 +18,6 @@ public class StorageController {
 
     // 文件将被存储在项目根目录下的 uploads 文件夹中
     private static final String UPLOAD_PATH = "uploads";
-
-    // 读取 application.yml 里的端口，用于构建完整的访问 URL
-    @Value("${server.port:8080}")
-    private String serverPort;
-
-    // 完整的 BASE URL (例如: http://localhost:8080/static/)
-    private final String BASE_URL = "http://localhost:" + serverPort + "/static/";
 
     /**
      * 文件上传接口，支持图片或音频文件
@@ -48,7 +41,10 @@ public class StorageController {
 
             // 2. 构造新文件名 (UUID + 原始文件后缀名，防止重名)
             String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String extension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
             String newFilename = UUID.randomUUID().toString().replace("-", "") + extension;
 
             // 3. 将文件写入磁盘
@@ -56,7 +52,12 @@ public class StorageController {
             file.transferTo(dest);
 
             // 4. 返回可访问的 URL (例如: http://localhost:8080/static/abcde123.mp3)
-            String fileUrl = BASE_URL + newFilename;
+            String baseUrl = ServletUriComponentsBuilder
+                    .fromCurrentContextPath()
+                    .path("/static/")
+                    .build()
+                    .toUriString();
+            String fileUrl = baseUrl + newFilename;
             return Result.success(fileUrl);
 
         } catch (IOException e) {
