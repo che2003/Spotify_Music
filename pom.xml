@@ -21,6 +21,7 @@
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
         <jwt.version>0.11.5</jwt.version>
         <hutool.version>5.8.26</hutool.version>
+        <poi.version>5.2.5</poi.version>
     </properties>
 
     <dependencies>
@@ -78,6 +79,12 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
             <version>${hutool.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
         </dependency>
 
         <dependency>
