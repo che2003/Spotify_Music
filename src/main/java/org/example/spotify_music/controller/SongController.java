@@ -81,8 +81,6 @@ public class SongController {
     public Result<?> addSong(@RequestBody SongUploadRequest request) {
         Song song = new Song();
         BeanUtils.copyProperties(request, song);
-        // 将描述信息复用到歌词字段，便于详情页展示
-        song.setLyrics(request.getDescription());
 
         songService.saveSongWithGenres(song, request.getGenreIds());
         return Result.success("添加成功");
@@ -159,7 +157,10 @@ public class SongController {
         existing.setDuration(request.getDuration());
         existing.setGenre(request.getGenre());
         if (request.getDescription() != null) {
-            existing.setLyrics(request.getDescription());
+            existing.setDescription(request.getDescription());
+        }
+        if (request.getLyrics() != null) {
+            existing.setLyrics(request.getLyrics());
         }
 
         songService.updateSongWithGenres(existing, request.getGenreIds());
