@@ -3,8 +3,13 @@ package org.example.spotify_music.loader;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelReader;
+import io.minio.BucketExistsArgs;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.spotify_music.config.MinioProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.CommandLineRunner;
@@ -15,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -33,6 +40,8 @@ import java.util.Optional;
 public class MusicLibraryLoader implements CommandLineRunner {
 
     private final JdbcTemplate jdbcTemplate;
+    private final MinioClient minioClient;
+    private final MinioProperties minioProperties;
 
     @Value("${music.loader.excel-path:music_load/music_information/歌曲信息汇总.xlsx}")
     private String excelPath;
@@ -49,6 +58,8 @@ public class MusicLibraryLoader implements CommandLineRunner {
     @Value("${music.loader.default-genre:Imported}")
     private String defaultGenre;
 
+    private volatile boolean bucketPrepared = false;
+
     @Override
     public void run(String... args) throws Exception {
         File excelFile = Paths.get(excelPath).toFile();
@@ -64,6 +75,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
         Map<String, Long> artistCache = new HashMap<>();
         Map<String, Map<String, Long>> albumCache = new HashMap<>();
         ensureGenreExists(defaultGenre);
+        ensureBucketExists();
 
         int inserted = 0;
         for (Map<String, Object> row : rows) {
@@ -79,7 +91,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
                 continue;
             }
 
-            String fileUrl = resolveAudioPath(entry);
+            String fileUrl = resolveAudioUrl(entry);
             String coverUrl = resolveCover(entry);
             String lyrics = resolveLyrics(entry);
 
@@ -101,17 +113,9 @@ public class MusicLibraryLoader implements CommandLineRunner {
         return String.format("来自《%s》的本地导入歌曲（封面：%s）", entry.getAlbumTitle(), entry.getCoverStatus());
     }
 
-    private String resolveAudioPath(MusicLoadRow entry) {
-        if (CharSequenceUtil.isNotBlank(entry.getMp3Location())) {
-            return entry.getMp3Location();
-        }
-        Path resolved = Paths.get(audioRoot, entry.baseFileName() + ".mp3");
-        return resolved.toString();
-    }
-
     private String resolveCover(MusicLoadRow entry) {
         Optional<Path> candidate = findFirstExisting(entry.baseFileName(), coverRoot, ".jpg", ".png");
-        return candidate.map(Path::toString).orElse(null);
+        return candidate.map(path -> uploadToMinio(path, "image/jpeg")).orElse(null);
     }
 
     private String resolveLyrics(MusicLoadRow entry) {
@@ -138,6 +142,85 @@ public class MusicLibraryLoader implements CommandLineRunner {
             }
         }
         return Optional.empty();
+    }
+
+    private String resolveAudioUrl(MusicLoadRow entry) {
+        String mp3Location = entry.getMp3Location();
+        if (CharSequenceUtil.isNotBlank(mp3Location) && mp3Location.startsWith("http")) {
+            return mp3Location;
+        }
+
+        Optional<Path> audioPath = Optional.empty();
+        if (CharSequenceUtil.isNotBlank(mp3Location)) {
+            Path manual = Paths.get(mp3Location);
+            if (Files.exists(manual)) {
+                audioPath = Optional.of(manual);
+            } else {
+                log.warn("指定的 MP3 路径不存在：{}", mp3Location);
+            }
+        }
+
+        if (audioPath.isEmpty()) {
+            Path fallback = Paths.get(audioRoot, entry.baseFileName() + ".mp3");
+            if (Files.exists(fallback)) {
+                audioPath = Optional.of(fallback);
+            }
+        }
+
+        return audioPath.map(path -> uploadToMinio(path, "audio/mpeg")).orElse(null);
+    }
+
+    private String uploadToMinio(Path filePath, String fallbackContentType) {
+        try (InputStream stream = Files.newInputStream(filePath)) {
+            ensureBucketExists();
+
+            String objectName = buildObjectName(filePath.getFileName().toString());
+            long size = Files.size(filePath);
+            String contentType = Optional.ofNullable(Files.probeContentType(filePath))
+                    .filter(CharSequenceUtil::isNotBlank)
+                    .orElse(fallbackContentType);
+
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(minioProperties.getBucket())
+                    .object(objectName)
+                    .stream(stream, size, -1)
+                    .contentType(contentType)
+                    .build());
+
+            return String.format("%s/%s/%s", minioProperties.getEndpoint(), minioProperties.getBucket(), objectName);
+        } catch (Exception ex) {
+            log.warn("上传文件到存储失败：{}", filePath, ex);
+            return null;
+        }
+    }
+
+    private String buildObjectName(String originalFilename) {
+        String extension = "";
+        int dotIndex = originalFilename.lastIndexOf('.');
+        if (dotIndex >= 0) {
+            extension = originalFilename.substring(dotIndex);
+        }
+        return "imports/" + UUID.randomUUID().toString().replace("-", "") + extension;
+    }
+
+    private void ensureBucketExists() throws Exception {
+        if (bucketPrepared) {
+            return;
+        }
+        synchronized (this) {
+            if (bucketPrepared) {
+                return;
+            }
+            boolean exists = minioClient.bucketExists(BucketExistsArgs.builder()
+                    .bucket(minioProperties.getBucket())
+                    .build());
+            if (!exists) {
+                minioClient.makeBucket(MakeBucketArgs.builder()
+                        .bucket(minioProperties.getBucket())
+                        .build());
+            }
+            bucketPrepared = true;
+        }
     }
 
     private boolean songExists(String title, long artistId) {
