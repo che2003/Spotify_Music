@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import request from '@/utils/request'
 import { usePlayerStore } from '@/stores/player'
+import { ElMessage } from 'element-plus'
 
 type SearchResult = {
   songs: any[]
@@ -41,6 +42,10 @@ const hasResult = computed(() =>
 )
 
 const playSong = (song: any) => { playerStore.setSong(song) }
+const playNext = (song: any) => {
+  playerStore.enqueueNext(song)
+  ElMessage.success('已加入下一首播放')
+}
 const formatDuration = (duration?: number) => {
   if (!duration && duration !== 0) return '--:--'
   const minutes = Math.floor(duration / 60)
@@ -90,9 +95,10 @@ const formatDuration = (duration?: number) => {
             <el-table-column prop="duration" label="时长" width="100">
               <template #default="scope">{{ formatDuration(scope.row.duration) }}</template>
             </el-table-column>
-            <el-table-column width="100">
+            <el-table-column width="150" label="操作">
               <template #default="scope">
                 <el-button circle type="success" size="small" @click="playSong(scope.row)">▶</el-button>
+                <el-button circle type="primary" size="small" @click="playNext(scope.row)">➜</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -155,9 +161,10 @@ const formatDuration = (duration?: number) => {
           <el-table-column prop="duration" label="时长" width="100">
             <template #default="scope">{{ formatDuration(scope.row.duration) }}</template>
           </el-table-column>
-          <el-table-column width="100">
+          <el-table-column width="150" label="操作">
             <template #default="scope">
               <el-button circle type="success" size="small" @click="playSong(scope.row)">▶</el-button>
+              <el-button circle type="primary" size="small" @click="playNext(scope.row)">➜</el-button>
             </template>
           </el-table-column>
         </el-table>
