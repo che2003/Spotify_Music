@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import request from '@/utils/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
@@ -18,6 +18,9 @@ const banners = ref<Banner[]>([])
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增 Banner')
 const uploadUrl = '/api/storage/upload'
+const uploadHeaders = computed(() => ({
+  Authorization: 'Bearer ' + localStorage.getItem('token')
+}))
 
 const form = reactive<Banner>({
   id: undefined,
@@ -185,6 +188,7 @@ onMounted(fetchBanners)
           <div class="upload-box">
             <el-upload
               :action="uploadUrl"
+              :headers="uploadHeaders"
               :show-file-list="false"
               :on-success="handleUploadSuccess"
               class="upload-trigger"
