@@ -39,3 +39,6 @@ mybatis-plus:
 logging:
   level:
     org.springframework.web: DEBUG
+
+storage:
+  local-path: D:/my-project/music-files/

@@ -1,6 +1,7 @@
 package org.example.spotify_music.controller;
 
 import org.example.spotify_music.common.Result;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -10,17 +11,20 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/storage")
 public class StorageController {
 
-    // 文件将被存储在项目根目录下的 uploads 文件夹中
-    private static final String UPLOAD_PATH = "uploads";
+    @Value("${storage.local-path}")
+    private String storageLocalPath;
 
     /**
-     * 文件上传接口，支持图片或音频文件
+     * MP3 文件上传接口
      * @param file 前端上传的文件对象
      * @return 存储后的文件访问URL
      */
@@ -31,13 +35,9 @@ public class StorageController {
         }
 
         try {
-            // 1. 确定文件存储的绝对路径 (项目根目录 + uploads)
-            String rootPath = System.getProperty("user.dir");
-            File uploadDir = new File(rootPath, UPLOAD_PATH);
-
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs(); // 如果 uploads 目录不存在，则创建
-            }
+            // 1. 确定文件存储的绝对路径，并确保目录存在
+            Path storageDir = Paths.get(storageLocalPath);
+            Files.createDirectories(storageDir);
 
             // 2. 构造新文件名 (UUID + 原始文件后缀名，防止重名)
             String originalFilename = file.getOriginalFilename();
@@ -45,16 +45,19 @@ public class StorageController {
             if (originalFilename != null && originalFilename.contains(".")) {
                 extension = originalFilename.substring(originalFilename.lastIndexOf("."));
             }
+            if (!".mp3".equalsIgnoreCase(extension)) {
+                return Result.error("仅支持上传 MP3 音频文件");
+            }
             String newFilename = UUID.randomUUID().toString().replace("-", "") + extension;
 
             // 3. 将文件写入磁盘
-            File dest = new File(uploadDir, newFilename);
+            File dest = storageDir.resolve(newFilename).toFile();
             file.transferTo(dest);
 
-            // 4. 返回可访问的 URL (例如: http://localhost:8080/static/abcde123.mp3)
+            // 4. 返回可访问的 URL (例如: http://localhost:8080/files/abcde123.mp3)
             String baseUrl = ServletUriComponentsBuilder
                     .fromCurrentContextPath()
-                    .path("/static/")
+                    .path("/files/")
                     .build()
                     .toUriString();
             String fileUrl = baseUrl + newFilename;
