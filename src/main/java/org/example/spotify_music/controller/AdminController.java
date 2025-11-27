@@ -5,13 +5,18 @@ import org.example.spotify_music.common.Result;
 import org.example.spotify_music.entity.Album;
 import org.example.spotify_music.entity.Artist;
 import org.example.spotify_music.entity.Genre;
+import org.example.spotify_music.entity.Playlist;
+import org.example.spotify_music.entity.PlaylistSong;
 import org.example.spotify_music.entity.User;
 import org.example.spotify_music.entity.UserRole;
 import org.example.spotify_music.mapper.AlbumMapper;
 import org.example.spotify_music.mapper.ArtistMapper;
 import org.example.spotify_music.mapper.GenreMapper;
+import org.example.spotify_music.mapper.PlaylistMapper;
+import org.example.spotify_music.mapper.PlaylistSongMapper;
 import org.example.spotify_music.mapper.UserMapper;
 import org.example.spotify_music.mapper.UserRoleMapper;
+import org.example.spotify_music.vo.PlaylistAdminVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize; // 需要开启鉴权
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +24,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin")
@@ -29,6 +37,8 @@ public class AdminController {
     @Autowired private AlbumMapper albumMapper;
     @Autowired private ArtistMapper artistMapper;
     @Autowired private GenreMapper genreMapper;
+    @Autowired private PlaylistMapper playlistMapper;
+    @Autowired private PlaylistSongMapper playlistSongMapper;
 
     // 1. 获取所有用户列表 (仅管理员可用)
     // 简单起见，这里不分页，直接返回所有
@@ -66,6 +76,67 @@ public class AdminController {
         userRoleMapper.insert(ur);
 
         return Result.success("角色修改成功");
+    }
+
+    // ---------------------------
+    // 歌单监管
+    // ---------------------------
+    @GetMapping("/playlists")
+    public Result<List<PlaylistAdminVo>> listAllPlaylists(@RequestParam(required = false) String keyword) {
+        QueryWrapper<Playlist> wrapper = new QueryWrapper<Playlist>().orderByDesc("create_time");
+        if (keyword != null && !keyword.isEmpty()) {
+            wrapper.like("title", keyword);
+        }
+
+        List<Playlist> playlists = playlistMapper.selectList(wrapper);
+        if (playlists.isEmpty()) {
+            return Result.success(List.of());
+        }
+
+        Set<Long> creatorIds = playlists.stream()
+                .map(Playlist::getCreatorId)
+                .filter(id -> id != null)
+                .collect(Collectors.toSet());
+
+        Map<Long, User> userMap = creatorIds.isEmpty()
+                ? Map.of()
+                : userMapper.selectBatchIds(creatorIds).stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+
+        List<PlaylistAdminVo> vos = playlists.stream().map(p -> {
+            PlaylistAdminVo vo = new PlaylistAdminVo();
+            vo.setId(p.getId());
+            vo.setTitle(p.getTitle());
+            vo.setCoverUrl(p.getCoverUrl());
+            vo.setDescription(p.getDescription());
+            vo.setIsPublic(p.getIsPublic());
+            vo.setCreatorId(p.getCreatorId());
+            vo.setCreateTime(p.getCreateTime());
+
+            User creator = userMap.get(p.getCreatorId());
+            if (creator != null) {
+                String displayName = creator.getNickname() != null ? creator.getNickname() : creator.getUsername();
+                vo.setCreatorName(displayName);
+            } else {
+                vo.setCreatorName("未知用户");
+            }
+            return vo;
+        }).collect(Collectors.toList());
+
+        return Result.success(vos);
+    }
+
+    @DeleteMapping("/playlists/{id}")
+    @Transactional
+    public Result<?> forceDeletePlaylist(@PathVariable Long id) {
+        Playlist playlist = playlistMapper.selectById(id);
+        if (playlist == null) {
+            return Result.error("歌单不存在");
+        }
+
+        playlistSongMapper.delete(new QueryWrapper<PlaylistSong>().eq("playlist_id", id));
+        playlistMapper.deleteById(id);
+        return Result.success("歌单已强制删除");
     }
 
     // ---------------------------
