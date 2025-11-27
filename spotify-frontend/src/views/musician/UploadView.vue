@@ -12,6 +12,9 @@ interface GenreOption {
 }
 
 const uploadUrl = '/api/storage/upload' // 对应后端 StorageController
+const uploadHeaders = computed(() => ({
+  Authorization: 'Bearer ' + localStorage.getItem('token')
+}))
 const fileList = ref([])
 const coverList = ref([])
 const lyricsFileList = ref([])
@@ -236,6 +239,7 @@ const submitSong = async () => {
         <el-upload
             class="upload-demo"
             :action="uploadUrl"
+            :headers="uploadHeaders"
             :limit="1"
             :on-success="handleAudioSuccess"
             :file-list="fileList"
@@ -252,6 +256,7 @@ const submitSong = async () => {
         <el-upload
             class="upload-demo"
             :action="uploadUrl"
+            :headers="uploadHeaders"
             :limit="1"
             :on-success="handleCoverSuccess"
             :file-list="coverList"
