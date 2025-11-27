@@ -55,30 +55,43 @@ const formatDuration = (duration?: number) => {
 </script>
 
 <template>
-  <div class="search-container">
-    <div class="search-header">
-      <el-input
-          v-model="keyword"
-          placeholder="想听什么？"
-          size="large"
-          class="search-bar"
-          @keyup.enter="handleSearch"
-      >
-        <template #prefix><el-icon><i class="el-icon-search"></i></el-icon></template>
-      </el-input>
+  <div class="page-shell search-container">
+    <div class="section-card search-header">
+      <div class="section-heading">
+        <div class="heading-text">
+          <span class="heading-eyebrow">Search · 找找看</span>
+          <h2 class="heading-title">发现你想听的</h2>
+          <p class="heading-subtitle">输入关键词即可在歌曲、艺人、专辑与歌单里极速匹配。</p>
+        </div>
+        <div class="pill-badge">
+          <svg role="img" height="16" width="16" viewBox="0 0 24 24" fill="#1db954"><path d="M15.7 14.3a6 6 0 10-1.4 1.4l4 4a1 1 0 001.4-1.4l-4-4zM14 10a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          实时结果
+        </div>
+      </div>
+
+      <div class="search-controls">
+        <el-input
+            v-model="keyword"
+            placeholder="想听什么？"
+            size="large"
+            class="search-bar"
+            @keyup.enter="handleSearch"
+        >
+          <template #prefix><el-icon><i class="el-icon-search"></i></el-icon></template>
+        </el-input>
+        <div class="filter-tags">
+          <span :class="{active: activeTab==='all'}" @click="activeTab='all'">全部</span>
+          <span :class="{active: activeTab==='songs'}" @click="activeTab='songs'">歌曲</span>
+          <span :class="{active: activeTab==='artists'}" @click="activeTab='artists'">艺人</span>
+          <span :class="{active: activeTab==='albums'}" @click="activeTab='albums'">专辑</span>
+          <span :class="{active: activeTab==='playlists'}" @click="activeTab='playlists'">歌单</span>
+        </div>
+      </div>
     </div>
 
-    <div class="filter-tags">
-      <span :class="{active: activeTab==='all'}" @click="activeTab='all'">全部</span>
-      <span :class="{active: activeTab==='songs'}" @click="activeTab='songs'">歌曲</span>
-      <span :class="{active: activeTab==='artists'}" @click="activeTab='artists'">艺人</span>
-      <span :class="{active: activeTab==='albums'}" @click="activeTab='albums'">专辑</span>
-      <span :class="{active: activeTab==='playlists'}" @click="activeTab='playlists'">歌单</span>
-    </div>
-
-    <div v-if="hasResult" class="results-list">
+    <div v-if="hasResult" class="section-card results-card">
       <template v-if="activeTab==='all'">
-        <div v-if="searchResults.songs.length" class="section-block">
+        <div v-if="searchResults.songs.length" class="section-block glass-panel">
           <div class="section-header">
             <div class="title">歌曲</div>
             <div class="count">{{ searchResults.songs.length }} 条结果</div>
@@ -104,7 +117,7 @@ const formatDuration = (duration?: number) => {
           </el-table>
         </div>
 
-        <div v-if="searchResults.artists.length" class="section-block">
+        <div v-if="searchResults.artists.length" class="section-block glass-panel">
           <div class="section-header">
             <div class="title">艺人</div>
             <div class="count">{{ searchResults.artists.length }} 位艺人</div>
@@ -118,7 +131,7 @@ const formatDuration = (duration?: number) => {
           </div>
         </div>
 
-        <div v-if="searchResults.albums.length" class="section-block">
+        <div v-if="searchResults.albums.length" class="section-block glass-panel">
           <div class="section-header">
             <div class="title">专辑</div>
             <div class="count">{{ searchResults.albums.length }} 张专辑</div>
@@ -133,7 +146,7 @@ const formatDuration = (duration?: number) => {
           </div>
         </div>
 
-        <div v-if="searchResults.playlists.length" class="section-block">
+        <div v-if="searchResults.playlists.length" class="section-block glass-panel">
           <div class="section-header">
             <div class="title">歌单</div>
             <div class="count">{{ searchResults.playlists.length }} 个歌单</div>
@@ -149,25 +162,27 @@ const formatDuration = (duration?: number) => {
       </template>
 
       <template v-else-if="activeTab==='songs'">
-        <el-table :data="searchResults.songs" stripe style="width: 100%">
-          <el-table-column type="index" width="50" />
-          <el-table-column label="封面" width="80">
-            <template #default="scope">
-              <img :src="scope.row.coverUrl" class="cover" />
-            </template>
-          </el-table-column>
-          <el-table-column prop="title" label="歌曲" />
-          <el-table-column prop="artistName" label="艺人" />
-          <el-table-column prop="duration" label="时长" width="100">
-            <template #default="scope">{{ formatDuration(scope.row.duration) }}</template>
-          </el-table-column>
-          <el-table-column width="150" label="操作">
-            <template #default="scope">
-              <el-button circle type="success" size="small" @click="playSong(scope.row)">▶</el-button>
-              <el-button circle type="primary" size="small" @click="playNext(scope.row)">➜</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+        <div class="table-surface">
+          <el-table :data="searchResults.songs" stripe style="width: 100%">
+            <el-table-column type="index" width="50" />
+            <el-table-column label="封面" width="80">
+              <template #default="scope">
+                <img :src="scope.row.coverUrl" class="cover" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="title" label="歌曲" />
+            <el-table-column prop="artistName" label="艺人" />
+            <el-table-column prop="duration" label="时长" width="100">
+              <template #default="scope">{{ formatDuration(scope.row.duration) }}</template>
+            </el-table-column>
+            <el-table-column width="150" label="操作">
+              <template #default="scope">
+                <el-button circle type="success" size="small" @click="playSong(scope.row)">▶</el-button>
+                <el-button circle type="primary" size="small" @click="playNext(scope.row)">➜</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
       </template>
 
       <template v-else-if="activeTab==='artists'">
@@ -201,12 +216,14 @@ const formatDuration = (duration?: number) => {
         </div>
       </template>
     </div>
-    <div v-else-if="searched" class="empty-hint">没有找到相关结果，试试别的关键词吧~</div>
+    <div v-else-if="searched" class="glass-panel empty-hint">没有找到相关结果，试试别的关键词吧~</div>
   </div>
 </template>
 
 <style scoped>
-.search-header { margin-bottom: 20px; }
+.search-container { gap: 16px; }
+.search-header { margin-bottom: 4px; }
+.search-controls { display: flex; flex-direction: column; gap: 14px; }
 .search-bar {
   max-width: 400px;
   --el-input-bg-color: #242424;
@@ -231,8 +248,8 @@ const formatDuration = (duration?: number) => {
   border-color: transparent;
 }
 
-.results-list { display: flex; flex-direction: column; gap: 20px; }
-.section-block { background: #121212; padding: 16px; border-radius: 12px; }
+.results-card { display: flex; flex-direction: column; gap: 16px; }
+.section-block { padding: 16px; border-radius: 12px; }
 .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .section-header .title { color: white; font-weight: 600; }
 .section-header .count { color: #8c8c8c; font-size: 13px; }
