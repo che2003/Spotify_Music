@@ -41,6 +41,9 @@ public class BannerDataInitializer implements CommandLineRunner {
     private final MinioClient minioClient;
     private final MinioProperties minioProperties;
 
+    private volatile boolean bucketPrepared = false;
+    private volatile boolean minioAvailable = true;
+
     @Value("${music.banner.seed.limit:4}")
     private int bannerLimit;
 
@@ -122,7 +125,7 @@ public class BannerDataInitializer implements CommandLineRunner {
         return "新曲上线";
     }
 
-    private String resolveImageUrl(SongVo song) throws Exception {
+    private String resolveImageUrl(SongVo song) {
         String candidate = firstNonBlank(song.getCoverUrl(), song.getAlbumCover());
         if (!StringUtils.hasText(candidate)) {
             return null;
@@ -138,8 +141,10 @@ public class BannerDataInitializer implements CommandLineRunner {
         return candidate;
     }
 
-    private String uploadToMinio(Path filePath) throws Exception {
-        ensureBucketExists();
+    private String uploadToMinio(Path filePath) {
+        if (!ensureBucketAvailable()) {
+            return null;
+        }
         try (InputStream stream = Files.newInputStream(filePath)) {
             String objectName = filePath.getFileName().toString();
             if (!CharSequenceUtil.contains(objectName, '.')) {
@@ -158,18 +163,40 @@ public class BannerDataInitializer implements CommandLineRunner {
                     .build());
 
             return String.format("%s/%s/%s", minioProperties.getEndpoint(), minioProperties.getBucket(), "banners/" + objectName);
+        } catch (Exception ex) {
+            log.warn("上传 Banner 图片到存储失败：{}", filePath, ex);
+            return null;
         }
     }
 
-    private void ensureBucketExists() throws Exception {
-        boolean exists = minioClient.bucketExists(BucketExistsArgs.builder()
-                .bucket(minioProperties.getBucket())
-                .build());
-        if (!exists) {
-            minioClient.makeBucket(MakeBucketArgs.builder()
-                    .bucket(minioProperties.getBucket())
-                    .build());
+    private boolean ensureBucketAvailable() {
+        if (!minioAvailable) {
+            return false;
         }
+        if (bucketPrepared) {
+            return true;
+        }
+        synchronized (this) {
+            if (bucketPrepared) {
+                return true;
+            }
+            try {
+                boolean exists = minioClient.bucketExists(BucketExistsArgs.builder()
+                        .bucket(minioProperties.getBucket())
+                        .build());
+                if (!exists) {
+                    minioClient.makeBucket(MakeBucketArgs.builder()
+                            .bucket(minioProperties.getBucket())
+                            .build());
+                }
+                bucketPrepared = true;
+            } catch (Exception ex) {
+                minioAvailable = false;
+                log.warn("对象存储不可用，无法访问或创建 Banner 桶：{}", minioProperties.getBucket(), ex);
+                return false;
+            }
+        }
+        return true;
     }
 
     private String firstNonBlank(String first, String second) {
