@@ -59,6 +59,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
     private String defaultGenre;
 
     private volatile boolean bucketPrepared = false;
+    private volatile boolean minioAvailable = true;
 
     @Override
     public void run(String... args) throws Exception {
@@ -75,7 +76,10 @@ public class MusicLibraryLoader implements CommandLineRunner {
         Map<String, Long> artistCache = new HashMap<>();
         Map<String, Map<String, Long>> albumCache = new HashMap<>();
         ensureGenreExists(defaultGenre);
-        ensureBucketExists();
+        if (!ensureBucketAvailable()) {
+            log.warn("跳过音乐导入：无法连接对象存储 (endpoint: {})", minioProperties.getEndpoint());
+            return;
+        }
 
         int inserted = 0;
         for (Map<String, Object> row : rows) {
@@ -193,8 +197,11 @@ public class MusicLibraryLoader implements CommandLineRunner {
     }
 
     private String uploadToMinio(Path filePath, String fallbackContentType) {
+        if (!ensureBucketAvailable()) {
+            return null;
+        }
+
         try (InputStream stream = Files.newInputStream(filePath)) {
-            ensureBucketExists();
 
             String objectName = buildObjectName(filePath.getFileName().toString());
             long size = Files.size(filePath);
@@ -225,24 +232,34 @@ public class MusicLibraryLoader implements CommandLineRunner {
         return "imports/" + UUID.randomUUID().toString().replace("-", "") + extension;
     }
 
-    private void ensureBucketExists() throws Exception {
+    private boolean ensureBucketAvailable() {
+        if (!minioAvailable) {
+            return false;
+        }
         if (bucketPrepared) {
-            return;
+            return true;
         }
         synchronized (this) {
             if (bucketPrepared) {
-                return;
+                return true;
             }
-            boolean exists = minioClient.bucketExists(BucketExistsArgs.builder()
-                    .bucket(minioProperties.getBucket())
-                    .build());
-            if (!exists) {
-                minioClient.makeBucket(MakeBucketArgs.builder()
+            try {
+                boolean exists = minioClient.bucketExists(BucketExistsArgs.builder()
                         .bucket(minioProperties.getBucket())
                         .build());
+                if (!exists) {
+                    minioClient.makeBucket(MakeBucketArgs.builder()
+                            .bucket(minioProperties.getBucket())
+                            .build());
+                }
+                bucketPrepared = true;
+            } catch (Exception ex) {
+                minioAvailable = false;
+                log.warn("对象存储不可用，无法访问或创建桶：{}", minioProperties.getBucket(), ex);
+                return false;
             }
-            bucketPrepared = true;
         }
+        return true;
     }
 
     private boolean songExists(String title, long artistId) {
