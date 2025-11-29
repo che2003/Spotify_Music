@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.example.spotify_music.loader.MinioBootstrapper;
 
+
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -43,6 +44,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
     private final MinioProperties minioProperties;
     private final TransactionTemplate transactionTemplate;
     private final MinioBootstrapper minioBootstrapper;
+
 
     @Value("${music.loader.base-dir:}")
     private String baseDir;
@@ -276,8 +278,10 @@ public class MusicLibraryLoader implements CommandLineRunner {
         } catch (Exception ex) {
             log.warn("自动定位项目根目录失败，使用当前工作目录。", ex);
             return Paths.get("").toAbsolutePath().normalize();
+
         }
     }
+
 
     private Path findProjectRoot(Path start) {
         Path current = start;
