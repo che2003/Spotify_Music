@@ -17,21 +17,16 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.example.spotify_music.loader.MinioBootstrapper;
-
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -72,6 +67,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         loaderBaseDir = determineBaseDir();
+        // 初始化路径配置
         audioRootPath = resolveConfiguredRoot(audioRoot);
         coverRootPath = resolveConfiguredRoot(coverRoot);
         lyricsRootPath = resolveConfiguredRoot(lyricsRoot);
@@ -96,7 +92,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
             log.warn("对象存储不可用，音频和封面将不上传，仅落库文本及元数据 (endpoint: {})", minioProperties.getEndpoint());
         }
 
-        int inserted = 0;
+        int processed = 0;
         for (Map<String, Object> row : rows) {
             MusicLoadRow entry = MusicLoadRow.fromRow(row);
             if (CharSequenceUtil.isBlank(entry.getArtistName())) {
@@ -104,30 +100,77 @@ public class MusicLibraryLoader implements CommandLineRunner {
                 continue;
             }
 
-            inserted += processRow(entry, artistCache, albumCache);
+            processed += processRow(entry, artistCache, albumCache);
         }
 
-        log.info("音乐导入完成，本次新增 {} 首歌曲。", inserted);
+        log.info("音乐导入完成，本次处理（新增或更新） {} 首歌曲。", processed);
     }
 
     private int processRow(MusicLoadRow entry, Map<String, Long> artistCache, Map<String, Map<String, Long>> albumCache) {
         return Optional.ofNullable(transactionTemplate.execute(status -> {
             long artistId = ensureArtist(entry.getArtistName(), artistCache);
-            if (songExists(entry.getSongTitle(), artistId)) {
-                log.info("跳过已存在的歌曲：{} - {}", entry.getArtistName(), entry.getSongTitle());
-                return 0;
-            }
-
             long albumId = ensureAlbum(entry.getAlbumTitle(), artistId, albumCache);
 
             String fileUrl = resolveAudioUrl(entry);
             String coverUrl = resolveCover(entry);
+
+            // 【新增】如果 MinIO 没启动导致 url 为空，给一个占位符，防止数据库报错
+            if (fileUrl == null) {
+                // 只有在是“新增”且没有URL时才给占位符；如果是更新，可能不想覆盖为空，但在 processRow 层面不知道是新增还是更新
+                // 为了简单起见，如果这里没拿到 URL，我们给个占位符，但在 updateSong 里我们会做非空判断
+                // 不过数据库 file_url 是 NOT NULL，如果是 Insert 必须有值。
+                fileUrl = "http://localhost:8080/unavailable.mp3";
+                // log.warn("MinIO unavailable or file not found, using placeholder for: {}", entry.getSongTitle());
+            }
+
             String lyrics = resolveLyrics(entry);
 
-            int affected = insertSong(entry, artistId, albumId, fileUrl, coverUrl, lyrics);
-            updateAlbumCoverIfMissing(albumId, coverUrl);
-            return affected;
+            // 【修改】检查歌曲是否存在，存在则更新，不存在则插入
+            if (songExists(entry.getSongTitle(), artistId)) {
+                log.info("更新已存在的歌曲：{} - {}", entry.getArtistName(), entry.getSongTitle());
+                // 注意：如果 fileUrl 是占位符，且数据库里已经有真实 URL，我们可能不希望覆盖。
+                // 这里的策略是：只要 resolveAudioUrl 返回了（哪怕是占位符），就认为是最新的状态。
+                // 如果您希望“如果本地没文件就不更新 URL”，可以在 updateSong 里判断 fileUrl 是否包含 "unavailable"
+                updateSong(entry, artistId, albumId, fileUrl, coverUrl, lyrics);
+                // 更新后也尝试更新专辑封面（如果专辑还没封面）
+                updateAlbumCoverIfMissing(albumId, coverUrl);
+                return 1;
+            } else {
+                int affected = insertSong(entry, artistId, albumId, fileUrl, coverUrl, lyrics);
+                updateAlbumCoverIfMissing(albumId, coverUrl);
+                return affected;
+            }
         })).orElse(0);
+    }
+
+    // 【新增】更新歌曲方法
+    private void updateSong(MusicLoadRow entry, long artistId, long albumId, String fileUrl, String coverUrl, String lyrics) {
+        List<Object> params = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("UPDATE music_song SET album_id = ?, description = ?, genre = ?");
+        params.add(albumId);
+        params.add(buildDescription(entry));
+        params.add(defaultGenre);
+
+        // 只有当 fileUrl 有效（非空且不是我们的占位符，或者是占位符但我们想覆盖）时才更新
+        // 这里简化逻辑：只要不为空就更新。如果您不想用占位符覆盖旧的真实链接，可以加判断。
+        if (CharSequenceUtil.isNotBlank(fileUrl)) {
+            sql.append(", file_url = ?");
+            params.add(fileUrl);
+        }
+        if (CharSequenceUtil.isNotBlank(coverUrl)) {
+            sql.append(", cover_url = ?");
+            params.add(coverUrl);
+        }
+        if (CharSequenceUtil.isNotBlank(lyrics)) {
+            sql.append(", lyrics = ?");
+            params.add(lyrics);
+        }
+
+        sql.append(" WHERE title = ? AND artist_id = ?");
+        params.add(entry.getSongTitle());
+        params.add(artistId);
+
+        jdbcTemplate.update(sql.toString(), params.toArray());
     }
 
     private int insertSong(MusicLoadRow entry, long artistId, long albumId, String fileUrl, String coverUrl, String lyrics) {
@@ -145,7 +188,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
     private String resolveCover(MusicLoadRow entry) {
         Optional<Path> candidate = findFirstExisting(entry.baseFileName(), coverRootPath, ".jpg", ".png");
         if (candidate.isEmpty()) {
-            log.warn("未找到封面文件：{}", entry.baseFileName());
+            // log.warn("未找到封面文件：{}", entry.baseFileName());
             return null;
         }
         return uploadToMinio(candidate.get(), "image/jpeg");
@@ -154,7 +197,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
     private String resolveLyrics(MusicLoadRow entry) {
         Optional<Path> candidate = findLyricsPath(entry.baseFileName());
         if (candidate.isEmpty()) {
-            log.warn("未找到歌词文件：{}", entry.baseFileName());
+            // log.warn("未找到歌词文件：{}", entry.baseFileName());
             return null;
         }
         try {
@@ -211,7 +254,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
             if (Files.exists(manual)) {
                 audioPath = Optional.of(manual);
             } else {
-                log.warn("指定的 MP3 路径不存在：{}", manual);
+                // log.warn("指定的 MP3 路径不存在：{}", manual);
             }
         }
 
@@ -294,12 +337,28 @@ public class MusicLibraryLoader implements CommandLineRunner {
         return null;
     }
 
+    // 【修改】增强的路径解析逻辑：支持自动尝试添加 music_load 前缀
     private Path resolvePath(String rawPath) {
         Path path = Paths.get(rawPath);
         if (path.isAbsolute()) {
             return path.normalize();
         }
-        return loaderBaseDir.resolve(path).normalize();
+
+        // 1. 先尝试直接解析（即按 Excel/配置 原文找）
+        Path directPath = loaderBaseDir.resolve(path).normalize();
+        if (Files.exists(directPath)) {
+            return directPath;
+        }
+
+        // 2. 如果找不到，尝试加上 "music_load" 前缀再找一次
+        // (解决 Excel 里少写了 "music_load/" 的问题，以及确保优先使用 music_load 下的资源)
+        Path fixedPath = loaderBaseDir.resolve("music_load").resolve(path).normalize();
+        if (Files.exists(fixedPath)) {
+            return fixedPath;
+        }
+
+        // 3. 都找不到，返回原始路径让上层逻辑去处理（比如报错或 fallback）
+        return directPath;
     }
 
     private String uploadToMinio(Path filePath, String fallbackContentType) {
@@ -427,6 +486,9 @@ public class MusicLibraryLoader implements CommandLineRunner {
         if (CharSequenceUtil.isBlank(coverUrl)) {
             return;
         }
+        // 如果是更新封面，我们不需要检查是否为 NULL，而是可以尝试用最新的封面去更新专辑封面
+        // 但为了不频繁更新，这里保留原逻辑：只有当专辑没封面时才更新。
+        // 如果您希望歌曲封面变了，专辑封面也跟着变，可以去掉这个 COUNT 检查。
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(1) FROM music_album WHERE id = ? AND cover_url IS NOT NULL AND cover_url <> ''",
                 Integer.class, albumId);

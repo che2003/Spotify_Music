@@ -79,9 +79,20 @@ public class MinioBootstrapper {
 
         try {
             log.warn("检测到 MinIO 不可用，正在尝试自动启动 ({}). 触发原因：{}", command, trigger.getMessage());
-            Process process = new ProcessBuilder("/bin/sh", "-c", command)
-                    .redirectErrorStream(true)
-                    .start();
+
+            // 【修改点】检测操作系统并选择正确的 Shell
+            boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+            ProcessBuilder processBuilder;
+
+            if (isWindows) {
+                // Windows 使用 cmd.exe /c
+                processBuilder = new ProcessBuilder("cmd.exe", "/c", command);
+            } else {
+                // Linux/Mac 使用 /bin/sh -c
+                processBuilder = new ProcessBuilder("/bin/sh", "-c", command);
+            }
+
+            Process process = processBuilder.redirectErrorStream(true).start();
 
             boolean finished = process.waitFor(waitSeconds, TimeUnit.SECONDS);
             String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
@@ -108,4 +119,3 @@ public class MinioBootstrapper {
                 minioProperties.getAccessKey(), minioProperties.getSecretKey());
     }
 }
-
