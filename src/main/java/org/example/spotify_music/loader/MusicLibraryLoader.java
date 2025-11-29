@@ -43,6 +43,9 @@ public class MusicLibraryLoader implements CommandLineRunner {
     private final MinioClient minioClient;
     private final MinioProperties minioProperties;
 
+    @Value("${music.loader.base-dir:}")
+    private String baseDir;
+
     @Value("${music.loader.excel-path:music_load/music_information/歌曲信息汇总.xlsx}")
     private String excelPath;
 
@@ -61,9 +64,19 @@ public class MusicLibraryLoader implements CommandLineRunner {
     private volatile boolean bucketPrepared = false;
     private volatile boolean minioAvailable = true;
 
+    private Path loaderBaseDir;
+    private Path audioRootPath;
+    private Path coverRootPath;
+    private Path lyricsRootPath;
+
     @Override
     public void run(String... args) throws Exception {
-        File excelFile = Paths.get(excelPath).toFile();
+        loaderBaseDir = determineBaseDir();
+        audioRootPath = resolveConfiguredRoot(audioRoot);
+        coverRootPath = resolveConfiguredRoot(coverRoot);
+        lyricsRootPath = resolveConfiguredRoot(lyricsRoot);
+
+        File excelFile = resolvePath(excelPath).toFile();
         if (!excelFile.exists()) {
             log.warn("音乐导入跳过，找不到 Excel 源文件: {}", excelFile.getAbsolutePath());
             return;
@@ -119,7 +132,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
     }
 
     private String resolveCover(MusicLoadRow entry) {
-        Optional<Path> candidate = findFirstExisting(entry.baseFileName(), coverRoot, ".jpg", ".png");
+        Optional<Path> candidate = findFirstExisting(entry.baseFileName(), coverRootPath, ".jpg", ".png");
         return candidate.map(path -> uploadToMinio(path, "image/jpeg")).orElse(null);
     }
 
@@ -137,17 +150,17 @@ public class MusicLibraryLoader implements CommandLineRunner {
     }
 
     private Optional<Path> findLyricsPath(String baseName) {
-        if (!CharSequenceUtil.isNotBlank(lyricsRoot)) {
+        if (lyricsRootPath == null) {
             return Optional.empty();
         }
 
-        List<String> candidateRoots = List.of(
-                lyricsRoot,
-                Paths.get(lyricsRoot, "所有歌词(Lyrics)").toString(),
-                Paths.get(lyricsRoot, "lrc", "所有歌词(Lyrics)").toString()
+        List<Path> candidateRoots = List.of(
+                lyricsRootPath,
+                lyricsRootPath.resolve("所有歌词(Lyrics)"),
+                lyricsRootPath.resolve(Paths.get("lrc", "所有歌词(Lyrics)"))
         );
 
-        for (String root : candidateRoots) {
+        for (Path root : candidateRoots) {
             Optional<Path> candidate = findFirstExisting(baseName, root, ".lrc", ".txt");
             if (candidate.isPresent()) {
                 return candidate;
@@ -157,12 +170,12 @@ public class MusicLibraryLoader implements CommandLineRunner {
         return Optional.empty();
     }
 
-    private Optional<Path> findFirstExisting(String baseName, String root, String... extensions) {
-        if (!CharSequenceUtil.isNotBlank(root)) {
+    private Optional<Path> findFirstExisting(String baseName, Path root, String... extensions) {
+        if (root == null) {
             return Optional.empty();
         }
         for (String ext : extensions) {
-            Path candidate = Paths.get(root, baseName + ext);
+            Path candidate = root.resolve(baseName + ext);
             if (Files.exists(candidate)) {
                 return Optional.of(candidate);
             }
@@ -178,22 +191,54 @@ public class MusicLibraryLoader implements CommandLineRunner {
 
         Optional<Path> audioPath = Optional.empty();
         if (CharSequenceUtil.isNotBlank(mp3Location)) {
-            Path manual = Paths.get(mp3Location);
+            Path manual = resolvePath(mp3Location);
             if (Files.exists(manual)) {
                 audioPath = Optional.of(manual);
             } else {
-                log.warn("指定的 MP3 路径不存在：{}", mp3Location);
+                log.warn("指定的 MP3 路径不存在：{}", manual);
             }
         }
 
         if (audioPath.isEmpty()) {
-            Path fallback = Paths.get(audioRoot, entry.baseFileName() + ".mp3");
-            if (Files.exists(fallback)) {
-                audioPath = Optional.of(fallback);
+            Optional<Path> fallback = findFirstExisting(entry.baseFileName(), audioRootPath, ".mp3");
+            if (fallback.isPresent()) {
+                audioPath = fallback;
             }
         }
 
         return audioPath.map(path -> uploadToMinio(path, "audio/mpeg")).orElse(null);
+    }
+
+    private Path resolveConfiguredRoot(String configured) {
+        if (!CharSequenceUtil.isNotBlank(configured)) {
+            return null;
+        }
+        return resolvePath(configured);
+    }
+
+    private Path determineBaseDir() {
+        if (CharSequenceUtil.isNotBlank(baseDir)) {
+            Path configured = Paths.get(baseDir);
+            if (configured.isAbsolute()) {
+                return configured.normalize();
+            }
+            return Paths.get("").toAbsolutePath().resolve(configured).normalize();
+        }
+
+        Path excelConfigured = Paths.get(excelPath).toAbsolutePath().getParent();
+        if (excelConfigured != null) {
+            return excelConfigured.normalize();
+        }
+
+        return Paths.get("").toAbsolutePath();
+    }
+
+    private Path resolvePath(String rawPath) {
+        Path path = Paths.get(rawPath);
+        if (path.isAbsolute()) {
+            return path.normalize();
+        }
+        return loaderBaseDir.resolve(path).normalize();
     }
 
     private String uploadToMinio(Path filePath, String fallbackContentType) {
