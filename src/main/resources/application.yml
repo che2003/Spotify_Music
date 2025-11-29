@@ -45,6 +45,11 @@ minio:
   access-key: admin
   secret-key: password123
   bucket: spotifymusic
+  auto-start:
+    enabled: true
+    # 自定义启动命令（留空则使用内置 docker start/run 逻辑）
+    command:
+    wait-seconds: 20
 
 music:
   loader:
