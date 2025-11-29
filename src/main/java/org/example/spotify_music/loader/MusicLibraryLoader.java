@@ -19,8 +19,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.example.spotify_music.loader.MinioBootstrapper;
 
+
 import java.io.File;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -277,8 +277,10 @@ public class MusicLibraryLoader implements CommandLineRunner {
         } catch (Exception ex) {
             log.warn("自动定位项目根目录失败，使用当前工作目录。", ex);
             return Paths.get("").toAbsolutePath().normalize();
+
         }
     }
+
 
     private Path findProjectRoot(Path start) {
         Path current = start;
