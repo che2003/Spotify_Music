@@ -1,23 +1,23 @@
 package org.example.spotify_music.loader;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelReader;
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
+import cn.hutool.poi.excel.ExcelUtil;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.spotify_music.config.MinioProperties;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.example.spotify_music.loader.MinioBootstrapper;
 
 import java.io.File;
 import java.io.InputStream;
@@ -42,6 +42,8 @@ public class MusicLibraryLoader implements CommandLineRunner {
     private final JdbcTemplate jdbcTemplate;
     private final MinioClient minioClient;
     private final MinioProperties minioProperties;
+    private final TransactionTemplate transactionTemplate;
+    private final MinioBootstrapper minioBootstrapper;
 
     @Value("${music.loader.base-dir:}")
     private String baseDir;
@@ -61,9 +63,6 @@ public class MusicLibraryLoader implements CommandLineRunner {
     @Value("${music.loader.default-genre:Imported}")
     private String defaultGenre;
 
-    private volatile boolean bucketPrepared = false;
-    private volatile boolean minioAvailable = true;
-
     private Path loaderBaseDir;
     private Path audioRootPath;
     private Path coverRootPath;
@@ -75,6 +74,9 @@ public class MusicLibraryLoader implements CommandLineRunner {
         audioRootPath = resolveConfiguredRoot(audioRoot);
         coverRootPath = resolveConfiguredRoot(coverRoot);
         lyricsRootPath = resolveConfiguredRoot(lyricsRoot);
+
+        log.info("音乐导入基准路径：{}", loaderBaseDir);
+        log.info("音频目录：{}，封面目录：{}，歌词目录：{}", audioRootPath, coverRootPath, lyricsRootPath);
 
         File excelFile = resolvePath(excelPath).toFile();
         if (!excelFile.exists()) {
@@ -89,9 +91,8 @@ public class MusicLibraryLoader implements CommandLineRunner {
         Map<String, Long> artistCache = new HashMap<>();
         Map<String, Map<String, Long>> albumCache = new HashMap<>();
         ensureGenreExists(defaultGenre);
-        if (!ensureBucketAvailable()) {
-            log.warn("跳过音乐导入：无法连接对象存储 (endpoint: {})", minioProperties.getEndpoint());
-            return;
+        if (!minioBootstrapper.ensureBucketAvailable("music-loader")) {
+            log.warn("对象存储不可用，音频和封面将不上传，仅落库文本及元数据 (endpoint: {})", minioProperties.getEndpoint());
         }
 
         int inserted = 0;
@@ -102,21 +103,30 @@ public class MusicLibraryLoader implements CommandLineRunner {
                 continue;
             }
 
+            inserted += processRow(entry, artistCache, albumCache);
+        }
+
+        log.info("音乐导入完成，本次新增 {} 首歌曲。", inserted);
+    }
+
+    private int processRow(MusicLoadRow entry, Map<String, Long> artistCache, Map<String, Map<String, Long>> albumCache) {
+        return Optional.ofNullable(transactionTemplate.execute(status -> {
             long artistId = ensureArtist(entry.getArtistName(), artistCache);
-            long albumId = ensureAlbum(entry.getAlbumTitle(), artistId, albumCache);
             if (songExists(entry.getSongTitle(), artistId)) {
-                continue;
+                log.info("跳过已存在的歌曲：{} - {}", entry.getArtistName(), entry.getSongTitle());
+                return 0;
             }
+
+            long albumId = ensureAlbum(entry.getAlbumTitle(), artistId, albumCache);
 
             String fileUrl = resolveAudioUrl(entry);
             String coverUrl = resolveCover(entry);
             String lyrics = resolveLyrics(entry);
 
-            inserted += insertSong(entry, artistId, albumId, fileUrl, coverUrl, lyrics);
+            int affected = insertSong(entry, artistId, albumId, fileUrl, coverUrl, lyrics);
             updateAlbumCoverIfMissing(albumId, coverUrl);
-        }
-
-        log.info("音乐导入完成，本次新增 {} 首歌曲。", inserted);
+            return affected;
+        })).orElse(0);
     }
 
     private int insertSong(MusicLoadRow entry, long artistId, long albumId, String fileUrl, String coverUrl, String lyrics) {
@@ -133,12 +143,17 @@ public class MusicLibraryLoader implements CommandLineRunner {
 
     private String resolveCover(MusicLoadRow entry) {
         Optional<Path> candidate = findFirstExisting(entry.baseFileName(), coverRootPath, ".jpg", ".png");
-        return candidate.map(path -> uploadToMinio(path, "image/jpeg")).orElse(null);
+        if (candidate.isEmpty()) {
+            log.warn("未找到封面文件：{}", entry.baseFileName());
+            return null;
+        }
+        return uploadToMinio(candidate.get(), "image/jpeg");
     }
 
     private String resolveLyrics(MusicLoadRow entry) {
         Optional<Path> candidate = findLyricsPath(entry.baseFileName());
         if (candidate.isEmpty()) {
+            log.warn("未找到歌词文件：{}", entry.baseFileName());
             return null;
         }
         try {
@@ -203,6 +218,8 @@ public class MusicLibraryLoader implements CommandLineRunner {
             Optional<Path> fallback = findFirstExisting(entry.baseFileName(), audioRootPath, ".mp3");
             if (fallback.isPresent()) {
                 audioPath = fallback;
+            } else {
+                log.warn("未找到音频文件：{}", entry.baseFileName());
             }
         }
 
@@ -217,20 +234,61 @@ public class MusicLibraryLoader implements CommandLineRunner {
     }
 
     private Path determineBaseDir() {
+        Path anchorRoot = detectAnchorRoot();
+
         if (CharSequenceUtil.isNotBlank(baseDir)) {
             Path configured = Paths.get(baseDir);
-            if (configured.isAbsolute()) {
-                return configured.normalize();
+            return configured.isAbsolute() ? configured.normalize() : anchorRoot.resolve(configured).normalize();
+        }
+
+        return anchorRoot;
+    }
+
+    private Path detectAnchorRoot() {
+        Path codeSourceRoot = locateCodeSourceRoot();
+        Path anchored = findProjectRoot(codeSourceRoot);
+        if (anchored != null) {
+            return anchored;
+        }
+
+        Path workingDir = Paths.get("").toAbsolutePath();
+        Path workingAnchored = findProjectRoot(workingDir);
+        if (workingAnchored != null) {
+            return workingAnchored;
+        }
+
+        return codeSourceRoot;
+    }
+
+    private Path locateCodeSourceRoot() {
+        try {
+            Path codeSource = Paths.get(MusicLibraryLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            Path base = Files.isRegularFile(codeSource) ? codeSource.getParent() : codeSource;
+
+            if (base != null && base.getFileName() != null &&
+                    ("classes".equals(base.getFileName().toString()) || "test-classes".equals(base.getFileName().toString()))) {
+                Path parent = base.getParent();
+                if (parent != null && parent.getParent() != null) {
+                    return parent.getParent().normalize();
+                }
             }
-            return Paths.get("").toAbsolutePath().resolve(configured).normalize();
-        }
 
-        Path excelConfigured = Paths.get(excelPath).toAbsolutePath().getParent();
-        if (excelConfigured != null) {
-            return excelConfigured.normalize();
+            return base == null ? Paths.get("").toAbsolutePath() : base.normalize();
+        } catch (Exception ex) {
+            log.warn("自动定位项目根目录失败，使用当前工作目录。", ex);
+            return Paths.get("").toAbsolutePath().normalize();
         }
+    }
 
-        return Paths.get("").toAbsolutePath();
+    private Path findProjectRoot(Path start) {
+        Path current = start;
+        while (current != null) {
+            if (Files.exists(current.resolve("pom.xml")) || Files.exists(current.resolve("mvnw"))) {
+                return current.normalize();
+            }
+            current = current.getParent();
+        }
+        return null;
     }
 
     private Path resolvePath(String rawPath) {
@@ -242,7 +300,8 @@ public class MusicLibraryLoader implements CommandLineRunner {
     }
 
     private String uploadToMinio(Path filePath, String fallbackContentType) {
-        if (!ensureBucketAvailable()) {
+        if (!minioBootstrapper.ensureBucketAvailable("music-loader-upload")) {
+            log.warn("对象存储不可用，跳过文件上传：{}", filePath);
             return null;
         }
 
@@ -275,36 +334,6 @@ public class MusicLibraryLoader implements CommandLineRunner {
             extension = originalFilename.substring(dotIndex);
         }
         return "imports/" + UUID.randomUUID().toString().replace("-", "") + extension;
-    }
-
-    private boolean ensureBucketAvailable() {
-        if (!minioAvailable) {
-            return false;
-        }
-        if (bucketPrepared) {
-            return true;
-        }
-        synchronized (this) {
-            if (bucketPrepared) {
-                return true;
-            }
-            try {
-                boolean exists = minioClient.bucketExists(BucketExistsArgs.builder()
-                        .bucket(minioProperties.getBucket())
-                        .build());
-                if (!exists) {
-                    minioClient.makeBucket(MakeBucketArgs.builder()
-                            .bucket(minioProperties.getBucket())
-                            .build());
-                }
-                bucketPrepared = true;
-            } catch (Exception ex) {
-                minioAvailable = false;
-                log.warn("对象存储不可用，无法访问或创建桶：{}", minioProperties.getBucket(), ex);
-                return false;
-            }
-        }
-        return true;
     }
 
     private boolean songExists(String title, long artistId) {
