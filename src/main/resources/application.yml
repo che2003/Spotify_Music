@@ -49,6 +49,8 @@ minio:
 music:
   loader:
     enabled: true
+    # 相对路径将基于 base-dir（为空时取 Excel 所在目录）解析
+    base-dir: 
     excel-path: music_load/music_information/歌曲信息汇总.xlsx
     audio-root: music_load/music_information/所有歌曲(MP3)
     cover-root: music_load/music_information/所有封面(Covers)
