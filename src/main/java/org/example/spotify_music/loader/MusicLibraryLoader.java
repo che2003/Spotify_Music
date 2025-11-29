@@ -1,27 +1,25 @@
 package org.example.spotify_music.loader;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelReader;
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
+import cn.hutool.poi.excel.ExcelUtil;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.spotify_music.config.MinioProperties;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.example.spotify_music.loader.MinioBootstrapper;
 
 import java.io.File;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,6 +42,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
     private final MinioClient minioClient;
     private final MinioProperties minioProperties;
     private final TransactionTemplate transactionTemplate;
+    private final MinioBootstrapper minioBootstrapper;
 
     @Value("${music.loader.base-dir:}")
     private String baseDir;
@@ -62,9 +61,6 @@ public class MusicLibraryLoader implements CommandLineRunner {
 
     @Value("${music.loader.default-genre:Imported}")
     private String defaultGenre;
-
-    private volatile boolean bucketPrepared = false;
-    private volatile boolean minioAvailable = true;
 
     private Path loaderBaseDir;
     private Path audioRootPath;
@@ -94,7 +90,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
         Map<String, Long> artistCache = new HashMap<>();
         Map<String, Map<String, Long>> albumCache = new HashMap<>();
         ensureGenreExists(defaultGenre);
-        if (!ensureBucketAvailable()) {
+        if (!minioBootstrapper.ensureBucketAvailable("music-loader")) {
             log.warn("对象存储不可用，音频和封面将不上传，仅落库文本及元数据 (endpoint: {})", minioProperties.getEndpoint());
         }
 
@@ -303,7 +299,7 @@ public class MusicLibraryLoader implements CommandLineRunner {
     }
 
     private String uploadToMinio(Path filePath, String fallbackContentType) {
-        if (!ensureBucketAvailable()) {
+        if (!minioBootstrapper.ensureBucketAvailable("music-loader-upload")) {
             log.warn("对象存储不可用，跳过文件上传：{}", filePath);
             return null;
         }
@@ -337,36 +333,6 @@ public class MusicLibraryLoader implements CommandLineRunner {
             extension = originalFilename.substring(dotIndex);
         }
         return "imports/" + UUID.randomUUID().toString().replace("-", "") + extension;
-    }
-
-    private boolean ensureBucketAvailable() {
-        if (!minioAvailable) {
-            return false;
-        }
-        if (bucketPrepared) {
-            return true;
-        }
-        synchronized (this) {
-            if (bucketPrepared) {
-                return true;
-            }
-            try {
-                boolean exists = minioClient.bucketExists(BucketExistsArgs.builder()
-                        .bucket(minioProperties.getBucket())
-                        .build());
-                if (!exists) {
-                    minioClient.makeBucket(MakeBucketArgs.builder()
-                            .bucket(minioProperties.getBucket())
-                            .build());
-                }
-                bucketPrepared = true;
-            } catch (Exception ex) {
-                minioAvailable = false;
-                log.warn("对象存储不可用，无法访问或创建桶：{}", minioProperties.getBucket(), ex);
-                return false;
-            }
-        }
-        return true;
     }
 
     private boolean songExists(String title, long artistId) {

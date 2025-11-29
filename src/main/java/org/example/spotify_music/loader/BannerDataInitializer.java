@@ -2,13 +2,12 @@ package org.example.spotify_music.loader;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.MinioClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.spotify_music.config.MinioProperties;
+import org.example.spotify_music.loader.MinioBootstrapper;
 import org.example.spotify_music.entity.SysBanner;
 import org.example.spotify_music.mapper.SysBannerMapper;
 import org.example.spotify_music.mapper.SongMapper;
@@ -38,11 +37,9 @@ public class BannerDataInitializer implements CommandLineRunner {
 
     private final SysBannerMapper sysBannerMapper;
     private final SongMapper songMapper;
-    private final MinioClient minioClient;
     private final MinioProperties minioProperties;
-
-    private volatile boolean bucketPrepared = false;
-    private volatile boolean minioAvailable = true;
+    private final MinioClient minioClient;
+    private final MinioBootstrapper minioBootstrapper;
 
     @Value("${music.banner.seed.limit:4}")
     private int bannerLimit;
@@ -142,7 +139,7 @@ public class BannerDataInitializer implements CommandLineRunner {
     }
 
     private String uploadToMinio(Path filePath) {
-        if (!ensureBucketAvailable()) {
+        if (!minioBootstrapper.ensureBucketAvailable("banner-seed")) {
             return null;
         }
         try (InputStream stream = Files.newInputStream(filePath)) {
@@ -167,36 +164,6 @@ public class BannerDataInitializer implements CommandLineRunner {
             log.warn("上传 Banner 图片到存储失败：{}", filePath, ex);
             return null;
         }
-    }
-
-    private boolean ensureBucketAvailable() {
-        if (!minioAvailable) {
-            return false;
-        }
-        if (bucketPrepared) {
-            return true;
-        }
-        synchronized (this) {
-            if (bucketPrepared) {
-                return true;
-            }
-            try {
-                boolean exists = minioClient.bucketExists(BucketExistsArgs.builder()
-                        .bucket(minioProperties.getBucket())
-                        .build());
-                if (!exists) {
-                    minioClient.makeBucket(MakeBucketArgs.builder()
-                            .bucket(minioProperties.getBucket())
-                            .build());
-                }
-                bucketPrepared = true;
-            } catch (Exception ex) {
-                minioAvailable = false;
-                log.warn("对象存储不可用，无法访问或创建 Banner 桶：{}", minioProperties.getBucket(), ex);
-                return false;
-            }
-        }
-        return true;
     }
 
     private String firstNonBlank(String first, String second) {
