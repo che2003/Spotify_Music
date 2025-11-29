@@ -45,7 +45,6 @@ public class MusicLibraryLoader implements CommandLineRunner {
     private final TransactionTemplate transactionTemplate;
     private final MinioBootstrapper minioBootstrapper;
 
-
     @Value("${music.loader.base-dir:}")
     private String baseDir;
 
